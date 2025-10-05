@@ -7,6 +7,10 @@ const jiti = createJiti(fileURLToPath(import.meta.url));
 jiti("./src/env.ts");
 
 const nextConfig: NextConfig = {
+  experimental: {
+    inlineCss: true,
+    useCache: true,
+  },
   /* config options here */
   images: {
     remotePatterns: [

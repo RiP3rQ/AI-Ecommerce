@@ -1,12 +1,14 @@
 import { HeroThreeItemGrid } from "@/components/grid/hero";
-import { Navbar } from "@/components/layout/navbar";
+import Footer from "@/components/layout/footer";
+import { ItemsMarquee } from "@/components/marquee";
 import { ReactNode } from "react";
 
 export default function Page(): ReactNode {
   return (
     <>
-      <Navbar />
       <HeroThreeItemGrid />
+      <ItemsMarquee />
+      <Footer />
     </>
   );
 }

@@ -5,6 +5,10 @@ import { ThemeProvider } from "next-themes";
 import { ModeSwitcher } from "@/components/global/theme-switcher";
 import { LogoutButton } from "@/components/global/logout-button";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { Navbar } from "@/components/layout/navbar";
+import { WelcomeToast } from "@/components/welcome-toast";
+import { Toaster } from "sonner";
+import { AuthButton } from "@/components/global/auth-button";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,9 +42,14 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            {children}
-            <LogoutButton />
-            <ModeSwitcher />
+            <Navbar />
+            <main>
+              {children}
+              <Toaster closeButton position="top-center" />
+              <WelcomeToast />
+              <AuthButton />
+              <ModeSwitcher />
+            </main>
           </ThemeProvider>
         </TooltipProvider>
       </body>

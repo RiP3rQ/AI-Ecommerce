@@ -21,7 +21,7 @@ export function LogoutButton() {
 
   return (
     <Tooltip>
-      <TooltipTrigger className="absolute bottom-16 right-4" asChild>
+      <TooltipTrigger asChild>
         <Button variant="outline" size="icon" onClick={logout}>
           <DoorOpen className="size-4 text-red-400" />
           <span className="sr-only">Logout</span>
