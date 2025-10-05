@@ -5,6 +5,7 @@ import { ThemeProvider } from "next-themes";
 import { ModeSwitcher } from "@/components/global/theme-switcher";
 import { LogoutButton } from "@/components/global/logout-button";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { Navbar } from "@/components/layout/navbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,6 +39,7 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
+            <Navbar />
             {children}
             <LogoutButton />
             <ModeSwitcher />
