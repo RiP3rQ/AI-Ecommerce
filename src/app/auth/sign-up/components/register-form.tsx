@@ -13,50 +13,63 @@ import { ComponentProps, ReactNode } from "react";
 import { GoogleIcon } from "../../../../../public/icons";
 import Image from "next/image";
 
-interface LoginFormProps extends ComponentProps<"div"> {
-  loginHandler: (formData: FormData) => Promise<void>;
+interface RegisterFormProps extends ComponentProps<"div"> {
+  registerHandler: (formData: FormData) => Promise<void>;
 }
 
-export function LoginForm({
+export function RegisterForm({
   className,
-  loginHandler,
+  registerHandler,
   ...props
-}: LoginFormProps): ReactNode {
+}: RegisterFormProps): ReactNode {
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-2">
-          <form className="p-6 md:p-8">
+          <form action={registerHandler} className="p-6 md:p-8">
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
-                <h1 className="text-2xl font-bold">Welcome back</h1>
+                <h1 className="text-2xl font-bold">Create an account</h1>
                 <p className="text-muted-foreground text-balance">
-                  Login to your Acme Inc account
+                  Enter your details below to create your Acme Inc account
                 </p>
               </div>
               <Field>
                 <FieldLabel htmlFor="email">Email</FieldLabel>
                 <Input
                   id="email"
+                  name="email"
                   type="email"
                   placeholder="m@example.com"
                   required
                 />
               </Field>
               <Field>
-                <div className="flex items-center">
-                  <FieldLabel htmlFor="password">Password</FieldLabel>
-                  <a
-                    href="#"
-                    className="ml-auto text-sm underline-offset-2 hover:underline"
-                  >
-                    Forgot your password?
-                  </a>
-                </div>
-                <Input id="password" type="password" required />
+                <FieldLabel htmlFor="password">Password</FieldLabel>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  minLength={6}
+                />
               </Field>
               <Field>
-                <Button type="submit">Login</Button>
+                <FieldLabel htmlFor="confirmPassword">
+                  Confirm Password
+                </FieldLabel>
+                <Input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  required
+                  minLength={6}
+                />
+              </Field>
+              <Field>
+                <Button type="submit" className="w-full">
+                  Create Account
+                </Button>
               </Field>
               <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
                 Or continue with
@@ -65,11 +78,11 @@ export function LoginForm({
                 <Button variant="outline" type="button">
                   <GoogleIcon />
                   <span>Continue with Google</span>
-                  <span className="sr-only">Login with Google</span>
+                  <span className="sr-only">Sign up with Google</span>
                 </Button>
               </Field>
               <FieldDescription className="text-center">
-                Don&apos;t have an account? <a href="/auth/sign-up">Sign up</a>
+                Already have an account? <a href="/auth/login">Sign in</a>
               </FieldDescription>
             </FieldGroup>
           </form>
@@ -79,7 +92,7 @@ export function LoginForm({
               alt="Ecommerce Login Page"
               className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
               width={500}
-              height={500}
+              height={520}
             />
           </div>
         </CardContent>
