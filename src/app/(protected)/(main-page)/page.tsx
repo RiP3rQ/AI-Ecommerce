@@ -1,6 +1,10 @@
-import { AuthButton } from "@/components/global/auth-button";
-import Image from "next/image";
+import { Navbar } from "@/components/layout/navbar";
+import { ReactNode } from "react";
 
-export default function Home() {
-  return <div>Main page</div>;
+export default function Page(): ReactNode {
+  return (
+    <>
+      <Navbar />
+    </>
+  );
 }
