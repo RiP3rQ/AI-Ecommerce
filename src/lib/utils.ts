@@ -58,3 +58,13 @@ export function formatFullPrice({
     return `${majorUnit.toFixed(2)} ${currencyCode}`;
   }
 }
+
+/**
+ * The base URL of the application.
+ * This is used to generate the metadata for the application.
+ * VERCEL_PROJECT_PRODUCTION_URL - is the production URL of the application provided by Vercel.
+ * http://localhost:3000 - is the local development URL.
+ */
+export const BASE_URL = process.env.VERCEL_PROJECT_PRODUCTION_URL
+  ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+  : "http://localhost:3000";

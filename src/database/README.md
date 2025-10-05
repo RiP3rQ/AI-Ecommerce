@@ -56,7 +56,6 @@ Main product catalog table containing core product information.
 ```sql
 CREATE TABLE "products" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-  "url_handle" varchar(255) UNIQUE NOT NULL,
   "available_for_sale" boolean DEFAULT true NOT NULL,
   "title" varchar(255) NOT NULL,
   "description" text,
@@ -69,7 +68,6 @@ CREATE TABLE "products" (
 
 **Fields**:
 - `id`: UUID primary key with auto-generation
-- `url_handle`: Unique URL-friendly identifier for the product
 - `available_for_sale`: Boolean flag for product availability
 - `title`: Product name (max 255 chars)
 - `description`: Plain text product description

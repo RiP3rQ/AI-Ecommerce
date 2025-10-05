@@ -24,7 +24,7 @@ function HeroGridItem({
     >
       <Link
         className="relative block aspect-square h-full w-full"
-        href={`/product/${item.products.urlHandle}`}
+        href={`/product/${item.products.id}`}
         prefetch={true}
       >
         <GridTileImage
