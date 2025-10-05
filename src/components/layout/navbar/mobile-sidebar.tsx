@@ -6,7 +6,13 @@ import { ReactNode, useEffect, useState } from "react";
 
 import { MenuIcon, XIcon } from "lucide-react";
 import { SelectMenuItemType } from "@/database/schema";
-import { Dialog, DialogContent, DialogOverlay } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogOverlay,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { env } from "@/env";
 
 export function MobileMenu({
   menu,
@@ -43,6 +49,9 @@ export function MobileMenu({
         <MenuIcon className="h-4" />
       </button>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogTitle className="sr-only">
+          {`${process.env.NEXT_PUBLIC_SITE_NAME} - Mobile Menu`}
+        </DialogTitle>
         <DialogContent
           showCloseButton={false}
           className="fixed bottom-0 left-0 right-0 top-0 flex h-full w-full max-w-none translate-x-0 translate-y-0 flex-col bg-white pb-6 dark:bg-black p-4"
