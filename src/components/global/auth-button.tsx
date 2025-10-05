@@ -11,7 +11,7 @@ export async function AuthButton() {
   const user = data?.claims;
 
   return user ? (
-    <div className="absolute bottom-16 right-4">
+    <div className="fixed bottom-16 right-4 z-[55] bg-background hover:bg-background/80">
       <LogoutButton />
     </div>
   ) : null;

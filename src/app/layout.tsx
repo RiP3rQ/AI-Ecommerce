@@ -8,6 +8,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Navbar } from "@/components/layout/navbar";
 import { WelcomeToast } from "@/components/welcome-toast";
 import { Toaster } from "sonner";
+import { AuthButton } from "@/components/global/auth-button";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -46,7 +47,7 @@ export default function RootLayout({
               {children}
               <Toaster closeButton position="top-center" />
               <WelcomeToast />
-              <LogoutButton />
+              <AuthButton />
               <ModeSwitcher />
             </main>
           </ThemeProvider>
