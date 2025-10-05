@@ -5,12 +5,14 @@ export const env = createEnv({
   // ============================= SERVER CONFIG =============================
   server: {
     DATABASE_URL: z.string().url(),
-    AI_API_KEY: z.string().min(1),
+    // AI_API_KEY: z.string().min(1),
   },
 
   // ============================= CLIENT CONFIG =============================
   client: {
-    PUBLIC_SITE_NAME: z.string().min(1),
+    NEXT_PUBLIC_SITE_NAME: z.string().min(1),
+    NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().min(1),
   },
 
   // ============================= GENERAL CONFIG =============================
@@ -19,7 +21,7 @@ export const env = createEnv({
    * The prefix that client-side variables must have. This is enforced both at
    * a type-level and at runtime.
    */
-  clientPrefix: "PUBLIC_",
+  clientPrefix: "NEXT_PUBLIC_",
   /**
    * What object holds the environment variables at runtime. This is usually
    * `process.env` or `import.meta.env`.
