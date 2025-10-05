@@ -11,3 +11,50 @@ export function getErrorMessage(error: unknown) {
   }
   return String(error);
 }
+
+/**
+ * Formats a price object with amount in minor units (e.g., cents) and currency code.
+ * Example: { price: 999, currencyCode: 'USD' } => "$9.99"
+ * Handles invalid or missing values gracefully.
+ */
+export function formatBasicPrice({ price }: { price?: number | null }): string {
+  return price?.toFixed(2) ?? "";
+}
+
+/**
+ * Formats a price object with amount in minor units (e.g., cents) and currency code.
+ * Example: { price: 999, currencyCode: 'USD' } => "$9.99"
+ * Handles invalid or missing values gracefully.
+ */
+export function formatFullPrice({
+  price,
+  currencyCode,
+}: {
+  price?: number | null;
+  currencyCode?: string | null;
+}): string {
+  if (
+    typeof price !== "number" ||
+    !isFinite(price) ||
+    price < 0 ||
+    !currencyCode ||
+    typeof currencyCode !== "string"
+  ) {
+    return "";
+  }
+
+  // Convert minor units (e.g., cents) to major units (e.g., dollars)
+  const majorUnit = price / 100;
+
+  try {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: currencyCode,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(majorUnit);
+  } catch {
+    // Fallback for invalid currency codes or formatting errors
+    return `${majorUnit.toFixed(2)} ${currencyCode}`;
+  }
+}
