@@ -3,6 +3,12 @@
 import { createClientSupabaseClient } from "@/supabase-auth/client";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { DoorOpen } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export function LogoutButton() {
   const router = useRouter();
@@ -13,5 +19,17 @@ export function LogoutButton() {
     router.push("/auth/login");
   };
 
-  return <Button onClick={logout}>Logout</Button>;
+  return (
+    <Tooltip>
+      <TooltipTrigger className="absolute bottom-16 right-4" asChild>
+        <Button variant="outline" size="icon" onClick={logout}>
+          <DoorOpen className="size-4 text-red-400" />
+          <span className="sr-only">Logout</span>
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>
+        <p>Logout</p>
+      </TooltipContent>
+    </Tooltip>
+  );
 }
