@@ -5,6 +5,7 @@ export const env = createEnv({
   // ============================= SERVER CONFIG =============================
   server: {
     DATABASE_URL: z.string().url(),
+    // AI_API_KEY: z.string().min(1),
   },
 
   // ============================= CLIENT CONFIG =============================

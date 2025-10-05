@@ -132,9 +132,9 @@ export async function updateSupabaseSession(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
 
   // Redirect unauthenticated users to login
-  if (!user && !request.nextUrl.pathname.startsWith("/login") && /* other allowed paths */) {
+  if (!user && !request.nextUrl.pathname.startsWith("/auth/login") && /* other allowed paths */) {
     const url = request.nextUrl.clone();
-    url.pathname = "/login";
+    url.pathname = "/auth/login";
     return NextResponse.redirect(url);
   }
 
@@ -143,7 +143,7 @@ export async function updateSupabaseSession(request: NextRequest) {
 ```
 
 **Route Protection Logic:**
-- Allows access to `/login`, `/auth/*`, and `/error` for unauthenticated users
+- Allows access to `/auth/login`, `/auth/*`, and `/error` for unauthenticated users
 - Redirects all other requests to `/login` if no valid session exists
 - Preserves session state through proper cookie handling
 
@@ -243,7 +243,7 @@ export function RegisterForm({ registerHandler, ...props }: RegisterFormProps) {
 
 1. User makes request to protected route
 2. Middleware checks for valid session via `supabase.auth.getUser()`
-3. If no valid session and not on allowed route: redirect to `/login`
+3. If no valid session and not on allowed route: redirect to `/auth/login`
 4. If valid session or allowed route: continue request
 
 ## Security Considerations
