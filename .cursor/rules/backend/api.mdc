@@ -1,0 +1,119 @@
+---
+globs: src/app/api/**
+alwaysApply: false
+---
+# Next.js API Endpoint Structure
+
+To maintain a clean and scalable architecture, all Next.js API endpoints should follow a consistent structure. Each endpoint should be composed of three main files: `route.ts`, `service.ts`, and `dto.ts`.
+
+## 1. Directory Structure
+
+Each API endpoint should have its own directory. For example, a `users` endpoint would have the following structure:
+
+```
+src/app/api/users/
+├── dto.ts
+├── service.ts
+└── route.ts
+```
+
+## 2. Data Transfer Objects (`dto.ts`)
+
+This file is responsible for defining the data schemas and validation rules for the endpoint's inputs. We use `zod` for schema validation.
+
+- **Purpose**: To validate incoming data (e.g., request body, query parameters) and ensure type safety.
+- **Implementation**: Define a `zod` schema for the expected data.
+
+### Example: `dto.ts`
+
+```typescript
+import { z } from 'zod';
+
+export const createUserSchema = z.object({
+  email: z.string().email('Invalid email address.'),
+  name: z.string().min(2, 'Name must be at least 2 characters long.'),
+});
+
+export type CreateUserDto = z.infer<typeof createUserSchema>;
+```
+
+## 3. Service Layer (`service.ts`)
+
+The service layer contains the core business logic for the endpoint. It should be completely decoupled from the Next.js request/response cycle.
+
+- **Purpose**: To handle business logic, data persistence, and interactions with other services.
+- **Implementation**: Create a class or functions that take validated DTOs as input and perform the necessary operations.
+
+### Example: `service.ts`
+
+```typescript
+import { db } from '@/database';
+import { users } from '@/database/schema';
+import { eq } from 'drizzle-orm';
+import { type CreateUserDto } from './dto';
+import { UserAlreadyExistsError } from '@/lib/errors';
+
+export class UserService {
+  public async createUser(dto: CreateUserDto) {
+    // Check if user already exists
+    const existingUser = await db.query.users.findFirst({
+      where: eq(users.email, dto.email),
+    });
+
+    if (existingUser) {
+      throw new UserAlreadyExistsError();
+    }
+
+    // Create user in the database
+    const newUser = await db.insert(users).values(dto).returning();
+    return newUser[0];
+  }
+}
+
+export const userService = new UserService();
+```
+
+## 4. Route Handler (`route.ts`)
+
+The `route.ts` file is the entry point for the API endpoint. It connects the HTTP layer with the service layer.
+
+- **Purpose**: To handle incoming HTTP requests, validate user sessions, parse and validate data using DTOs, call the appropriate service method, and handle responses and errors.
+- **Implementation**: Use Next.js API route handlers (e.g., `GET`, `POST`).
+
+### Example: `route.ts`
+
+```typescript
+import { type NextRequest, NextResponse } from 'next/server';
+import { createUserSchema } from './dto';
+import { userService } from './service';
+import { handleApiError } from '@/lib/errors';
+import { getSession } from '@/lib/session'; // Assuming a session management utility
+
+export async function POST(req: NextRequest) {
+  try {
+    // 1. User Session Validation (for protected routes)
+    const session = await getSession(req);
+    if (!session?.user) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    // 2. DTO Validation
+    const body = await req.json();
+    const validatedDto = createUserSchema.parse(body);
+
+    // 3. Call Service
+    const newUser = await userService.createUser(validatedDto);
+
+    return NextResponse.json(newUser, { status: 201 });
+  } catch (err) {
+    // 4. Error Handling
+    return handleApiError(err);
+  }
+}
+```
+
+## Summary of Responsibilities
+
+- **`route.ts`**: Handles HTTP concerns (request, response, status codes), session validation, calls DTO for validation, calls service for logic, and centralizes error handling.
+- **`dto.ts`**: Defines the shape and validation rules of data entering the system.
+- **`service.ts`**: Contains pure business logic, completely unaware of HTTP. Interacts with the database or other services.

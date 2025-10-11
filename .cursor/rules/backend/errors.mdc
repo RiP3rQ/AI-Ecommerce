@@ -1,0 +1,132 @@
+---
+description: Standardized approach for creating, throwing, and handling errors within Next.js API endpoints.
+globs: src/app/api/**
+alwaysApply: false
+---
+
+# API Error Handling Strategy
+
+A robust error handling strategy is crucial for building reliable APIs. This guide outlines the standardized approach for creating, throwing, and handling errors within Next.js API endpoints.
+
+## 1. Base API Error Class
+
+We use a custom `ApiError` class as the foundation for all API-specific errors. This ensures that our errors carry consistent information, including an HTTP status code and a clear message.
+
+This class should be located in a shared location, like `src/lib/errors/api-error.ts`.
+
+```typescript
+// src/lib/errors/api-error.ts
+export class ApiError extends Error {
+  public readonly statusCode: number;
+
+  constructor(message: string, statusCode: number) {
+    super(message);
+    this.statusCode = statusCode;
+    Object.setPrototypeOf(this, new.target.prototype);
+  }
+}
+```
+
+## 2. Creating Specific Custom Errors
+
+Create specific error classes that extend `ApiError` for different failure scenarios. This allows for fine-grained error handling and clearer intent. These should also live in `src/lib/errors/`.
+
+### Example: `UserAlreadyExistsError`
+
+```typescript
+// src/lib/errors/user-already-exists-error.ts
+import { ApiError } from './api-error';
+
+export class UserAlreadyExistsError extends ApiError {
+  constructor(message: string = 'A user with this email already exists.') {
+    super(message, 409); // 409 Conflict
+  }
+}
+```
+
+### Example: `ValidationError`
+
+```typescript
+// src/lib/errors/validation-error.ts
+import { ApiError } from './api-error';
+
+export class ValidationError extends ApiError {
+  public readonly details: Record<string, any>;
+
+  constructor(message: string = 'Validation failed.', details: Record<string, any>) {
+    super(message, 400); // 400 Bad Request
+    this.details = details;
+  }
+}
+```
+
+## 3. Centralized Error Handler
+
+A centralized handler, `handleApiError`, processes caught exceptions and returns a standardized `NextResponse`. This function should be placed in `src/lib/errors/handle-api-error.ts`.
+
+It should handle:
+1.  Instances of our custom `ApiError`.
+2.  `zod` validation errors.
+3.  Generic `Error` objects as a fallback.
+
+```typescript
+// src/lib/errors/handle-api-error.ts
+import { NextResponse } from 'next/server';
+import { ZodError } from 'zod';
+import { ApiError } from './api-error';
+
+export function handleApiError(error: unknown): NextResponse {
+  if (error instanceof ApiError) {
+    return NextResponse.json(
+      { message: error.message },
+      { status: error.statusCode },
+    );
+  }
+
+  if (error instanceof ZodError) {
+    return NextResponse.json(
+      {
+        message: 'Input validation failed',
+        errors: error.flatten().fieldErrors,
+      },
+      { status: 400 },
+    );
+  }
+
+  // Fallback for unexpected errors
+  console.error(error); // It's good practice to log the actual error
+  return NextResponse.json(
+    { message: 'An unexpected internal server error occurred.' },
+    { status: 500 },
+  );
+}
+```
+
+## 4. Usage in API Routes
+
+All logic within an API route handler (e.g., `POST`, `GET`) should be wrapped in a `try...catch` block. The `catch` block should pass the caught error to `handleApiError`.
+
+### Example: `route.ts`
+
+```typescript
+// src/app/api/users/route.ts
+import { type NextRequest, NextResponse } from 'next/server';
+import { createUserSchema } from './dto';
+import { userService } from './service';
+import { handleApiError } from '@/lib/errors/handle-api-error';
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const validatedDto = createUserSchema.parse(body); // Can throw ZodError
+
+    const newUser = await userService.createUser(validatedDto); // Can throw UserAlreadyExistsError
+
+    return NextResponse.json(newUser, { status: 201 });
+  } catch (err) {
+    return handleApiError(err);
+  }
+}
+```
+
+This approach ensures that all API responses, both success and error, are consistent and predictable.
