@@ -1,0 +1,52 @@
+---
+Rule Type: Always
+---
+
+# AI Rules for AI-Powered E-commerce MVP
+
+This project is a modern e-commerce application built to demonstrate the practical application of AI in improving both user experience (UX) and key business metrics. While the platform includes standard e-commerce functionalities—such as product categories (e.g., 'T-shirts', 'Hoodies'), color variants, and sizing options—the primary focus is on the AI-powered modules.
+
+Key AI Features:
+
+AI Review Summarization: An integrated AI model that processes all customer feedback for a product and generates a concise, easy-to-read summary, allowing customers to understand product sentiment at a glance.
+
+Intelligent Cross-Selling Engine: A recommendation system that analyzes the items in a customer's shopping cart and suggests relevant additional products. This feature is designed to enhance the customer's shopping journey and increase the average order value.
+
+## Tech Stack
+
+- Next.js 15
+- TypeScript 5
+- React 19
+- Tailwind 4
+
+## Project Structure
+
+When introducing changes to the project, always follow the directory structure below:
+
+- `./public` - public assets
+- `./src` - source code
+- `./src/app/api/*/route.ts` - REST API route files for handling server calls
+- `./src/components` - client-side components written in React (dynamic)
+- `./src/database` - drizzle ORM schemas, connection file, migrations and helpers
+- `./src/hooks` - custom React hooks
+- `./src/lib` - custom library files
+- `./src/providers` - store providers
+- `./src/supabase-auth` - authentication of the customers using Supabase
+- `./src/schemas` - zod DTOs, schemas for form validation
+- `./src/env` - custom runtime environment variables validator
+- `./src/middleware` - middleware called on every user request
+
+When modifying the directory structure, always update this section.
+
+## Coding practices
+
+### Guidelines for clean code
+
+- Prioritize error handling and edge cases
+- Handle errors and edge cases at the beginning of functions.
+- Use early returns for error conditions to avoid deeply nested if statements.
+- Place the happy path last in the function for improved readability.
+- Avoid unnecessary else statements; use if-return pattern instead.
+- Use guard clauses to handle preconditions and invalid states early.
+- Implement proper error logging and user-friendly error messages.
+- Consider using custom error types or error factories for consistent error handling.
