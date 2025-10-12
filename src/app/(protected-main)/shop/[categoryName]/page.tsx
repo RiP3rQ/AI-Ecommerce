@@ -1,3 +1,4 @@
+import { ShopWrapper } from "@/components/shop/wrapper";
 import { ReactNode } from "react";
 
 interface ShopPageProps {
@@ -11,5 +12,5 @@ export default async function ShopPage({
 }: Readonly<ShopPageProps>): Promise<ReactNode> {
   const { categoryName } = await params;
 
-  return <div>ShopPage {categoryName}</div>;
+  return <ShopWrapper categoryName={categoryName} />;
 }

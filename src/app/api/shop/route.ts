@@ -29,7 +29,7 @@ export async function GET(
     // Step 1: Parse and validate query parameters
     const searchParams = request.nextUrl.searchParams;
 
-    const queryParams = {
+    let queryParams = {
       page: searchParams.get("page")
         ? Number.parseInt(searchParams.get("page")!)
         : undefined,
@@ -59,6 +59,11 @@ export async function GET(
         ? searchParams.get("availableForSale") === "true"
         : undefined,
     };
+
+    // Make sure to remove 'all' category from the query params
+    if (queryParams.category?.toLowerCase() === "all") {
+      queryParams.category = undefined;
+    }
 
     const validatedDto = getProductsSchemaRefined.parse(queryParams);
 

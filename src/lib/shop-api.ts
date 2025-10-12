@@ -2,6 +2,7 @@ import {
   PaginationUrlSchema,
   ShopFiltersUrlSchema,
 } from "@/schemas/shop-url-schema";
+import { BASE_URL } from "./utils";
 
 export function buildShopUrl({
   pagination,
@@ -21,7 +22,5 @@ export function buildShopUrl({
     priceMax: filters.priceRange?.max?.toString(),
   };
 
-  return `${process.env.NEXT_PUBLIC_API_URL}/api/products?${new URLSearchParams(
-    params
-  ).toString()}`;
+  return `${BASE_URL}/api/shop?${new URLSearchParams(params).toString()}`;
 }
