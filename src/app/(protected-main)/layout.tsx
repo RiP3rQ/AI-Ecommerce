@@ -3,7 +3,6 @@ import { Navbar } from "@/components/layout/navbar";
 import { env } from "@/env";
 import { BASE_URL } from "@/lib/utils";
 import { CartProvider } from "@/providers/cart-provider";
-import { getCartFromApi } from "@/lib/cart-api";
 
 const { NEXT_PUBLIC_SITE_NAME } = env;
 
@@ -24,11 +23,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Don't await the fetch, pass the Promise to the context provider
-  const cart = getCartFromApi();
-
   return (
-    <CartProvider cartPromise={cart}>
+    <CartProvider>
       <Navbar />
       <main>{children}</main>
     </CartProvider>

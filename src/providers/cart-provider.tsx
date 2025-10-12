@@ -2,6 +2,7 @@
 
 import { CartResponse } from "@/app/api/cart/types";
 import { SelectProduct, SelectProductVariant } from "@/database/schema";
+import { swrFetcher } from "@/lib/swr-fetcher";
 import {
   CartCost,
   CartItemCost,
@@ -11,11 +12,11 @@ import {
 } from "@/types/cart";
 import React, {
   createContext,
-  use,
   useContext,
   useMemo,
   useOptimistic,
 } from "react";
+import useSWR from "swr";
 
 type UpdateType = "plus" | "minus" | "delete";
 
@@ -39,7 +40,7 @@ type CartAction =
     };
 
 type CartContextType = {
-  cartPromise: Promise<FrontendCart | undefined>;
+  cartUrl: string;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -261,22 +262,12 @@ function cartReducer(
   }
 }
 
-export function CartProvider({
-  children,
-  cartPromise,
-}: {
-  children: React.ReactNode;
-  cartPromise: Promise<CartResponse | undefined>;
-}) {
-  // Transform the API response to the frontend structure
-  const transformedCartPromise = cartPromise.then((response) =>
-    response ? transformCartResponse(response) : undefined
-  );
+export function CartProvider({ children }: { children: React.ReactNode }) {
+  // Provide the cart API endpoint URL for SWR
+  const cartUrl = "/api/cart";
 
   return (
-    <CartContext.Provider value={{ cartPromise: transformedCartPromise }}>
-      {children}
-    </CartContext.Provider>
+    <CartContext.Provider value={{ cartUrl }}>{children}</CartContext.Provider>
   );
 }
 
@@ -286,7 +277,18 @@ export function useCart() {
     throw new Error("useCart must be used within a CartProvider");
   }
 
-  const initialCart = use(context.cartPromise);
+  // Use SWR to fetch cart data asynchronously
+  const {
+    data: cartResponse,
+    error,
+    isLoading,
+  } = useSWR<CartResponse>(context.cartUrl, swrFetcher);
+
+  // Transform the API response to frontend format
+  const initialCart = cartResponse
+    ? transformCartResponse(cartResponse)
+    : undefined;
+
   const [optimisticCart, updateOptimisticCart] = useOptimistic(
     initialCart,
     cartReducer
@@ -320,7 +322,9 @@ export function useCart() {
       cart: optimisticCart,
       updateCartItem,
       addCartItem,
+      isLoading,
+      error,
     }),
-    [optimisticCart]
+    [optimisticCart, isLoading, error]
   );
 }

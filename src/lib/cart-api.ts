@@ -7,6 +7,7 @@ import type {
   CartResponse,
   DeleteCartItemResponse,
 } from "@/app/api/cart/types";
+import { BASE_URL } from "./utils";
 
 /**
  * Adds an item to the cart.
@@ -18,7 +19,7 @@ export async function addItemToCart({
   productVariantId: string;
   quantity: number;
 }): Promise<CartResponse> {
-  const response = await fetch("/api/cart", {
+  const response = await fetch(`${BASE_URL}/api/cart`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -49,7 +50,7 @@ export async function updateCartItemQuantity({
   cartItemId: string;
   quantity: number;
 }): Promise<CartResponse> {
-  const response = await fetch("/api/cart", {
+  const response = await fetch(`${BASE_URL}/api/cart`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -78,7 +79,7 @@ export async function removeCartItem({
 }: {
   cartItemId: string;
 }): Promise<DeleteCartItemResponse> {
-  const response = await fetch("/api/cart", {
+  const response = await fetch(`${BASE_URL}/api/cart`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
@@ -102,7 +103,7 @@ export async function removeCartItem({
  * Gets the current cart.
  */
 export async function getCartFromApi(): Promise<CartResponse> {
-  const response = await fetch("/api/cart", {
+  const response = await fetch(`${BASE_URL}/api/cart`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",

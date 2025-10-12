@@ -6,6 +6,9 @@ export const env = createEnv({
   server: {
     DATABASE_URL: z.string().url(),
     // AI_API_KEY: z.string().min(1),
+    NODE_ENV: z
+      .enum(["development", "production", "preview", "test", "CI"])
+      .default("development"),
   },
 
   // ============================= CLIENT CONFIG =============================
@@ -26,7 +29,14 @@ export const env = createEnv({
    * What object holds the environment variables at runtime. This is usually
    * `process.env` or `import.meta.env`.
    */
-  runtimeEnv: process.env,
+  runtimeEnv: {
+    DATABASE_URL: process.env.DATABASE_URL,
+    NODE_ENV: process.env.NODE_ENV,
+    NEXT_PUBLIC_SITE_NAME: process.env.NEXT_PUBLIC_SITE_NAME,
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+  },
   /**
    * By default, this library will feed the environment variables directly to
    * the Zod validator.
