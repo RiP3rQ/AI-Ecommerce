@@ -22,16 +22,20 @@ export async function GET(
     // Step 1: Parse and validate query parameters
     const searchParams = request.nextUrl.searchParams;
 
+    const rawSortDirection = searchParams.get("sortDirection")?.toLowerCase();
+    const rawSortField = searchParams.get("sortField")?.toLowerCase();
+
     const queryParams = {
-      sortDirection: searchParams.get("sortDirection") as
-        | "asc"
-        | "desc"
-        | undefined,
-      sortField: searchParams.get("sortField") as
-        | "name"
-        | "createdAt"
-        | "updatedAt"
-        | undefined,
+      sortDirection:
+        rawSortDirection === "asc" || rawSortDirection === "desc"
+          ? rawSortDirection
+          : undefined,
+      sortField:
+        rawSortField === "name" ||
+        rawSortField === "createdAt" ||
+        rawSortField === "updatedAt"
+          ? rawSortField
+          : undefined,
     };
 
     const validatedDto = getCategoriesSchema.parse(queryParams);
