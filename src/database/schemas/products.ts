@@ -6,12 +6,14 @@ import {
   varchar,
   index,
   uuid,
+  vector,
 } from "drizzle-orm/pg-core";
 import { relations, sql } from "drizzle-orm";
 import { DEFAULT_DATE_TABLES } from "../helpers/dates";
 import { productVariants } from "./product-variants";
 import { productImages } from "./product-images";
 import { productOptions } from "./product-options";
+import { categories } from "./categories";
 
 // Main products table
 export const products = pgTable(
@@ -25,6 +27,10 @@ export const products = pgTable(
     description: text("description"),
     descriptionHtml: text("description_html"),
     tags: jsonb("tags").$type<string[]>().default([]), // Store tags as JSON array
+    categoryId: uuid("category_id").references(() => categories.id, {
+      onDelete: "set null",
+    }),
+    embedding: vector("embedding", { dimensions: 1536 }), // Example dimension for OpenAI embeddings
     ...DEFAULT_DATE_TABLES,
   },
   (table) => ({
@@ -35,14 +41,19 @@ export const products = pgTable(
     titleIndex: index("products_title_index").on(table.title),
     createdAtIndex: index("products_created_at_index").on(table.createdAt),
     updatedAtIndex: index("products_updated_at_index").on(table.updatedAt),
+    categoryIdIndex: index("products_category_id_index").on(table.categoryId),
   })
 );
 
 // Relations definitions for Drizzle ORM
-export const productsRelations = relations(products, ({ many }) => ({
+export const productsRelations = relations(products, ({ one, many }) => ({
   variants: many(productVariants),
   images: many(productImages),
   options: many(productOptions),
+  category: one(categories, {
+    fields: [products.categoryId],
+    references: [categories.id],
+  }),
 }));
 
 // Type exports for Drizzle
