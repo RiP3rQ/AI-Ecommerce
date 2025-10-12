@@ -7,6 +7,7 @@ import { useProduct } from "@/providers/product-provider";
 import clsx from "clsx";
 import { PlusIcon } from "lucide-react";
 import { useActionState } from "react";
+import { addItem } from "./actions";
 
 function SubmitButton({
   availableForSale,
@@ -67,7 +68,7 @@ export function AddToCart({
   const { availableForSale } = product;
   const { addCartItem } = useCart();
   const { state } = useProduct();
-  const [, formAction] = useActionState(() => null, null);
+  const [message, formAction] = useActionState(addItem, null);
 
   const variant = variants.find((variant: SelectProductVariant) =>
     variant.selectedOptions.every(

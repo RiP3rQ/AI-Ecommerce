@@ -51,17 +51,37 @@ export async function getProductData(
 
     //Step 3: Transform the joined result into the expected format
     const product = productData[0].products;
-    const product_variants = productData
-      .map((row) => row.product_variants)
-      .filter((variant): variant is SelectProductVariant => variant !== null);
-    const product_images = productData
-      .map((row) => row.product_images)
-      .filter((image): image is SelectProductImage => image !== null)
-      .sort((a, b) => a.order - b.order);
-    const product_options = productData
-      .map((row) => row.product_options)
-      .filter((option): option is SelectProductOption => option !== null)
-      .sort((a, b) => a.position - b.position);
+
+    // Deduplicate variants by ID
+    const variantsMap = new Map<string, SelectProductVariant>();
+    for (const row of productData) {
+      if (row.product_variants) {
+        variantsMap.set(row.product_variants.id, row.product_variants);
+      }
+    }
+    const product_variants = Array.from(variantsMap.values());
+
+    // Deduplicate images by ID and sort by order
+    const imagesMap = new Map<string, SelectProductImage>();
+    for (const row of productData) {
+      if (row.product_images) {
+        imagesMap.set(row.product_images.id, row.product_images);
+      }
+    }
+    const product_images = Array.from(imagesMap.values()).sort(
+      (a, b) => a.order - b.order
+    );
+
+    // Deduplicate options by ID and sort by position
+    const optionsMap = new Map<string, SelectProductOption>();
+    for (const row of productData) {
+      if (row.product_options) {
+        optionsMap.set(row.product_options.id, row.product_options);
+      }
+    }
+    const product_options = Array.from(optionsMap.values()).sort(
+      (a, b) => a.position - b.position
+    );
 
     //Step 4: Calculate the price range
     // Calculate min and max variant price, ensuring the currencyCode matches the min/max value
