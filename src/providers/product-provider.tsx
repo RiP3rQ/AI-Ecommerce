@@ -1,18 +1,22 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import React, {
   createContext,
   useContext,
   useMemo,
   useOptimistic,
 } from "react";
+import { parseAsInteger, parseAsJson, useQueryState } from "nuqs";
+import { index } from "drizzle-orm/gel-core";
+import {
+  ProductUrlSchema,
+  productUrlSchema,
+} from "@/schemas/product-url-schema";
 
 type ProductState = {
-  [key: string]: string;
-} & {
   image?: string;
-};
+} & Record<string, string | undefined>;
 
 type ProductContextType = {
   state: ProductState;
@@ -23,13 +27,20 @@ type ProductContextType = {
 const ProductContext = createContext<ProductContextType | undefined>(undefined);
 
 export function ProductProvider({ children }: { children: React.ReactNode }) {
-  const searchParams = useSearchParams();
+  const [urlImage, setUrlImage] = useQueryState(
+    "image",
+    parseAsInteger.withDefault(0)
+  );
+  const [selectedProductOption, setSelectedProductOption] = useQueryState(
+    "selectedProductOption",
+    parseAsJson(productUrlSchema)
+  );
 
   const getInitialState = () => {
-    const params: ProductState = {};
-    for (const [key, value] of searchParams.entries()) {
-      params[key] = value;
-    }
+    const params: ProductState = {
+      image: urlImage.toString(),
+      ...selectedProductOption,
+    };
     return params;
   };
 
@@ -44,12 +55,14 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
   const updateOption = (name: string, value: string) => {
     const newState = { [name]: value };
     setOptimisticState(newState);
+    setSelectedProductOption((prev) => ({ ...prev, [name]: value }));
     return { ...state, ...newState };
   };
 
   const updateImage = (index: string) => {
     const newState = { image: index };
     setOptimisticState(newState);
+    setUrlImage(Number(index));
     return { ...state, ...newState };
   };
 
@@ -67,22 +80,10 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function useProduct() {
+export function useProductProvider() {
   const context = useContext(ProductContext);
   if (context === undefined) {
-    throw new Error("useProduct must be used within a ProductProvider");
+    throw new Error("useProductProvider must be used within a ProductProvider");
   }
   return context;
-}
-
-export function useUpdateURL() {
-  const router = useRouter();
-
-  return (state: ProductState) => {
-    const newParams = new URLSearchParams(window.location.search);
-    Object.entries(state).forEach(([key, value]) => {
-      newParams.set(key, value);
-    });
-    router.push(`?${newParams.toString()}`, { scroll: false });
-  };
 }

@@ -3,7 +3,7 @@
 import { SelectProductVariant } from "@/database/schema";
 import { GetProductDataReturnType } from "@/app/(protected-main)/product/[productUuid]/actions";
 import { useCart } from "@/providers/cart-provider";
-import { useProduct } from "@/providers/product-provider";
+import { useProductProvider } from "@/providers/product-provider";
 import clsx from "clsx";
 import { PlusIcon } from "lucide-react";
 import { useActionState } from "react";
@@ -67,7 +67,7 @@ export function AddToCart({
 }) {
   const { availableForSale } = product;
   const { addCartItem } = useCart();
-  const { state } = useProduct();
+  const { state } = useProductProvider();
   const [message, formAction] = useActionState(addItem, null);
 
   const variant = variants.find((variant: SelectProductVariant) =>

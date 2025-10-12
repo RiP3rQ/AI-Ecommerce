@@ -1,7 +1,7 @@
 "use client";
 
 import { GridTileImage } from "@/components/grid/single-tile";
-import { useProduct, useUpdateURL } from "@/providers/product-provider";
+import { useProductProvider } from "@/providers/product-provider";
 import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 import Image from "next/image";
 
@@ -10,8 +10,7 @@ export function Gallery({
 }: {
   images: { src: string; altText: string }[];
 }) {
-  const { state, updateImage } = useProduct();
-  const updateURL = useUpdateURL();
+  const { state, updateImage } = useProductProvider();
   const imageIndex = state.image ? parseInt(state.image) : 0;
 
   const nextImageIndex = imageIndex + 1 < images.length ? imageIndex + 1 : 0;
@@ -40,8 +39,7 @@ export function Gallery({
             <div className="mx-auto flex h-11 items-center rounded-full border border-white bg-neutral-50/80 text-neutral-500 backdrop-blur-sm dark:border-black dark:bg-neutral-900/80">
               <button
                 formAction={() => {
-                  const newState = updateImage(previousImageIndex.toString());
-                  updateURL(newState);
+                  updateImage(previousImageIndex.toString());
                 }}
                 aria-label="Previous product image"
                 className={buttonClassName}
@@ -51,8 +49,7 @@ export function Gallery({
               <div className="mx-1 h-6 w-px bg-neutral-500"></div>
               <button
                 formAction={() => {
-                  const newState = updateImage(nextImageIndex.toString());
-                  updateURL(newState);
+                  updateImage(nextImageIndex.toString());
                 }}
                 aria-label="Next product image"
                 className={buttonClassName}
@@ -73,8 +70,7 @@ export function Gallery({
               <li key={image.src} className="h-20 w-20">
                 <button
                   formAction={() => {
-                    const newState = updateImage(index.toString());
-                    updateURL(newState);
+                    updateImage(index.toString());
                   }}
                   aria-label="Select product image"
                   className="h-full w-full"

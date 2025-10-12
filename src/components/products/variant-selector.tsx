@@ -1,8 +1,10 @@
 "use client";
 
 import { SelectProductOption, SelectProductVariant } from "@/database/schema";
-import { useProduct, useUpdateURL } from "@/providers/product-provider";
+import { useProductProvider } from "@/providers/product-provider";
+import { productUrlSchema } from "@/schemas/product-url-schema";
 import clsx from "clsx";
+import { useQueryState, parseAsString, parseAsJson } from "nuqs";
 
 type Combination = {
   id: string;
@@ -17,8 +19,8 @@ export function VariantSelector({
   options: SelectProductOption[];
   variants: SelectProductVariant[];
 }) {
-  const { state, updateOption } = useProduct();
-  const updateURL = useUpdateURL();
+  const { state, updateOption } = useProductProvider();
+
   const hasNoOptionsOrJustOneOption =
     !options.length ||
     (options.length === 1 && options[0]?.values.length === 1);
@@ -56,7 +58,7 @@ export function VariantSelector({
                 options.find(
                   (option) =>
                     option.name.toLowerCase() === key &&
-                    option.values.includes(value)
+                    option.values.includes(value as string)
                 )
             );
             const isAvailableForSale = combinations.find((combination) =>
@@ -72,8 +74,7 @@ export function VariantSelector({
             return (
               <button
                 formAction={() => {
-                  const newState = updateOption(optionNameLowerCase, value);
-                  updateURL(newState);
+                  updateOption(optionNameLowerCase, value);
                 }}
                 key={value}
                 aria-disabled={!isAvailableForSale}
