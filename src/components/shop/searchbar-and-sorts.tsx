@@ -31,6 +31,8 @@ export function SearchbarAndSorts({
   const debouncedSearch = useDebounce(localSearch, 500);
 
   useEffect(() => {
+    console.log("[SearchbarAndSorts] debouncedSearch: ", debouncedSearch);
+    console.log("[SearchbarAndSorts] searchValue: ", searchValue);
     onSearchChange(debouncedSearch);
   }, [debouncedSearch, onSearchChange]);
 

@@ -3,6 +3,7 @@
 import { CartResponse } from "@/app/api/cart/types";
 import { SelectProduct, SelectProductVariant } from "@/database/schema";
 import { swrFetcher } from "@/lib/swr-fetcher";
+import { BASE_URL } from "@/lib/utils";
 import {
   CartCost,
   CartItemCost,
@@ -272,7 +273,7 @@ function cartReducer(
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   // Provide the cart API endpoint URL for SWR
-  const cartUrl = "/api/cart";
+  const cartUrl = `${BASE_URL}/api/cart`;
 
   return (
     <CartContext.Provider value={{ cartUrl }}>{children}</CartContext.Provider>

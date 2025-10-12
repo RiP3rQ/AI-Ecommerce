@@ -3,7 +3,7 @@ export const swrFetcher = (url: string) =>
     .then(async (res) => {
       const data = await res.json();
       if (process.env.NODE_ENV !== "production") {
-        console.log("[SWR_FETCHER] Response data: ", data);
+        console.log("[SWR_FETCHER] (URL: ", url, ") Response data: ", data);
       }
       return data;
     })

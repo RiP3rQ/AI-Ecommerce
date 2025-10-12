@@ -17,6 +17,8 @@ import { Filters } from "./filter";
 import { SearchbarAndSorts } from "./searchbar-and-sorts";
 import { ProductsList } from "./products-list";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SWRResponse } from "@/types/swr";
+import { ShopProductsData } from "@/app/api/shop/types";
 
 export function ShopWrapper({
   categoryName,
@@ -35,7 +37,7 @@ export function ShopWrapper({
   );
 
   // ============================= DATA FETCHING =============================
-  const { data, isLoading, error } = useSWR(
+  const { data, isLoading, error } = useSWR<SWRResponse<ShopProductsData>>(
     buildShopUrl({
       pagination: pagination as PaginationUrlSchema,
       filters: filters as ShopFiltersUrlSchema,
@@ -133,7 +135,6 @@ export function ShopWrapper({
           </div>
         ) : (
           <Filters
-            categories={data?.categories || []}
             selectedCategory={(filters as ShopFiltersUrlSchema).category}
             priceRange={(filters as ShopFiltersUrlSchema).priceRange}
             onCategoryChange={handleCategoryChange}
@@ -171,11 +172,13 @@ export function ShopWrapper({
                 onSortChange={handleSortChange}
               />
               <ProductsList
-                products={data?.products || []}
+                products={data?.data.products || []}
                 currentPage={(pagination as PaginationUrlSchema).page}
-                totalPages={data?.totalPages || 1}
-                totalProducts={data?.totalProducts || 0}
+                totalPages={data?.data.pagination.totalPages || 1}
+                totalProducts={data?.data.pagination.totalItems || 0}
                 onPageChange={handlePageChange}
+                categoryName={categoryName}
+                filters={filters as ShopFiltersUrlSchema}
               />
             </>
           )}

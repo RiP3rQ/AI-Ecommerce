@@ -16,6 +16,7 @@ import {
   EmptyDescription,
 } from "@/components/ui/empty";
 import { PackageSearchIcon } from "lucide-react";
+import { ShopFiltersUrlSchema } from "@/schemas/shop-url-schema";
 
 interface Product {
   id: string;
@@ -33,6 +34,8 @@ interface ProductsListProps {
   totalPages: number;
   totalProducts: number;
   onPageChange: (page: number) => void;
+  categoryName?: string;
+  filters?: ShopFiltersUrlSchema;
 }
 
 export function ProductsList({
@@ -41,7 +44,27 @@ export function ProductsList({
   totalPages,
   totalProducts,
   onPageChange,
+  categoryName = "",
+  filters,
 }: ProductsListProps): ReactNode {
+  const buildPageUrl = (page: number): string => {
+    const params = new URLSearchParams();
+    params.set("pagination", JSON.stringify({ page, limit: 12 }));
+    params.set(
+      "filters",
+      JSON.stringify(
+        filters || {
+          category: categoryName,
+          search: "",
+          sortField: "createdAt",
+          sortDirection: "desc" as const,
+          priceRange: null,
+        }
+      )
+    );
+    return `/shop/${categoryName}?${params.toString()}`;
+  };
+
   if (products.length === 0) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
@@ -120,17 +143,9 @@ export function ProductsList({
           <PaginationContent>
             <PaginationItem>
               <PaginationPrevious
-                onClick={(event) => {
-                  event.preventDefault();
-                  if (currentPage > 1) {
-                    onPageChange(currentPage - 1);
-                  }
-                }}
-                href="#"
+                href={currentPage > 1 ? buildPageUrl(currentPage - 1) : "#"}
                 className={
-                  currentPage === 1
-                    ? "pointer-events-none opacity-50"
-                    : "cursor-pointer"
+                  currentPage === 1 ? "pointer-events-none opacity-50" : ""
                 }
               />
             </PaginationItem>
@@ -141,13 +156,8 @@ export function ProductsList({
                   <PaginationEllipsis />
                 ) : (
                   <PaginationLink
-                    onClick={(event) => {
-                      event.preventDefault();
-                      onPageChange(pageNum);
-                    }}
-                    href="#"
+                    href={buildPageUrl(pageNum)}
                     isActive={currentPage === pageNum}
-                    className="cursor-pointer"
                   >
                     {pageNum}
                   </PaginationLink>
@@ -157,17 +167,13 @@ export function ProductsList({
 
             <PaginationItem>
               <PaginationNext
-                onClick={(event) => {
-                  event.preventDefault();
-                  if (currentPage < totalPages) {
-                    onPageChange(currentPage + 1);
-                  }
-                }}
-                href="#"
+                href={
+                  currentPage < totalPages ? buildPageUrl(currentPage + 1) : "#"
+                }
                 className={
                   currentPage === totalPages
                     ? "pointer-events-none opacity-50"
-                    : "cursor-pointer"
+                    : ""
                 }
               />
             </PaginationItem>

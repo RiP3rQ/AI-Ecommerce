@@ -1,16 +1,18 @@
 "use client";
 
-import { ReactNode, useState } from "react";
+import { ReactNode, useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { CheckIcon, XIcon, FilterIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { BASE_URL, cn } from "@/lib/utils";
+import { SelectCategory } from "@/database/schema";
+import { swrFetcher } from "@/lib/swr-fetcher";
+import useSWR, { SWRResponse } from "swr";
 
 interface FiltersProps {
-  categories: Array<{ id: string; name: string }>;
   selectedCategory?: string;
   priceRange: { min: number; max: number };
   onCategoryChange: (categoryId: string) => void;
@@ -19,7 +21,6 @@ interface FiltersProps {
 }
 
 export function Filters({
-  categories = [],
   selectedCategory,
   priceRange,
   onCategoryChange,
@@ -29,6 +30,12 @@ export function Filters({
   const [localMinPrice, setLocalMinPrice] = useState(priceRange.min.toString());
   const [localMaxPrice, setLocalMaxPrice] = useState(priceRange.max.toString());
 
+  // ============================= SWR DATA =============================
+  const { data, isLoading, error } = useSWR<SWRResponse<SelectCategory[]>>(
+    `${BASE_URL}/api/categories`,
+    swrFetcher
+  );
+
   const handleApplyPriceRange = (): void => {
     const min = Number.parseFloat(localMinPrice) || 0;
     const max = Number.parseFloat(localMaxPrice) || 1000000;
@@ -37,6 +44,8 @@ export function Filters({
 
   const hasActiveFilters =
     selectedCategory || priceRange.min > 0 || priceRange.max < 1000000;
+
+  const categories = useMemo(() => data?.data || [], [data]);
 
   return (
     <aside className="sticky top-0 h-screen w-full overflow-y-auto border-r border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-black">
