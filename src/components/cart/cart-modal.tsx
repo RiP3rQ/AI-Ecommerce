@@ -39,7 +39,7 @@ export function CartModalWithTrigger(): ReactNode {
           <OpenCart quantity={quantityRef.current} />
         </button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent aria-describedby={undefined}>
         <DialogTitle>Cart</DialogTitle>
         {!cart || cart.lines.length === 0 ? (
           <div className="mt-20 flex w-full flex-col items-center justify-center overflow-hidden">
