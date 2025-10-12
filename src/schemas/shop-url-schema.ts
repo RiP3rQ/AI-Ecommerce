@@ -3,7 +3,7 @@ import z from "zod";
 // ============================= PAGINATION URL SCHEMA =============================
 export const DEFAULT_PAGINATION = {
   page: 1,
-  limit: 10,
+  limit: 12,
 };
 export const paginationUrlSchema = z.object({
   page: z.number().optional().default(DEFAULT_PAGINATION.page),

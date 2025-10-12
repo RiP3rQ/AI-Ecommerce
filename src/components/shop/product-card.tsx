@@ -4,17 +4,10 @@ import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Price } from "../custom-price";
+import { ProductWithDetails } from "@/app/api/shop/types";
 
 interface ProductCardProps {
-  product: {
-    id: string;
-    title: string;
-    description?: string | null;
-    availableForSale: boolean;
-    imageUrl?: string;
-    price?: number;
-    currencyCode?: string;
-  };
+  product: ProductWithDetails;
   priority?: boolean;
 }
 
@@ -22,7 +15,7 @@ export function ProductCard({
   product,
   priority = false,
 }: ProductCardProps): ReactNode {
-  const hasImage = !!product.imageUrl;
+  const hasImage = !!product.featuredImage?.url;
 
   return (
     <Link
@@ -34,8 +27,8 @@ export function ProductCard({
       <div className="relative aspect-square w-full overflow-hidden bg-neutral-100 dark:bg-neutral-900">
         {hasImage ? (
           <Image
-            src={product.imageUrl ?? ""}
-            alt={product.title}
+            src={product.featuredImage?.url || ""}
+            alt={product.featuredImage?.altText || ""}
             fill
             sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
             priority={priority}
@@ -73,19 +66,21 @@ export function ProductCard({
         </div>
 
         {/* Price */}
-        {product.price !== undefined && product.currencyCode && (
-          <div className="mt-auto">
-            <Price
-              amount={product.price.toString()}
-              currencyCode={product.currencyCode}
-              className={cn(
-                "text-base font-bold",
-                !product.availableForSale &&
-                  "text-neutral-400 dark:text-neutral-600"
-              )}
-            />
-          </div>
-        )}
+        {product.minPrice !== undefined &&
+          product.maxPrice !== undefined &&
+          product.currencyCode && (
+            <div className="mt-auto">
+              <Price
+                amount={product.minPrice.toString()}
+                currencyCode={product.currencyCode}
+                className={cn(
+                  "text-base font-bold",
+                  !product.availableForSale &&
+                    "text-neutral-400 dark:text-neutral-600"
+                )}
+              />
+            </div>
+          )}
       </div>
     </Link>
   );

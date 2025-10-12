@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/empty";
 import { PackageSearchIcon } from "lucide-react";
 import { ShopFiltersUrlSchema } from "@/schemas/shop-url-schema";
+import { ProductWithDetails } from "@/app/api/shop/types";
 
 interface Product {
   id: string;
@@ -29,7 +30,7 @@ interface Product {
 }
 
 interface ProductsListProps {
-  products: Product[];
+  products: ProductWithDetails[];
   currentPage: number;
   totalPages: number;
   totalProducts: number;
@@ -143,7 +144,7 @@ export function ProductsList({
           <PaginationContent>
             <PaginationItem>
               <PaginationPrevious
-                href={currentPage > 1 ? buildPageUrl(currentPage - 1) : "#"}
+                onClick={() => onPageChange(currentPage - 1)}
                 className={
                   currentPage === 1 ? "pointer-events-none opacity-50" : ""
                 }
@@ -156,7 +157,7 @@ export function ProductsList({
                   <PaginationEllipsis />
                 ) : (
                   <PaginationLink
-                    href={buildPageUrl(pageNum)}
+                    onClick={() => onPageChange(pageNum)}
                     isActive={currentPage === pageNum}
                   >
                     {pageNum}
@@ -167,9 +168,7 @@ export function ProductsList({
 
             <PaginationItem>
               <PaginationNext
-                href={
-                  currentPage < totalPages ? buildPageUrl(currentPage + 1) : "#"
-                }
+                onClick={() => onPageChange(currentPage + 1)}
                 className={
                   currentPage === totalPages
                     ? "pointer-events-none opacity-50"
