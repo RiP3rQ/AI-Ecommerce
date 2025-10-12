@@ -22,7 +22,6 @@ export const products = pgTable(
     id: uuid("id")
       .default(sql`gen_random_uuid()`)
       .primaryKey(),
-    urlHandle: varchar("url_handle", { length: 255 }).notNull().unique(),
     availableForSale: boolean("available_for_sale").notNull().default(true),
     title: varchar("title", { length: 255 }).notNull(),
     description: text("description"),

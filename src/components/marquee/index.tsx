@@ -34,11 +34,11 @@ export async function ItemsMarquee(): Promise<ReactNode> {
       <ul className="flex animate-carousel gap-4">
         {carouselProducts?.map((product, i) => (
           <li
-            key={`${product.products.urlHandle}-${product.products.id}-${i}`}
+            key={`${product.products.id}-${i}`}
             className="relative aspect-square h-[30vh] max-h-[275px] w-2/3 max-w-[475px] flex-none md:w-1/3"
           >
             <Link
-              href={`/product/${product.products.urlHandle}/${product.products.id}`}
+              href={`/product/${product.products.id}`}
               className="relative h-full w-full"
             >
               <GridTileImage

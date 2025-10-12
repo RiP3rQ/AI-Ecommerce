@@ -5,7 +5,6 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
 
 import { MenuIcon, XIcon } from "lucide-react";
-import { SelectMenuItemType } from "@/database/schema";
 import {
   Dialog,
   DialogContent,
@@ -17,7 +16,7 @@ import { env } from "@/env";
 export function MobileMenu({
   menu,
 }: {
-  menu: SelectMenuItemType[];
+  menu: { title: string; path: string }[];
 }): ReactNode {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -66,7 +65,7 @@ export function MobileMenu({
 
           {menu.length ? (
             <ul className="flex w-full flex-col">
-              {menu.map((item: SelectMenuItemType) => (
+              {menu.map((item) => (
                 <li
                   className="py-2 text-xl text-black transition-colors hover:text-neutral-500 dark:text-white"
                   key={item.title}
