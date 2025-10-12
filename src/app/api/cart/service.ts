@@ -15,6 +15,7 @@ import type {
   RemoveCartItemDto,
 } from "./dto";
 import type { CartSummary, CartWithItems, CartItemWithDetails } from "./types";
+import type { SelectProductImage } from "@/database/schemas/product-images";
 
 /**
  * Service class for cart operations.
@@ -71,7 +72,11 @@ export class CartService {
           with: {
             productVariant: {
               with: {
-                product: true,
+                product: {
+                  with: {
+                    images: true,
+                  },
+                },
               },
             },
           },
@@ -83,7 +88,20 @@ export class CartService {
       throw new CartNotFoundError();
     }
 
-    return this.formatCartSummary({ cart: cart as CartWithItems });
+    // Add featured image to each cart item
+    const cartWithFeaturedImages = {
+      ...cart,
+      items: cart.items.map((item) => ({
+        ...item,
+        featuredImage: this.getFeaturedImage(
+          item.productVariant.product.images
+        ),
+      })),
+    };
+
+    return this.formatCartSummary({
+      cart: cartWithFeaturedImages as CartWithItems,
+    });
   }
 
   /**
@@ -245,6 +263,24 @@ export class CartService {
     await this.db.delete(cartItems).where(eq(cartItems.id, dto.cartItemId));
 
     return this.getCart({ userId });
+  }
+
+  /**
+   * Gets the featured image from a list of product images.
+   * The featured image is the one with the lowest order value.
+   * @param images - Array of product images
+   * @returns Featured image or null if no images exist
+   */
+  private getFeaturedImage(
+    images: readonly SelectProductImage[]
+  ): SelectProductImage | null {
+    if (!images || images.length === 0) {
+      return null;
+    }
+
+    return images.reduce((featured, current) =>
+      current.order < featured.order ? current : featured
+    );
   }
 
   /**

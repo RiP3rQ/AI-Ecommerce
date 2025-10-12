@@ -27,7 +27,6 @@ import {
   DrawerClose,
 } from "../ui/drawer";
 import { Button } from "../ui/button";
-import { TrashIcon } from "@heroicons/react/24/outline";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 export function CartModalWithTrigger(): ReactNode {
@@ -71,6 +70,8 @@ export function CartModalWithTrigger(): ReactNode {
                 )
                 .map((item, i) => {
                   const merchandiseSearchParams = {} as Record<string, string>;
+
+                  console.log("item", item);
 
                   item.merchandise.selectedOptions.forEach(
                     ({ name, value }) => {

@@ -1,6 +1,7 @@
 import type { SelectCart, SelectCartItem } from "@/database/schemas/cart";
 import type { SelectProductVariant } from "@/database/schemas/product-variants";
 import type { SelectProduct } from "@/database/schemas/products";
+import type { SelectProductImage } from "@/database/schemas/product-images";
 
 /**
  * Cart item with full product and variant details.
@@ -9,6 +10,7 @@ export interface CartItemWithDetails extends SelectCartItem {
   productVariant: SelectProductVariant & {
     product: SelectProduct;
   };
+  featuredImage: SelectProductImage | null;
 }
 
 /**
