@@ -1,15 +1,14 @@
-import { env } from "@/env";
-
 export const swrFetcher = (url: string) =>
   fetch(url)
-    .then((res) => {
-      if (env.NODE_ENV !== "production") {
-        console.log("[SWR_FETCHER] Response: ", res);
+    .then(async (res) => {
+      const data = await res.json();
+      if (process.env.NODE_ENV !== "production") {
+        console.log("[SWR_FETCHER] Response data: ", data);
       }
-      return res.json();
+      return data;
     })
     .catch((err: unknown) => {
-      if (env.NODE_ENV !== "production") {
+      if (process.env.NODE_ENV !== "production") {
         console.error(`[SWR_ERROR] Error fetching ${url}: `, err);
       }
       throw err;
