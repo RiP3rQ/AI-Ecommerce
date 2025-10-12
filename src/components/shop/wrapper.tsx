@@ -11,7 +11,7 @@ import {
   ShopFiltersUrlSchema,
 } from "@/schemas/shop-url-schema";
 import { parseAsJson, useQueryState } from "nuqs";
-import { ReactNode, useCallback } from "react";
+import { ReactNode, useCallback, useMemo } from "react";
 import useSWR from "swr";
 import { Filters } from "./filter";
 import { SearchbarAndSorts } from "./searchbar-and-sorts";
@@ -19,6 +19,7 @@ import { ProductsList } from "./products-list";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SWRResponse } from "@/types/swr";
 import { ShopProductsData } from "@/app/api/shop/types";
+import { CLIENT_SIDE_URL_UPDATE_OPTIONS } from "@/lib/nuqs";
 
 export function ShopWrapper({
   categoryName,
@@ -26,14 +27,18 @@ export function ShopWrapper({
   // ============================= URL STATES =============================
   const [pagination, setPagination] = useQueryState(
     "pagination",
-    parseAsJson(paginationUrlSchema).withDefault(DEFAULT_PAGINATION)
+    parseAsJson(paginationUrlSchema)
+      .withDefault(DEFAULT_PAGINATION)
+      .withOptions(CLIENT_SIDE_URL_UPDATE_OPTIONS)
   );
   const [filters, setFilters] = useQueryState(
     "filters",
-    parseAsJson(shopFiltersUrlSchema).withDefault({
-      ...DEFAULT_SHOP_FILTERS,
-      category: categoryName,
-    })
+    parseAsJson(shopFiltersUrlSchema)
+      .withDefault({
+        ...DEFAULT_SHOP_FILTERS,
+        category: categoryName,
+      })
+      .withOptions(CLIENT_SIDE_URL_UPDATE_OPTIONS)
   );
 
   // ============================= DATA FETCHING =============================
@@ -45,27 +50,42 @@ export function ShopWrapper({
     swrFetcher
   );
 
+  // ============================= MEMOIZED DATA =============================
+  const products = useMemo(() => data?.data.products || [], [data]);
+  const paginationMetadata = useMemo(() => data?.data.pagination, [data]);
+
+  const paginationUrlData = useMemo(
+    () => pagination as PaginationUrlSchema,
+    [pagination]
+  );
+  const filtersUrlData = useMemo(() => {
+    return {
+      ...filters,
+      category: filters.category !== "all" ? filters.category : "",
+    } as ShopFiltersUrlSchema;
+  }, [filters]);
+
   // ============================= HANDLERS =============================
   const handleCategoryChange = useCallback(
     (categoryId: string) => {
       setFilters({
-        ...(filters as ShopFiltersUrlSchema),
+        ...(filtersUrlData as ShopFiltersUrlSchema),
         category: categoryId,
       });
-      setPagination({ ...(pagination as PaginationUrlSchema), page: 1 });
+      setPagination({ ...(paginationUrlData as PaginationUrlSchema), page: 1 });
     },
-    [filters, pagination, setFilters, setPagination]
+    [filtersUrlData, paginationUrlData, setFilters, setPagination]
   );
 
   const handlePriceRangeChange = useCallback(
     (priceRange: { min: number; max: number }) => {
       setFilters({
-        ...(filters as ShopFiltersUrlSchema),
+        ...(filtersUrlData as ShopFiltersUrlSchema),
         priceRange,
       });
-      setPagination({ ...(pagination as PaginationUrlSchema), page: 1 });
+      setPagination({ ...(paginationUrlData as PaginationUrlSchema), page: 1 });
     },
-    [filters, pagination, setFilters, setPagination]
+    [filtersUrlData, paginationUrlData, setFilters, setPagination]
   );
 
   const handleResetFilters = useCallback(() => {
@@ -79,31 +99,31 @@ export function ShopWrapper({
   const handleSearchChange = useCallback(
     (search: string) => {
       setFilters({
-        ...(filters as ShopFiltersUrlSchema),
+        ...(filtersUrlData as ShopFiltersUrlSchema),
         search,
       });
-      setPagination({ ...(pagination as PaginationUrlSchema), page: 1 });
+      setPagination({ ...(paginationUrlData as PaginationUrlSchema), page: 1 });
     },
-    [filters, pagination, setFilters, setPagination]
+    [filtersUrlData, paginationUrlData, setFilters, setPagination]
   );
 
   const handleSortChange = useCallback(
     (sortField: string, sortDirection: "asc" | "desc") => {
       setFilters({
-        ...(filters as ShopFiltersUrlSchema),
+        ...(filtersUrlData as ShopFiltersUrlSchema),
         sortField,
         sortDirection,
       });
     },
-    [filters, setFilters]
+    [filtersUrlData, setFilters]
   );
 
   const handlePageChange = useCallback(
     (page: number) => {
-      setPagination({ ...(pagination as PaginationUrlSchema), page });
+      setPagination({ ...(paginationUrlData as PaginationUrlSchema), page });
       window.scrollTo({ top: 0, behavior: "smooth" });
     },
-    [pagination, setPagination]
+    [paginationUrlData, setPagination]
   );
 
   if (error) {
@@ -135,8 +155,8 @@ export function ShopWrapper({
           </div>
         ) : (
           <Filters
-            selectedCategory={(filters as ShopFiltersUrlSchema).category}
-            priceRange={(filters as ShopFiltersUrlSchema).priceRange}
+            selectedCategory={filtersUrlData.category}
+            priceRange={filtersUrlData.priceRange}
             onCategoryChange={handleCategoryChange}
             onPriceRangeChange={handlePriceRangeChange}
             onResetFilters={handleResetFilters}
@@ -165,20 +185,20 @@ export function ShopWrapper({
           ) : (
             <>
               <SearchbarAndSorts
-                searchValue={(filters as ShopFiltersUrlSchema).search}
-                sortField={(filters as ShopFiltersUrlSchema).sortField}
-                sortDirection={(filters as ShopFiltersUrlSchema).sortDirection}
+                searchValue={filtersUrlData.search}
+                sortField={filtersUrlData.sortField}
+                sortDirection={filtersUrlData.sortDirection}
                 onSearchChange={handleSearchChange}
                 onSortChange={handleSortChange}
               />
               <ProductsList
-                products={data?.data.products || []}
-                currentPage={(pagination as PaginationUrlSchema).page}
-                totalPages={data?.data.pagination.totalPages || 1}
-                totalProducts={data?.data.pagination.totalItems || 0}
+                products={products}
+                currentPage={paginationUrlData.page}
+                totalPages={paginationMetadata?.totalPages || 1}
+                totalProducts={paginationMetadata?.totalItems || 0}
                 onPageChange={handlePageChange}
                 categoryName={categoryName}
-                filters={filters as ShopFiltersUrlSchema}
+                filters={filtersUrlData}
               />
             </>
           )}

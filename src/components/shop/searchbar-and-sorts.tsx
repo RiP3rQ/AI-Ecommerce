@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useState, useEffect } from "react";
+import { ReactNode, useState, useEffect, useRef, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SearchIcon } from "lucide-react";
-import { useDebounce } from "@/hooks/use-debounce";
+import { debounce } from "lodash";
 
 interface SearchbarAndSortsProps {
   searchValue: string;
@@ -28,13 +28,35 @@ export function SearchbarAndSorts({
   onSortChange,
 }: SearchbarAndSortsProps): ReactNode {
   const [localSearch, setLocalSearch] = useState(searchValue);
-  const debouncedSearch = useDebounce(localSearch, 500);
 
+  // Create a stable debounced function using useRef
+  const debouncedSearchRef = useRef(
+    debounce((value: string) => {
+      onSearchChange(value);
+    }, 500)
+  );
+
+  // Cleanup debounced function on unmount
   useEffect(() => {
-    console.log("[SearchbarAndSorts] debouncedSearch: ", debouncedSearch);
-    console.log("[SearchbarAndSorts] searchValue: ", searchValue);
-    onSearchChange(debouncedSearch);
-  }, [debouncedSearch, onSearchChange]);
+    return () => {
+      debouncedSearchRef.current.cancel();
+    };
+  }, []);
+
+  // Sync localSearch with searchValue when it changes externally (e.g., filter reset)
+  // Only respond to searchValue changes, not localSearch changes
+  useEffect(() => {
+    setLocalSearch(searchValue);
+  }, [searchValue]);
+
+  const handleSearchInputChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>): void => {
+      const newValue = event.target.value;
+      setLocalSearch(newValue);
+      debouncedSearchRef.current(newValue);
+    },
+    []
+  );
 
   const handleSortChange = (value: string): void => {
     const [field, direction] = value.split("-");
@@ -52,7 +74,7 @@ export function SearchbarAndSorts({
           type="search"
           placeholder="Search products..."
           value={localSearch}
-          onChange={(event) => setLocalSearch(event.target.value)}
+          onChange={handleSearchInputChange}
           className="pl-10 h-10"
           aria-label="Search products"
         />

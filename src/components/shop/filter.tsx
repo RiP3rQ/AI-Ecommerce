@@ -58,7 +58,7 @@ export function Filters({
         </div>
         {hasActiveFilters && (
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
             onClick={onResetFilters}
             className="h-8 px-2 text-xs"

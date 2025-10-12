@@ -69,12 +69,12 @@ export class ShopService {
     // Validate category if provided
     if (category) {
       const categoryExists = await this.db.query.categories.findFirst({
-        where: eq(categories.name, category),
+        where: eq(categories.id, category),
       });
 
       if (!categoryExists) {
         throw new CategoryNotFoundError(
-          `Category "${category}" does not exist.`
+          `Category with id "${category}" does not exist.`
         );
       }
     }
