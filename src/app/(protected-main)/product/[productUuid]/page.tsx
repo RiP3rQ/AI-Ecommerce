@@ -117,7 +117,6 @@ export default async function ProductPage({
           </div>
         </div>
       </div>
-      <Footer />
     </ProductProvider>
   );
 }
