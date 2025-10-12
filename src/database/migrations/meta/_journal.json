@@ -15,6 +15,13 @@
       "when": 1759674444080,
       "tag": "0001_chief_ma_gnuci",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1760259409326,
+      "tag": "0002_minor_brother_voodoo",
+      "breakpoints": true
     }
   ]
 }
