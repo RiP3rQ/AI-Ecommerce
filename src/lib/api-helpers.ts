@@ -1,7 +1,6 @@
 "use server";
 
 import { createServerSupabaseClient } from "@/supabase-auth/server";
-import { NextRequest } from "next/server";
 import { UnauthorizedError } from "./errors";
 import { User } from "@supabase/supabase-js";
 
