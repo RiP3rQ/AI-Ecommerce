@@ -62,6 +62,18 @@ export interface SelectCart {
   cost: CartCost;
 }
 
+/**
+ * Frontend cart structure for the cart provider.
+ * This matches the structure expected by the UI components.
+ */
+export interface FrontendCart {
+  id: string | undefined;
+  checkoutUrl: string;
+  totalQuantity: number;
+  lines: SelectCartItem[];
+  cost: CartCost;
+}
+
 // Utility types for database operations
 export type DbCartWithItems = DbSelectCart & {
   items: (DbSelectCartItem & {
