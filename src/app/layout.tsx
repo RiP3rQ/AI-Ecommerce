@@ -54,7 +54,6 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <Navbar />
             <main>
               {children}
               <Toaster closeButton position="top-center" />
