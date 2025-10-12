@@ -16,8 +16,7 @@ import { createServerSupabaseClient } from "@/supabase-auth/server";
 import { PriceRange } from "@/types/products";
 import { asc, eq } from "drizzle-orm";
 
-interface GetProductDataReturnType {
-  product: SelectProduct;
+export interface GetProductDataReturnType extends SelectProduct {
   product_variants: SelectProductVariant[];
   product_images: SelectProductImage[];
   product_options: SelectProductOption[];
@@ -66,15 +65,27 @@ export async function getProductData(
 
     //Step 4: Calculate the price range
     // Calculate min and max variant price, ensuring the currencyCode matches the min/max value
-    let minVariantPrice = { amount: Number.POSITIVE_INFINITY, currencyCode: "USD" };
-    let maxVariantPrice = { amount: Number.NEGATIVE_INFINITY, currencyCode: "USD" };
+    let minVariantPrice = {
+      amount: Number.POSITIVE_INFINITY,
+      currencyCode: "USD",
+    };
+    let maxVariantPrice = {
+      amount: Number.NEGATIVE_INFINITY,
+      currencyCode: "USD",
+    };
 
     for (const variant of product_variants) {
       if (variant.price < minVariantPrice.amount) {
-        minVariantPrice = { amount: variant.price, currencyCode: variant.currencyCode };
+        minVariantPrice = {
+          amount: variant.price,
+          currencyCode: variant.currencyCode,
+        };
       }
       if (variant.price > maxVariantPrice.amount) {
-        maxVariantPrice = { amount: variant.price, currencyCode: variant.currencyCode };
+        maxVariantPrice = {
+          amount: variant.price,
+          currencyCode: variant.currencyCode,
+        };
       }
     }
 
@@ -92,7 +103,7 @@ export async function getProductData(
 
     // Step 6: Return the product data
     return {
-      product,
+      ...product,
       product_variants,
       product_images,
       product_options,

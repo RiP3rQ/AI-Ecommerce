@@ -1,8 +1,13 @@
-import { ReactNode } from "react";
+import { ReactNode, Suspense } from "react";
 import { getProductData } from "./actions";
 import { notFound } from "next/navigation";
 import { HIDDEN_PRODUCT_TAG } from "@/lib/constants";
 import { Metadata } from "next";
+import Footer from "@/components/layout/footer";
+import { ProductProvider } from "@/providers/product-provider";
+import { Gallery } from "@/components/products/gallery";
+import { SelectProductImage } from "@/database/schema";
+import { ProductDescription } from "@/components/products/description";
 
 // ============== METADATA ==============
 export async function generateMetadata({
@@ -19,11 +24,11 @@ export async function generateMetadata({
     height,
     altText: alt,
   } = productData.product_images[0] || {};
-  const indexable = !productData.product.tags?.includes(HIDDEN_PRODUCT_TAG);
+  const indexable = !productData.tags?.includes(HIDDEN_PRODUCT_TAG);
 
   return {
-    title: productData.product.title,
-    description: productData.product.description,
+    title: productData.title,
+    description: productData.description,
     robots: {
       index: indexable,
       follow: indexable,
@@ -57,26 +62,62 @@ export default async function ProductPage({
   params,
 }: Readonly<ProductPageProps>): Promise<ReactNode> {
   const { productUuid } = await params;
-  const product = await getProductData(productUuid);
+  const productData = await getProductData(productUuid);
 
-  if (!product) return notFound();
+  if (!productData) return notFound();
 
   const productJsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
-    name: product.product.title,
-    description: product.product.description,
-    image: product.product_images[0].url,
+    name: productData.title,
+    description: productData.description,
+    image: productData.product_images[0].url,
     offers: {
       "@type": "AggregateOffer",
-      availability: product.product.availableForSale
+      availability: productData.availableForSale
         ? "https://schema.org/InStock"
         : "https://schema.org/OutOfStock",
-      priceCurrency: product.priceRange.minVariantPrice.currencyCode,
-      highPrice: product.priceRange.maxVariantPrice.amount,
-      lowPrice: product.priceRange.minVariantPrice.amount,
+      priceCurrency: productData.priceRange.minVariantPrice.currencyCode,
+      highPrice: productData.priceRange.maxVariantPrice.amount,
+      lowPrice: productData.priceRange.minVariantPrice.amount,
     },
   };
 
-  return <div>ShopPage {productUuid}</div>;
+  return (
+    <ProductProvider>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(productJsonLd),
+        }}
+      />
+      <div className="mx-auto max-w-(--breakpoint-2xl) px-4">
+        <div className="flex flex-col rounded-lg border border-neutral-200 bg-white p-8 md:p-12 lg:flex-row lg:gap-8 dark:border-neutral-800 dark:bg-black">
+          <div className="h-full w-full basis-full lg:basis-4/6">
+            <Suspense
+              fallback={
+                <div className="relative aspect-square h-full max-h-[550px] w-full overflow-hidden" />
+              }
+            >
+              <Gallery
+                images={productData.product_images
+                  .slice(0, 5)
+                  .map((image: SelectProductImage) => ({
+                    src: image.url,
+                    altText: image.altText ?? "",
+                  }))}
+              />
+            </Suspense>
+          </div>
+
+          <div className="basis-full lg:basis-2/6">
+            <Suspense fallback={null}>
+              <ProductDescription product={productData} />
+            </Suspense>
+          </div>
+        </div>
+      </div>
+      <Footer />
+    </ProductProvider>
+  );
 }
