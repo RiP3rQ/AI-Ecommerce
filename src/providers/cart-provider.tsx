@@ -15,8 +15,9 @@ import React, {
   useContext,
   useMemo,
   useOptimistic,
+  startTransition,
 } from "react";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 
 type UpdateType = "plus" | "minus" | "delete";
 
@@ -74,7 +75,14 @@ function transformCartResponse(response: CartResponse): FrontendCart {
           id: item.productVariant.product.id,
           handle: item.productVariant.product.id,
           title: item.productVariant.product.title,
-          featuredImage: null, // Images can be added later if needed
+          featuredImage: item.featuredImage
+            ? {
+                url: item.featuredImage.url,
+                altText: item.featuredImage.altText || undefined,
+                width: item.featuredImage.width || undefined,
+                height: item.featuredImage.height || undefined,
+              }
+            : null,
         },
       },
     };
@@ -295,9 +303,11 @@ export function useCart() {
   );
 
   const updateCartItem = (merchandiseId: string, updateType: UpdateType) => {
-    updateOptimisticCart({
-      type: "UPDATE_ITEM",
-      payload: { merchandiseId, updateType },
+    startTransition(() => {
+      updateOptimisticCart({
+        type: "UPDATE_ITEM",
+        payload: { merchandiseId, updateType },
+      });
     });
   };
 
@@ -311,10 +321,16 @@ export function useCart() {
       height?: number;
     }
   ) => {
-    updateOptimisticCart({
-      type: "ADD_ITEM",
-      payload: { variant, product, featuredImage },
+    startTransition(() => {
+      updateOptimisticCart({
+        type: "ADD_ITEM",
+        payload: { variant, product, featuredImage },
+      });
     });
+  };
+
+  const refreshCart = () => {
+    mutate(context.cartUrl);
   };
 
   return useMemo(
@@ -322,9 +338,10 @@ export function useCart() {
       cart: optimisticCart,
       updateCartItem,
       addCartItem,
+      refreshCart,
       isLoading,
       error,
     }),
-    [optimisticCart, isLoading, error]
+    [optimisticCart, isLoading, error, context.cartUrl]
   );
 }

@@ -1,13 +1,8 @@
 "use client";
 
-import { ReactNode, useRef, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import OpenCart from "./open-cart-button";
-import {
-  ShoppingCartIcon,
-  Link,
-  ChevronLeftIcon,
-  ChevronRightCircleIcon,
-} from "lucide-react";
+import { ShoppingCartIcon, ChevronRightCircleIcon } from "lucide-react";
 import { Price } from "../custom-price";
 import { DeleteItemButton } from "./delete-item-button";
 import Image from "next/image";
@@ -22,20 +17,32 @@ import {
   DrawerContent,
   DrawerHeader,
   DrawerTrigger,
-  DrawerDescription,
-  DrawerFooter,
   DrawerClose,
 } from "../ui/drawer";
 import { Button } from "../ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import Link from "next/link";
 
 export function CartModalWithTrigger(): ReactNode {
-  const { cart, updateCartItem } = useCart();
+  const { cart, updateCartItem, refreshCart } = useCart();
 
   const [isOpen, setIsOpen] = useState(false);
   const quantityRef = useRef(cart?.totalQuantity);
   const openCart = () => setIsOpen(true);
   const closeCart = () => setIsOpen(false);
+
+  useEffect(() => {
+    if (
+      cart?.totalQuantity &&
+      cart?.totalQuantity !== quantityRef.current &&
+      cart?.totalQuantity > 0
+    ) {
+      if (!isOpen) {
+        setIsOpen(true);
+      }
+      quantityRef.current = cart?.totalQuantity;
+    }
+  }, [isOpen, cart?.totalQuantity, quantityRef]);
 
   return (
     <Drawer open={isOpen} onOpenChange={setIsOpen} direction="right">
@@ -48,9 +55,9 @@ export function CartModalWithTrigger(): ReactNode {
           <OpenCart quantity={quantityRef.current} />
         </button>
       </DrawerTrigger>
-      <DrawerContent aria-describedby={undefined}>
+      <DrawerContent aria-describedby={undefined} className="z-[99]">
         <DrawerHeader>
-          <DrawerTitle>Cart</DrawerTitle>
+          <DrawerTitle className="text-2xl font-bold">Cart</DrawerTitle>
         </DrawerHeader>
         {!cart || cart.lines.length === 0 ? (
           <div className="mt-20 flex w-full flex-col items-center justify-center overflow-hidden">
@@ -60,8 +67,8 @@ export function CartModalWithTrigger(): ReactNode {
             </p>
           </div>
         ) : (
-          <div className="flex h-full flex-col justify-between overflow-hidden p-1">
-            <ul className="grow overflow-auto py-4">
+          <div className="flex h-full flex-col justify-between overflow-hidden m-4 p-2 overflow-y-auto overflow-x-visible">
+            <ul className="grow py-4 ">
               {cart.lines
                 .sort((a, b) =>
                   a.merchandise.product.title.localeCompare(
@@ -70,8 +77,6 @@ export function CartModalWithTrigger(): ReactNode {
                 )
                 .map((item, i) => {
                   const merchandiseSearchParams = {} as Record<string, string>;
-
-                  console.log("item", item);
 
                   item.merchandise.selectedOptions.forEach(
                     ({ name, value }) => {
@@ -92,10 +97,11 @@ export function CartModalWithTrigger(): ReactNode {
                       className="flex w-full flex-col border-b border-neutral-300 dark:border-neutral-700"
                     >
                       <div className="relative flex w-full flex-row justify-between px-1 py-4">
-                        <div className="absolute z-40 -ml-1 -mt-2">
+                        <div className="absolute z-40 -ml-2 -mt-4 overflow-visible">
                           <DeleteItemButton
                             item={item}
                             optimisticUpdate={updateCartItem}
+                            refreshCart={refreshCart}
                           />
                         </div>
                         <div className="flex flex-row">
@@ -142,6 +148,7 @@ export function CartModalWithTrigger(): ReactNode {
                               item={item}
                               type="minus"
                               optimisticUpdate={updateCartItem}
+                              refreshCart={refreshCart}
                             />
                             <p className="w-6 text-center">
                               <span className="w-full text-sm">
@@ -152,6 +159,7 @@ export function CartModalWithTrigger(): ReactNode {
                               item={item}
                               type="plus"
                               optimisticUpdate={updateCartItem}
+                              refreshCart={refreshCart}
                             />
                           </div>
                         </div>

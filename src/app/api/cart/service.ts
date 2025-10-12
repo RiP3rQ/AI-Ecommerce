@@ -227,7 +227,7 @@ export class CartService {
 
     await this.db
       .update(cartItems)
-      .set({ quantity: dto.quantity })
+      .set({ quantity: dto.quantity, updatedAt: new Date() })
       .where(eq(cartItems.id, dto.cartItemId));
 
     return this.getCart({ userId });

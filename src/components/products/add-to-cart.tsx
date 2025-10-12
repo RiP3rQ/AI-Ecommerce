@@ -71,7 +71,7 @@ export function AddToCart({
   variants: SelectProductVariant[];
 }) {
   const { availableForSale } = product;
-  const { addCartItem } = useCart();
+  const { addCartItem, refreshCart } = useCart();
   const { state } = useProductProvider();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -110,6 +110,7 @@ export function AddToCart({
         productVariantId: selectedVariantId,
         quantity: 1,
       });
+      refreshCart();
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to add item";

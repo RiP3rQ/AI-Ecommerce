@@ -8,9 +8,11 @@ import { SelectCartItem } from "@/types/cart";
 export function DeleteItemButton({
   item,
   optimisticUpdate,
+  refreshCart,
 }: {
   item: SelectCartItem;
   optimisticUpdate: (merchandiseId: string, updateType: "delete") => void;
+  refreshCart: () => void;
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,6 +33,7 @@ export function DeleteItemButton({
 
     try {
       await removeCartItem({ cartItemId });
+      refreshCart();
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to remove item";

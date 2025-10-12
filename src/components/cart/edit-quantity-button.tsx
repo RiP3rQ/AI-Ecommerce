@@ -40,6 +40,7 @@ export function EditItemQuantityButton({
   item,
   type,
   optimisticUpdate,
+  refreshCart,
 }: {
   item: SelectCartItem;
   type: "plus" | "minus";
@@ -47,6 +48,7 @@ export function EditItemQuantityButton({
     merchandiseId: string,
     updateType: "plus" | "minus"
   ) => void;
+  refreshCart: () => void;
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -76,6 +78,7 @@ export function EditItemQuantityButton({
           quantity: newQuantity,
         });
       }
+      refreshCart();
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to update quantity";
