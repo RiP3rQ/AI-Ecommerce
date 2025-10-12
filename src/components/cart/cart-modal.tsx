@@ -11,7 +11,6 @@ import {
 } from "../ui/dialog";
 import { ShoppingCartIcon, Link } from "lucide-react";
 import { Price } from "../custom-price";
-import { getCart, redirectToCheckout } from "../products/actions";
 import { DeleteItemButton } from "./delete-item-button";
 import Image from "next/image";
 import { CheckoutButton } from "./checkout-button";
@@ -169,9 +168,7 @@ export function CartModalWithTrigger(): ReactNode {
                 />
               </div>
             </div>
-            <form action={redirectToCheckout}>
-              <CheckoutButton />
-            </form>
+            <CheckoutButton />
           </div>
         )}
       </DialogContent>

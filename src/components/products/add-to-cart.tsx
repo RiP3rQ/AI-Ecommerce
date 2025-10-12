@@ -4,17 +4,19 @@ import { SelectProductVariant } from "@/database/schema";
 import { GetProductDataReturnType } from "@/app/(protected-main)/product/[productUuid]/actions";
 import { useCart } from "@/providers/cart-provider";
 import { useProductProvider } from "@/providers/product-provider";
+import { addItemToCart } from "@/lib/cart-api";
 import clsx from "clsx";
 import { PlusIcon } from "lucide-react";
-import { useActionState } from "react";
-import { addItem } from "./actions";
+import { useState } from "react";
 
 function SubmitButton({
   availableForSale,
   selectedVariantId,
+  isLoading,
 }: {
   availableForSale: boolean;
   selectedVariantId: string | undefined;
+  isLoading: boolean;
 }) {
   const buttonClasses =
     "relative flex w-full items-center justify-center rounded-full bg-blue-600 p-4 tracking-wide text-white cursor-pointer";
@@ -45,15 +47,18 @@ function SubmitButton({
 
   return (
     <button
+      type="button"
       aria-label="Add to cart"
+      disabled={isLoading}
       className={clsx(buttonClasses, {
-        "hover:opacity-90": true,
+        "hover:opacity-90": !isLoading,
+        "opacity-60": isLoading,
       })}
     >
       <div className="absolute left-0 ml-4">
         <PlusIcon className="h-5" />
       </div>
-      Add To Cart
+      {isLoading ? "Adding..." : "Add To Cart"}
     </button>
   );
 }
@@ -68,7 +73,8 @@ export function AddToCart({
   const { availableForSale } = product;
   const { addCartItem } = useCart();
   const { state } = useProductProvider();
-  const [message, formAction] = useActionState(addItem, null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const variant = variants.find((variant: SelectProductVariant) =>
     variant.selectedOptions.every(
@@ -77,7 +83,6 @@ export function AddToCart({
   );
   const defaultVariantId = variants.length === 1 ? variants[0]?.id : undefined;
   const selectedVariantId = variant?.id || defaultVariantId;
-  const addItemAction = formAction.bind(null, selectedVariantId);
   const finalVariant = variants.find(
     (variant) => variant.id === selectedVariantId
   )!;
@@ -93,20 +98,45 @@ export function AddToCart({
         }
       : undefined;
 
+  const handleAddToCart = async () => {
+    if (!selectedVariantId || isLoading) return;
+
+    setIsLoading(true);
+    setError(null);
+    addCartItem(finalVariant, product, featuredImage);
+
+    try {
+      await addItemToCart({
+        productVariantId: selectedVariantId,
+        quantity: 1,
+      });
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to add item";
+      setError(errorMessage);
+      console.error("Error adding to cart:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <form
-      action={async () => {
-        addCartItem(finalVariant, product, featuredImage);
-        addItemAction();
-      }}
-    >
-      <SubmitButton
-        availableForSale={availableForSale}
-        selectedVariantId={selectedVariantId}
-      />
+    <div>
+      <div onClick={handleAddToCart}>
+        <SubmitButton
+          availableForSale={availableForSale}
+          selectedVariantId={selectedVariantId}
+          isLoading={isLoading}
+        />
+      </div>
+      {error && (
+        <p aria-live="polite" className="text-sm text-red-500 mt-2">
+          {error}
+        </p>
+      )}
       <p aria-live="polite" className="sr-only" role="status">
-        Item added to cart
+        {!error && !isLoading && "Item added to cart"}
       </p>
-    </form>
+    </div>
   );
 }

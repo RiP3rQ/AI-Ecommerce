@@ -1,12 +1,13 @@
 "use client";
 
+import { CartResponse } from "@/app/api/cart/types";
 import { SelectProduct, SelectProductVariant } from "@/database/schema";
 import {
-  SelectCart,
-  SelectCartItem,
   CartCost,
   CartItemCost,
   CartMerchandise,
+  SelectCartItem,
+  FrontendCart,
 } from "@/types/cart";
 import React, {
   createContext,
@@ -38,10 +39,60 @@ type CartAction =
     };
 
 type CartContextType = {
-  cartPromise: Promise<SelectCart | undefined>;
+  cartPromise: Promise<FrontendCart | undefined>;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
+
+/**
+ * Transforms CartResponse from API to FrontendCart structure
+ */
+function transformCartResponse(response: CartResponse): FrontendCart {
+  const { cart, totalItems, totalPrice, currencyCode } = response.data;
+
+  const lines: SelectCartItem[] = cart.items.map((item) => {
+    const itemTotal = (item.productVariant.price / 100) * item.quantity;
+
+    return {
+      id: item.id,
+      quantity: item.quantity,
+      cost: {
+        totalAmount: {
+          amount: itemTotal.toString(),
+          currencyCode: item.productVariant.currencyCode,
+        },
+      },
+      merchandise: {
+        id: item.productVariant.id,
+        title: item.productVariant.title,
+        selectedOptions: item.productVariant.selectedOptions as Array<{
+          name: string;
+          value: string;
+        }>,
+        product: {
+          id: item.productVariant.product.id,
+          handle: item.productVariant.product.id,
+          title: item.productVariant.product.title,
+          featuredImage: null, // Images can be added later if needed
+        },
+      },
+    };
+  });
+
+  const totalAmount = (totalPrice / 100).toString();
+
+  return {
+    id: cart.id,
+    checkoutUrl: "",
+    totalQuantity: totalItems,
+    lines,
+    cost: {
+      subtotalAmount: { amount: totalAmount, currencyCode },
+      totalAmount: { amount: totalAmount, currencyCode },
+      totalTaxAmount: { amount: "0", currencyCode },
+    },
+  };
+}
 
 function calculateItemCost(quantity: number, priceInCents: number): string {
   // Convert from cents to dollars for display
@@ -60,7 +111,7 @@ function updateCartItem(
   if (newQuantity === 0) return null;
 
   const singleItemAmount = Number(item.cost.totalAmount.amount) / item.quantity;
-  const newTotalAmount = calculateItemCost(newQuantity, singleItemAmount);
+  const newTotalAmount = calculateItemCost(newQuantity, singleItemAmount * 100);
 
   return {
     ...item,
@@ -104,7 +155,7 @@ function createOrUpdateCartItem(
       selectedOptions: variant.selectedOptions,
       product: {
         id: product.id,
-        handle: product.id, // Use product id as handle for now
+        handle: product.id,
         title: product.title,
         featuredImage: featuredImage || null,
       },
@@ -114,7 +165,7 @@ function createOrUpdateCartItem(
 
 function updateCartTotals(
   lines: SelectCartItem[]
-): Pick<SelectCart, "totalQuantity" | "cost"> {
+): Pick<FrontendCart, "totalQuantity" | "cost"> {
   const totalQuantity = lines.reduce((sum, item) => sum + item.quantity, 0);
   const totalAmount = lines.reduce(
     (sum, item) => sum + Number(item.cost.totalAmount.amount),
@@ -132,7 +183,7 @@ function updateCartTotals(
   };
 }
 
-function createEmptyCart(): SelectCart {
+function createEmptyCart(): FrontendCart {
   return {
     id: undefined,
     checkoutUrl: "",
@@ -147,9 +198,9 @@ function createEmptyCart(): SelectCart {
 }
 
 function cartReducer(
-  state: SelectCart | undefined,
+  state: FrontendCart | undefined,
   action: CartAction
-): SelectCart {
+): FrontendCart {
   const currentCart = state || createEmptyCart();
 
   switch (action.type) {
@@ -215,10 +266,15 @@ export function CartProvider({
   cartPromise,
 }: {
   children: React.ReactNode;
-  cartPromise: Promise<SelectCart | undefined>;
+  cartPromise: Promise<CartResponse | undefined>;
 }) {
+  // Transform the API response to the frontend structure
+  const transformedCartPromise = cartPromise.then((response) =>
+    response ? transformCartResponse(response) : undefined
+  );
+
   return (
-    <CartContext.Provider value={{ cartPromise }}>
+    <CartContext.Provider value={{ cartPromise: transformedCartPromise }}>
       {children}
     </CartContext.Provider>
   );
