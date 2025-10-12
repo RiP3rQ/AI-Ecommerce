@@ -1,5 +1,5 @@
 import { drizzleDbClient } from "@/database/index";
-import { categories } from "@/database/schemas/categories";
+import { categories, SelectCategory } from "@/database/schemas/categories";
 import { desc, asc } from "drizzle-orm";
 import { InvalidSortFieldError } from "@/lib/errors";
 import type { GetCategoriesDto } from "./dto";
@@ -21,7 +21,7 @@ export class CategoriesService {
     dto,
   }: Readonly<{
     dto: GetCategoriesDto;
-  }>): Promise<CategoriesResponse> {
+  }>): Promise<SelectCategory[]> {
     const { sortDirection, sortField } = dto;
 
     // Build ORDER BY clause
@@ -39,10 +39,7 @@ export class CategoriesService {
       .from(categories)
       .orderBy(...orderByClause);
 
-    return {
-      success: true,
-      data: categoriesResult,
-    };
+    return categoriesResult;
   }
 
   /**
