@@ -3,11 +3,11 @@ You are an AI assistant whose task is to help plan a PostgreSQL database schema 
 Please carefully review the following information:
 
 <product_requirements>
-{{prd}} <- replace with reference to @prd.md
+@prd.md 
 </product_requirements>
 
 <tech_stack>
-{{tech-stack}} <- replace with reference to @tech-stack.md
+@tech-stack.md 
 </tech_stack>
 
 Analyze the provided information, focusing on aspects relevant to database design. Consider the following issues:
