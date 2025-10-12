@@ -3,15 +3,14 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "next-themes";
 import { ModeSwitcher } from "@/components/global/theme-switcher";
-import { LogoutButton } from "@/components/global/logout-button";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { Navbar } from "@/components/layout/navbar";
 import { WelcomeToast } from "@/components/welcome-toast";
 import { Toaster } from "sonner";
 import { AuthButton } from "@/components/global/auth-button";
 import { env } from "@/env";
 import { BASE_URL } from "@/lib/utils";
 import Footer from "@/components/layout/footer";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -47,23 +46,25 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased relative min-h-screen`}
       >
-        <TooltipProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="dark"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <main>
-              {children}
-              <Toaster closeButton position="top-center" />
-              <WelcomeToast />
-              <AuthButton />
-              <ModeSwitcher />
-            </main>
-            <Footer />
-          </ThemeProvider>
-        </TooltipProvider>
+        <NuqsAdapter>
+          <TooltipProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="dark"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <main>
+                {children}
+                <Toaster closeButton position="top-center" />
+                <WelcomeToast />
+                <AuthButton />
+                <ModeSwitcher />
+              </main>
+              <Footer />
+            </ThemeProvider>
+          </TooltipProvider>
+        </NuqsAdapter>
       </body>
     </html>
   );
