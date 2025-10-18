@@ -13,3 +13,5 @@ export function drizzleDbClient() {
     casing: "snake_case",
   });
 }
+
+export type DrizzleDbClient = ReturnType<typeof drizzleDbClient>;

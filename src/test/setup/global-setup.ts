@@ -1,0 +1,101 @@
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
+import { migrate } from "drizzle-orm/postgres-js/migrator";
+import { env } from "../../env";
+import { sql } from "drizzle-orm";
+import * as schema from "../../database/schema";
+
+/**
+ * Global setup for test environment.
+ * Initializes test database with migrations and ensures clean state.
+ */
+export async function setup() {
+  // Ensure we're in test environment
+  if (process.env.NODE_ENV !== "test") {
+    throw new Error(
+      "Global setup can only be used in test environment. Set NODE_ENV=test"
+    );
+  }
+
+  try {
+    // Create database connection for migrations
+    const client = postgres(process.env.DATABASE_URL!, {
+      prepare: false,
+      // Suppress NOTICE messages from PostgreSQL
+      connection: {
+        client_min_messages: "warning",
+      },
+    });
+    const db = drizzle(client, { schema, logger: false });
+
+    // Run migrations to ensure schema is up to date
+    await migrate(db, {
+      migrationsFolder: "./src/database/migrations",
+    });
+
+    // Clean all data from tables to ensure clean test state
+    await cleanAllTables(db);
+
+    // Close the connection
+    await client.end();
+
+    console.log("✅ Test environment setup complete");
+  } catch (error) {
+    console.error("❌ Failed to setup test environment:", error);
+    throw error;
+  }
+}
+
+/**
+ * Global teardown for test environment.
+ * Cleans up after all tests are complete.
+ */
+export async function teardown() {
+  try {
+    // Create database connection for cleanup
+    const client = postgres(env.DATABASE_URL, {
+      prepare: false,
+      max: 1,
+      // Suppress NOTICE messages from PostgreSQL
+      connection: {
+        client_min_messages: "warning",
+      },
+    });
+    const db = drizzle(client, { schema });
+
+    // Clean all data from tables
+    await cleanAllTables(db);
+
+    // Close the connection
+    await client.end();
+  } catch (error) {
+    console.warn("⚠️  Failed to clean database during teardown:", error);
+  }
+
+  console.log("🏁 Finished tests");
+  process.exit(0);
+}
+
+/**
+ * Cleans all data from all tables while preserving schema.
+ * Tables are truncated in dependency order to avoid foreign key constraints.
+ */
+async function cleanAllTables(db: ReturnType<typeof drizzle>) {
+  // Truncate tables in reverse dependency order
+  // Child tables first, then parent tables
+  const truncateQueries = [
+    sql`TRUNCATE TABLE reviews CASCADE`,
+    sql`TRUNCATE TABLE carts CASCADE`,
+    sql`TRUNCATE TABLE orders CASCADE`,
+    sql`TRUNCATE TABLE product_options CASCADE`,
+    sql`TRUNCATE TABLE product_images CASCADE`,
+    sql`TRUNCATE TABLE product_variants CASCADE`,
+    sql`TRUNCATE TABLE products CASCADE`,
+    sql`TRUNCATE TABLE categories CASCADE`,
+    sql`TRUNCATE TABLE profiles CASCADE`,
+  ];
+
+  for (const query of truncateQueries) {
+    await db.execute(query);
+  }
+}
