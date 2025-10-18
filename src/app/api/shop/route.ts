@@ -48,7 +48,8 @@ export async function GET(
         | "availableForSale"
         | undefined,
       search: searchParams.get("search") || undefined,
-      category: searchParams.get("category") || undefined,
+      categoryId: searchParams.get("categoryId") || undefined,
+      categoryName: searchParams.get("categoryName") || undefined,
       priceMin: searchParams.get("priceMin")
         ? Number.parseInt(searchParams.get("priceMin")!)
         : undefined,
@@ -61,8 +62,8 @@ export async function GET(
     };
 
     // Make sure to remove 'all' category from the query params
-    if (queryParams.category?.toLowerCase() === "all") {
-      queryParams.category = undefined;
+    if (queryParams.categoryName?.toLowerCase() === "all") {
+      queryParams.categoryName = undefined;
     }
 
     const validatedDto = getProductsSchemaRefined.parse(queryParams);

@@ -16,9 +16,11 @@ export const DEFAULT_SHOP_FILTERS = {
   sortDirection: "asc" as const,
   sortField: "createdAt",
   search: "",
-  category: "",
+  categoryId: "",
+  categoryName: "",
   priceRange: { min: 0, max: 1000000 },
 };
+
 export const shopFiltersUrlSchema = z.object({
   sortDirection: z
     .enum(["asc", "desc"])
@@ -26,7 +28,11 @@ export const shopFiltersUrlSchema = z.object({
     .default(DEFAULT_SHOP_FILTERS.sortDirection),
   sortField: z.string().optional().default(DEFAULT_SHOP_FILTERS.sortField),
   search: z.string().optional().default(DEFAULT_SHOP_FILTERS.search),
-  category: z.string().optional().default(DEFAULT_SHOP_FILTERS.category),
+  categoryId: z.string().optional().default(DEFAULT_SHOP_FILTERS.categoryId),
+  categoryName: z
+    .string()
+    .optional()
+    .default(DEFAULT_SHOP_FILTERS.categoryName),
   priceRange: z
     .object({
       min: z.number().optional().default(DEFAULT_SHOP_FILTERS.priceRange.min),

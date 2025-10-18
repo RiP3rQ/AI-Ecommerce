@@ -48,24 +48,6 @@ export function ProductsList({
   categoryName = "",
   filters,
 }: ProductsListProps): ReactNode {
-  const buildPageUrl = (page: number): string => {
-    const params = new URLSearchParams();
-    params.set("pagination", JSON.stringify({ page, limit: 12 }));
-    params.set(
-      "filters",
-      JSON.stringify(
-        filters || {
-          category: categoryName,
-          search: "",
-          sortField: "createdAt",
-          sortDirection: "desc" as const,
-          priceRange: null,
-        }
-      )
-    );
-    return `/shop/${categoryName}?${params.toString()}`;
-  };
-
   if (products.length === 0) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">

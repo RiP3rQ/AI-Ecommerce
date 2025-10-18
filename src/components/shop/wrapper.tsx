@@ -36,7 +36,7 @@ export function ShopWrapper({
     parseAsJson(shopFiltersUrlSchema)
       .withDefault({
         ...DEFAULT_SHOP_FILTERS,
-        category: categoryName,
+        categoryName: categoryName,
       })
       .withOptions(CLIENT_SIDE_URL_UPDATE_OPTIONS)
   );
@@ -61,7 +61,7 @@ export function ShopWrapper({
   const filtersUrlData = useMemo(() => {
     return {
       ...filters,
-      category: filters.category !== "all" ? filters.category : "",
+      categoryName: filters.categoryName !== "all" ? filters.categoryName : "",
     } as ShopFiltersUrlSchema;
   }, [filters]);
 
@@ -70,7 +70,7 @@ export function ShopWrapper({
     (categoryId: string) => {
       setFilters({
         ...(filtersUrlData as ShopFiltersUrlSchema),
-        category: categoryId,
+        categoryId: categoryId,
       });
       setPagination({ ...(paginationUrlData as PaginationUrlSchema), page: 1 });
     },
@@ -91,7 +91,7 @@ export function ShopWrapper({
   const handleResetFilters = useCallback(() => {
     setFilters({
       ...DEFAULT_SHOP_FILTERS,
-      category: categoryName,
+      categoryName: categoryName,
     });
     setPagination(DEFAULT_PAGINATION);
   }, [categoryName, setFilters, setPagination]);
@@ -155,7 +155,7 @@ export function ShopWrapper({
           </div>
         ) : (
           <Filters
-            selectedCategory={filtersUrlData.category}
+            selectedCategory={filtersUrlData.categoryName}
             priceRange={filtersUrlData.priceRange}
             onCategoryChange={handleCategoryChange}
             onPriceRangeChange={handlePriceRangeChange}
