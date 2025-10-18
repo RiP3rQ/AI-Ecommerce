@@ -155,6 +155,7 @@ export function ShopWrapper({
             onCategoryChange={handleCategoryChange}
             onPriceRangeChange={handlePriceRangeChange}
             onResetFilters={handleResetFilters}
+            searchParamCategoryName={categoryName}
           />
         )}
       </div>
