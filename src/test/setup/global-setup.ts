@@ -1,6 +1,14 @@
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
+import { migrate } from "drizzle-orm/postgres-js/migrator";
+import { env } from "../../env";
 import { sql } from "drizzle-orm";
-import { drizzleDb } from "../../db/connection";
+import * as schema from "../../database/schema";
 
+/**
+ * Global setup for test environment.
+ * Initializes test database with migrations and ensures clean state.
+ */
 export async function setup() {
   console.log("🧪 Setting up test environment...");
 
@@ -12,17 +20,23 @@ export async function setup() {
   }
 
   try {
-    // Clean data from all tables (but keep schema)
+    // Create database connection for migrations
+    console.log("🔗 Connecting to test database...");
+    const client = postgres(env.DATABASE_URL, { prepare: false, max: 1 });
+    const db = drizzle(client, { schema });
+
+    // Run migrations to ensure schema is up to date
+    console.log("📦 Running database migrations...");
+    await migrate(db, {
+      migrationsFolder: "./src/database/migrations",
+    });
+
+    // Clean all data from tables to ensure clean test state
     console.log("🗄️  Cleaning test database data...");
-    await drizzleDb.execute(sql`TRUNCATE TABLE stock CASCADE`);
-    await drizzleDb.execute(sql`TRUNCATE TABLE products CASCADE`);
-    await drizzleDb.execute(sql`TRUNCATE TABLE categories CASCADE`);
-    await drizzleDb.execute(sql`TRUNCATE TABLE better_auth_sessions CASCADE`);
-    await drizzleDb.execute(sql`TRUNCATE TABLE better_auth_accounts CASCADE`);
-    await drizzleDb.execute(
-      sql`TRUNCATE TABLE better_auth_verifications CASCADE`
-    );
-    await drizzleDb.execute(sql`TRUNCATE TABLE better_auth_users CASCADE`);
+    await cleanAllTables(db);
+
+    // Close the connection
+    await client.end();
 
     console.log("✅ Test environment setup complete");
   } catch (error) {
@@ -31,31 +45,54 @@ export async function setup() {
   }
 }
 
+/**
+ * Global teardown for test environment.
+ * Cleans up after all tests are complete.
+ */
 export async function teardown() {
   console.log("🧹 Global teardown...");
 
   try {
-    // Clean data from all tables after tests
+    // Create database connection for cleanup
+    const client = postgres(env.DATABASE_URL, { prepare: false, max: 1 });
+    const db = drizzle(client, { schema });
+
+    // Clean all data from tables
     console.log("🗄️ Cleaning test database data after tests...");
-    await drizzleDb.execute(sql`TRUNCATE TABLE stock CASCADE`);
-    await drizzleDb.execute(sql`TRUNCATE TABLE products CASCADE`);
-    await drizzleDb.execute(sql`TRUNCATE TABLE categories CASCADE`);
-    await drizzleDb.execute(sql`TRUNCATE TABLE better_auth_sessions CASCADE`);
-    await drizzleDb.execute(sql`TRUNCATE TABLE better_auth_accounts CASCADE`);
-    await drizzleDb.execute(
-      sql`TRUNCATE TABLE better_auth_verifications CASCADE`
-    );
-    await drizzleDb.execute(sql`TRUNCATE TABLE better_auth_users CASCADE`);
+    await cleanAllTables(db);
+
+    // Close the connection
+    await client.end();
+    console.log("🔌 Database connection closed");
   } catch (error) {
     console.warn("⚠️  Failed to clean database during teardown:", error);
   }
 
   console.log("✅ Global teardown complete");
-  // Close the database connection
-  await drizzleDb.$client.end();
-  console.log("🔌 Database connection closed");
-
-  // End the test
   console.log("🏁 Finished tests");
   process.exit(0);
+}
+
+/**
+ * Cleans all data from all tables while preserving schema.
+ * Tables are truncated in dependency order to avoid foreign key constraints.
+ */
+async function cleanAllTables(db: ReturnType<typeof drizzle>) {
+  // Truncate tables in reverse dependency order
+  // Child tables first, then parent tables
+  const truncateQueries = [
+    sql`TRUNCATE TABLE reviews CASCADE`,
+    sql`TRUNCATE TABLE cart CASCADE`,
+    sql`TRUNCATE TABLE orders CASCADE`,
+    sql`TRUNCATE TABLE product_options CASCADE`,
+    sql`TRUNCATE TABLE product_images CASCADE`,
+    sql`TRUNCATE TABLE product_variants CASCADE`,
+    sql`TRUNCATE TABLE products CASCADE`,
+    sql`TRUNCATE TABLE categories CASCADE`,
+    sql`TRUNCATE TABLE profiles CASCADE`,
+  ];
+
+  for (const query of truncateQueries) {
+    await db.execute(query);
+  }
 }

@@ -20,7 +20,7 @@ export default defineConfig({
 
     // Test file patterns - tests alongside features
     include: ["src/**/*.test.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
-    exclude: ["node_modules", "dist", "build", "src/test/**"],
+    exclude: ["node_modules", "dist", "build"],
 
     // Test timeout
     testTimeout: 10000,
@@ -32,11 +32,11 @@ export default defineConfig({
       exclude: [
         "coverage/**",
         "dist/**",
-        "src/db/migrations/**",
+        "src/database/migrations/**",
         "**/*.d.ts",
         "**/*.config.*",
         "**/node_modules/**",
-        "test/**",
+        "src/test/**",
       ],
       thresholds: {
         global: {
