@@ -280,4 +280,38 @@ export const dbHelpers = {
 
     await db.execute(sql`TRUNCATE TABLE categories CASCADE`);
   },
+
+  /**
+   * Truncates cart-related tables for faster test setup.
+   * Use this instead of truncateAllTables when only testing cart functionality.
+   *
+   * @param db - Database connection to use for truncation
+   */
+  async truncateCartTables(db?: TestDatabase): Promise<void> {
+    if (!db) {
+      db = createTestDb();
+    }
+
+    // Truncate cart-related tables in dependency order
+    await db.execute(sql`TRUNCATE TABLE cart_items CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE carts CASCADE`);
+  },
+
+  /**
+   * Truncates product-related tables for faster test setup.
+   * Use this when testing cart or product functionality.
+   *
+   * @param db - Database connection to use for truncation
+   */
+  async truncateProductTables(db?: TestDatabase): Promise<void> {
+    if (!db) {
+      db = createTestDb();
+    }
+
+    // Truncate product-related tables in dependency order
+    await db.execute(sql`TRUNCATE TABLE product_options CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE product_images CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE product_variants CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE products CASCADE`);
+  },
 };
