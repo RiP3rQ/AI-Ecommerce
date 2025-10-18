@@ -1,12 +1,4 @@
-import {
-  describe,
-  it,
-  expect,
-  beforeEach,
-  beforeAll,
-  afterAll,
-  afterEach,
-} from "vitest";
+import { describe, it, expect, beforeEach, beforeAll, afterAll } from "vitest";
 import { NextRequest } from "next/server";
 import { GET } from "./route";
 import { categoriesService } from "./service";
@@ -17,7 +9,6 @@ import {
 } from "@/test/utils/db-helper";
 import { createCategoryFixture } from "@/test/fixtures/categories";
 import type { CategoriesResponse } from "./types";
-import type { GetCategoriesDto } from "./dto";
 
 /**
  * Comprehensive test suite for the categories API endpoint.

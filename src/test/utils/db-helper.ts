@@ -45,8 +45,12 @@ export async function createTestableUnit(
     });
   } catch (error) {
     if (error instanceof DrizzleError) {
-      // ignore
-      console.log("[Drizzle] DB Error:", error.message);
+      if (error.message.includes("Rollback")) {
+        // COMPLETELY IGNORE ROLLBACK ERRORS
+        return;
+      }
+      // OTHER DRIZZLE ERRORS SHOULD BE LOGGED BUT NOT THROWN
+      console.warn("[Drizzle] DB Error:", error.message);
     } else {
       console.error("[TEST] Error:", error);
       throw error;
