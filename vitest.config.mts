@@ -1,10 +1,77 @@
 import { defineConfig } from "vitest/config";
-import react from "@vitejs/plugin-react";
-import tsconfigPaths from "vite-tsconfig-paths";
+import path from "path";
 
 export default defineConfig({
-  plugins: [tsconfigPaths(), react()],
   test: {
-    environment: "jsdom",
+    // Global setup file to connect to the test DB and run migrations
+    globalSetup: ["./src/test/setup/global-setup.ts"],
+
+    // Setup file to run before each test file (e.g., for app instantiation)
+    setupFiles: ["./src/test/setup/test-setup.ts"],
+
+    // Ensure environment variables from .env.test are loaded but override with test-specific values
+    env: {
+      NODE_ENV: "test",
+    },
+
+    // Global test settings
+    globals: true,
+    environment: "node",
+
+    // Test file patterns - tests alongside features
+    include: ["src/**/*.test.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
+    exclude: ["node_modules", "dist", "build", "src/test/**"],
+
+    // Test timeout
+    testTimeout: 10000,
+
+    // Coverage configuration
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "json", "html"],
+      exclude: [
+        "coverage/**",
+        "dist/**",
+        "src/db/migrations/**",
+        "**/*.d.ts",
+        "**/*.config.*",
+        "**/node_modules/**",
+        "test/**",
+      ],
+      thresholds: {
+        global: {
+          branches: 80,
+          functions: 80,
+          lines: 80,
+          statements: 80,
+        },
+      },
+    },
+
+    // Reporter configuration
+    reporters: ["verbose"],
+
+    // Pool options for parallel testing
+    pool: "threads",
+    poolOptions: {
+      threads: {
+        singleThread: true, // Run tests serially to avoid database race conditions
+        minThreads: 1,
+        maxThreads: 1,
+      },
+    },
+  },
+
+  // Resolve configuration
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+      "@test": path.resolve(__dirname, "./test"),
+    },
+  },
+
+  // Define constants
+  define: {
+    "import.meta.vitest": undefined,
   },
 });
