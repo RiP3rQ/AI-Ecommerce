@@ -7,7 +7,10 @@ import {
   dbHelpers,
   createTestDb,
 } from "@/test/utils/db-helper";
-import { createCategoryFixture } from "@/test/fixtures/categories";
+import {
+  createCategoryFixture,
+  createCategoryFixtures,
+} from "@/test/fixtures/categories";
 import type { CategoriesResponse } from "./types";
 
 /**
@@ -16,16 +19,16 @@ import type { CategoriesResponse } from "./types";
  */
 describe("/api/categories", () => {
   beforeAll(async () => {
-    await dbHelpers.truncateAllTables();
+    await dbHelpers.truncateCategoriesTable();
   });
 
   afterAll(async () => {
-    await dbHelpers.truncateAllTables();
+    await dbHelpers.truncateCategoriesTable();
   });
 
   beforeEach(async () => {
-    // Ensure clean state before each test by truncating tables
-    await dbHelpers.truncateAllTables();
+    // Ensure clean state before each test by truncating categories table only
+    await dbHelpers.truncateCategoriesTable();
   });
 
   describe("GET /api/categories", () => {
@@ -33,17 +36,14 @@ describe("/api/categories", () => {
       it("should return all categories sorted by name in ascending order by default", async () => {
         await createTestableUnit(async (db) => {
           // Arrange: Seed multiple categories with unsorted names
-          await createCategoryFixture({
+          await createCategoryFixtures({
             db,
-            overrides: { name: "Zebra Electronics" },
-          });
-          await createCategoryFixture({
-            db,
-            overrides: { name: "Apple Gadgets" },
-          });
-          await createCategoryFixture({
-            db,
-            overrides: { name: "Mobile Phones" },
+            count: 3,
+            overrides: [
+              { name: "Zebra Electronics" },
+              { name: "Apple Gadgets" },
+              { name: "Mobile Phones" },
+            ],
           });
 
           // Act: Call service with default parameters
@@ -76,17 +76,14 @@ describe("/api/categories", () => {
       it("should sort categories by name in descending order", async () => {
         await createTestableUnit(async (db) => {
           // Arrange: Seed categories
-          await createCategoryFixture({
+          await createCategoryFixtures({
             db,
-            overrides: { name: "Apple Gadgets Desc" },
-          });
-          await createCategoryFixture({
-            db,
-            overrides: { name: "Zebra Electronics Desc" },
-          });
-          await createCategoryFixture({
-            db,
-            overrides: { name: "Mobile Phones Desc" },
+            count: 3,
+            overrides: [
+              { name: "Apple Gadgets Desc" },
+              { name: "Zebra Electronics Desc" },
+              { name: "Mobile Phones Desc" },
+            ],
           });
 
           // Act: Call service with descending sort by name
@@ -105,24 +102,21 @@ describe("/api/categories", () => {
       it("should sort categories by createdAt in ascending order", async () => {
         await createTestableUnit(async (db) => {
           // Arrange: Seed categories with different creation timestamps
-          const oldestCategory = await createCategoryFixture({
+          const baseTime = new Date();
+          await createCategoryFixtures({
             db,
-            overrides: { name: "Old Category Asc" },
-          });
-
-          // Wait a bit to ensure different timestamps
-          await new Promise((resolve) => setTimeout(resolve, 10));
-
-          const middleCategory = await createCategoryFixture({
-            db,
-            overrides: { name: "Middle Category Asc" },
-          });
-
-          await new Promise((resolve) => setTimeout(resolve, 10));
-
-          const newestCategory = await createCategoryFixture({
-            db,
-            overrides: { name: "New Category Asc" },
+            count: 3,
+            overrides: [
+              {
+                name: "Old Category Asc",
+                createdAt: new Date(baseTime.getTime() - 2000),
+              },
+              {
+                name: "Middle Category Asc",
+                createdAt: new Date(baseTime.getTime() - 1000),
+              },
+              { name: "New Category Asc", createdAt: baseTime },
+            ],
           });
 
           // Act: Call service with ascending sort by createdAt
@@ -152,16 +146,17 @@ describe("/api/categories", () => {
       it("should sort categories by createdAt in descending order", async () => {
         await createTestableUnit(async (db) => {
           // Arrange: Seed categories with different creation timestamps
-          const oldestCategory = await createCategoryFixture({
+          const baseTime = new Date();
+          await createCategoryFixtures({
             db,
-            overrides: { name: "Old Category Desc" },
-          });
-
-          await new Promise((resolve) => setTimeout(resolve, 10));
-
-          const newestCategory = await createCategoryFixture({
-            db,
-            overrides: { name: "New Category Desc" },
+            count: 2,
+            overrides: [
+              {
+                name: "Old Category Desc",
+                createdAt: new Date(baseTime.getTime() - 1000),
+              },
+              { name: "New Category Desc", createdAt: baseTime },
+            ],
           });
 
           // Act: Call service with descending sort by createdAt
@@ -188,13 +183,13 @@ describe("/api/categories", () => {
       it("should handle case-insensitive query parameters", async () => {
         await createTestableUnit(async (db) => {
           // Arrange: Seed categories
-          await createCategoryFixture({
+          await createCategoryFixtures({
             db,
-            overrides: { name: "Apple Gadgets Case" },
-          });
-          await createCategoryFixture({
-            db,
-            overrides: { name: "Zebra Electronics Case" },
+            count: 2,
+            overrides: [
+              { name: "Apple Gadgets Case" },
+              { name: "Zebra Electronics Case" },
+            ],
           });
 
           // Act: Call service with uppercase parameters (service layer doesn't handle case conversion)
@@ -229,13 +224,13 @@ describe("/api/categories", () => {
       it("should fall back to default sorting for invalid sortDirection", async () => {
         await createTestableUnit(async (db) => {
           // Arrange: Seed categories
-          await createCategoryFixture({
+          await createCategoryFixtures({
             db,
-            overrides: { name: "Zebra Electronics Fallback" },
-          });
-          await createCategoryFixture({
-            db,
-            overrides: { name: "Apple Gadgets Fallback" },
+            count: 2,
+            overrides: [
+              { name: "Zebra Electronics Fallback" },
+              { name: "Apple Gadgets Fallback" },
+            ],
           });
 
           // Act: Call service with invalid sortDirection (service uses default validation)
@@ -279,13 +274,13 @@ describe("Integration Tests - Route Handler", () => {
       // Arrange: Seed categories in test database (not in transaction since we're testing HTTP endpoint)
       const db = createTestDb();
       try {
-        await createCategoryFixture({
+        await createCategoryFixtures({
           db,
-          overrides: { name: "Apple Gadgets Route" },
-        });
-        await createCategoryFixture({
-          db,
-          overrides: { name: "Zebra Electronics Route" },
+          count: 2,
+          overrides: [
+            { name: "Apple Gadgets Route" },
+            { name: "Zebra Electronics Route" },
+          ],
         });
 
         // Act: Make GET request to categories endpoint
@@ -306,7 +301,7 @@ describe("Integration Tests - Route Handler", () => {
         expect(result.data[1].name).toBe("Zebra Electronics Route");
       } finally {
         // Clean up
-        await dbHelpers.truncateAllTables(db);
+        await dbHelpers.truncateCategoriesTable(db);
       }
     });
 
@@ -314,13 +309,13 @@ describe("Integration Tests - Route Handler", () => {
       // Arrange: Seed categories in test database (not in transaction since we're testing HTTP endpoint)
       const db = createTestDb();
       try {
-        await createCategoryFixture({
+        await createCategoryFixtures({
           db,
-          overrides: { name: "Apple Gadgets Route Case" },
-        });
-        await createCategoryFixture({
-          db,
-          overrides: { name: "Zebra Electronics Route Case" },
+          count: 2,
+          overrides: [
+            { name: "Apple Gadgets Route Case" },
+            { name: "Zebra Electronics Route Case" },
+          ],
         });
 
         // Act: Make GET request with uppercase parameters
@@ -338,7 +333,7 @@ describe("Integration Tests - Route Handler", () => {
         expect(result.data[1].name).toBe("Apple Gadgets Route Case");
       } finally {
         // Clean up
-        await dbHelpers.truncateAllTables(db);
+        await dbHelpers.truncateCategoriesTable(db);
       }
     });
   });

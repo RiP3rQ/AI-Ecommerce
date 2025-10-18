@@ -12,9 +12,10 @@ export type TestDatabase = NodePgDatabase<typeof schema>;
 // Create a pool of connections to the database
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL!,
-  max: 20,
-  idleTimeoutMillis: 10000,
-  connectionTimeoutMillis: 10000,
+  max: 50, // Increased for better parallel test performance
+  min: 5, // Keep minimum connections ready
+  idleTimeoutMillis: 30000, // Longer timeout to reuse connections
+  connectionTimeoutMillis: 20000, // Longer connection timeout
 });
 
 // Test connection on startup (skip logging in test environment)
@@ -264,5 +265,19 @@ export const dbHelpers = {
         products: true,
       },
     });
+  },
+
+  /**
+   * Truncates only the categories table for faster test setup.
+   * Use this instead of truncateAllTables when only testing categories.
+   *
+   * @param db - Database connection to use for truncation
+   */
+  async truncateCategoriesTable(db?: TestDatabase): Promise<void> {
+    if (!db) {
+      db = createTestDb();
+    }
+
+    await db.execute(sql`TRUNCATE TABLE categories CASCADE`);
   },
 };
