@@ -27,6 +27,8 @@ import type {
   PaginationMeta,
 } from "./types";
 import type { SelectProductImage } from "@/database/schemas/product-images";
+import page from "@/app/(compliance)/about/page";
+import { any, readonly } from "zod";
 
 /**
  * Service class for shop operations.
@@ -51,7 +53,7 @@ export class ShopService {
       sortDirection,
       sortField,
       search,
-      category,
+      categoryId,
       priceMin,
       priceMax,
       availableForSale,
@@ -67,14 +69,14 @@ export class ShopService {
     }
 
     // Validate category if provided
-    if (category) {
+    if (categoryId) {
       const categoryExists = await this.db.query.categories.findFirst({
-        where: eq(categories.id, category),
+        where: eq(categories.id, categoryId),
       });
 
       if (!categoryExists) {
         throw new CategoryNotFoundError(
-          `Category with id "${category}" does not exist.`
+          `Category with id "${categoryId}" does not exist.`
         );
       }
     }
@@ -82,7 +84,7 @@ export class ShopService {
     // Build WHERE conditions
     const conditions = this.buildWhereConditions({
       search,
-      category,
+      categoryId,
       availableForSale,
     });
 
@@ -154,11 +156,11 @@ export class ShopService {
    */
   private buildWhereConditions({
     search,
-    category,
+    categoryId,
     availableForSale,
   }: Readonly<{
     search?: string;
-    category?: string;
+    categoryId?: string;
     availableForSale?: boolean;
   }>) {
     const conditions = [];
@@ -173,12 +175,12 @@ export class ShopService {
       );
     }
 
-    // Filter by category
-    if (category) {
+    // Filter by categoryId
+    if (categoryId) {
       conditions.push(
         eq(
           products.categoryId,
-          sql`(SELECT id FROM ${categories} WHERE name = ${category})`
+          sql`(SELECT id FROM ${categories} WHERE id = ${categoryId})`
         )
       );
     }

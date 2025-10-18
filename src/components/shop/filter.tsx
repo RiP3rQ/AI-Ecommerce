@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useMemo, useState } from "react";
+import { ReactNode, useEffect, useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,7 @@ interface FiltersProps {
   onCategoryChange: (categoryId: string) => void;
   onPriceRangeChange: (range: { min: number; max: number }) => void;
   onResetFilters: () => void;
+  searchParamCategoryName?: string;
 }
 
 export function Filters({
@@ -26,6 +27,7 @@ export function Filters({
   onCategoryChange,
   onPriceRangeChange,
   onResetFilters,
+  searchParamCategoryName,
 }: FiltersProps): ReactNode {
   const [localMinPrice, setLocalMinPrice] = useState(priceRange.min.toString());
   const [localMaxPrice, setLocalMaxPrice] = useState(priceRange.max.toString());
@@ -35,6 +37,20 @@ export function Filters({
     `${BASE_URL}/api/categories`,
     swrFetcher
   );
+
+  useEffect(() => {
+    if (searchParamCategoryName && data?.data) {
+      const categoryId = data.data.find(
+        (category) =>
+          category.name.toLowerCase() === searchParamCategoryName.toLowerCase()
+      )?.id;
+      if (categoryId) {
+        console.log("categoryId", categoryId);
+        console.log("searchParamCategoryName", searchParamCategoryName);
+        onCategoryChange(categoryId);
+      }
+    }
+  }, [searchParamCategoryName, data]);
 
   const handleApplyPriceRange = (): void => {
     const min = Number.parseFloat(localMinPrice) || 0;

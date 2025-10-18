@@ -28,7 +28,7 @@ export const getProductsSchema = z.object({
 
   // Filtering
   search: z.string().optional(),
-  category: z.string().optional(),
+  categoryId: z.string().optional(),
   priceMin: z
     .number()
     .int()
