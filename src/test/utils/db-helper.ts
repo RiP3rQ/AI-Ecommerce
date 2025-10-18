@@ -17,7 +17,6 @@ export type TestDatabase = PostgresJsDatabase<typeof schema>;
 export function createTestDb(): TestDatabase {
   const client = postgres(process.env.DATABASE_URL!, {
     prepare: false,
-    max: 1,
     // Suppress NOTICE messages from PostgreSQL
     connection: {
       client_min_messages: "warning",
