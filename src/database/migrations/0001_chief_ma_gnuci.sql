@@ -1,14 +1,12 @@
 CREATE TABLE "products" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"url_handle" varchar(255) NOT NULL,
 	"available_for_sale" boolean DEFAULT true NOT NULL,
 	"title" varchar(255) NOT NULL,
 	"description" text,
 	"description_html" text,
 	"tags" jsonb DEFAULT '[]'::jsonb,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
-	CONSTRAINT "products_url_handle_unique" UNIQUE("url_handle")
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "product_variants" (

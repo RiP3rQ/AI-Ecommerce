@@ -55,12 +55,16 @@ export const dbHelpers = {
    *
    * @param db - Database connection to use for truncation
    */
-  async truncateAllTables(db: TestDatabase): Promise<void> {
+  async truncateAllTables(db?: TestDatabase): Promise<void> {
+    if (!db) {
+      db = createTestDb();
+    }
+
     // Truncate tables in reverse dependency order
     // Child tables first, then parent tables
     const truncateQueries = [
       sql`TRUNCATE TABLE reviews CASCADE`,
-      sql`TRUNCATE TABLE cart CASCADE`,
+      sql`TRUNCATE TABLE carts CASCADE`,
       sql`TRUNCATE TABLE orders CASCADE`,
       sql`TRUNCATE TABLE product_options CASCADE`,
       sql`TRUNCATE TABLE product_images CASCADE`,

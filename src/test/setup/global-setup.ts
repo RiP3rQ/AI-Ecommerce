@@ -22,7 +22,9 @@ export async function setup() {
   try {
     // Create database connection for migrations
     console.log("🔗 Connecting to test database...");
-    const client = postgres(env.DATABASE_URL, { prepare: false, max: 1 });
+    const client = postgres(process.env.DATABASE_URL!, {
+      prepare: false,
+    });
     const db = drizzle(client, { schema });
 
     // Run migrations to ensure schema is up to date
@@ -82,7 +84,7 @@ async function cleanAllTables(db: ReturnType<typeof drizzle>) {
   // Child tables first, then parent tables
   const truncateQueries = [
     sql`TRUNCATE TABLE reviews CASCADE`,
-    sql`TRUNCATE TABLE cart CASCADE`,
+    sql`TRUNCATE TABLE carts CASCADE`,
     sql`TRUNCATE TABLE orders CASCADE`,
     sql`TRUNCATE TABLE product_options CASCADE`,
     sql`TRUNCATE TABLE product_images CASCADE`,
