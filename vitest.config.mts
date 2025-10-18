@@ -50,13 +50,13 @@ export default defineConfig({
     // Reporter configuration
     reporters: ["verbose"],
 
-    // Pool options for parallel testing
+    // Pool options for parallel testing - now safe with savepoints
     pool: "threads",
     poolOptions: {
       threads: {
-        singleThread: true, // Run tests serially to avoid database race conditions
-        minThreads: 1,
-        maxThreads: 1,
+        singleThread: false, // Enable parallel execution with savepoints
+        minThreads: 12,
+        maxThreads: 12, // Allow up to 12 parallel threads
       },
     },
   },
