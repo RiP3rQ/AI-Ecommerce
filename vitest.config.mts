@@ -1,5 +1,9 @@
 import { defineConfig } from "vitest/config";
 import path from "path";
+import dotenv from "dotenv";
+
+// Load test environment variables
+dotenv.config({ path: ".env.test" });
 
 export default defineConfig({
   test: {
@@ -8,11 +12,6 @@ export default defineConfig({
 
     // Setup file to run before each test file (e.g., for app instantiation)
     setupFiles: ["./src/test/setup/test-setup.ts"],
-
-    // Ensure environment variables from .env.test are loaded but override with test-specific values
-    env: {
-      NODE_ENV: "test",
-    },
 
     // Global test settings
     globals: true,

@@ -2,7 +2,9 @@ version: '3.8'
 
 services:
   postgres-test:
-    image: postgres:15-alpine
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: ai-ecommerce-postgres-test
     restart: unless-stopped
     environment:
@@ -10,7 +12,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
     ports:
-      - "5433:5432"
+      - "5432:5432"
     networks:
       - ai-ecommerce-network
 

@@ -51,4 +51,8 @@ export const env = createEnv({
    * explicitly specify this option as true.
    */
   emptyStringAsUndefined: true,
+  skipValidation: Boolean(
+    (process.env.NODE_ENV as string) === "test" ||
+      (process.env.NODE_ENV as string) === "CI"
+  ),
 });
