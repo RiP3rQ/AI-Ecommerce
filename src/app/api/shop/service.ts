@@ -54,7 +54,6 @@ export class ShopService {
       sortField,
       search,
       categoryId,
-      categoryName,
       priceMin,
       priceMax,
       availableForSale,
@@ -82,23 +81,10 @@ export class ShopService {
       }
     }
 
-    // Validate category name if provided
-    if (categoryName) {
-      const categoryExists = await this.db.query.categories.findFirst({
-        where: ilike(categories.name, `%${categoryName.toLowerCase()}%`),
-      });
-      if (!categoryExists) {
-        throw new CategoryNotFoundError(
-          `Category with name "${categoryName}" does not exist.`
-        );
-      }
-    }
-
     // Build WHERE conditions
     const conditions = this.buildWhereConditions({
       search,
       categoryId,
-      categoryName,
       availableForSale,
     });
 
@@ -171,12 +157,10 @@ export class ShopService {
   private buildWhereConditions({
     search,
     categoryId,
-    categoryName,
     availableForSale,
   }: Readonly<{
     search?: string;
     categoryId?: string;
-    categoryName?: string;
     availableForSale?: boolean;
   }>) {
     const conditions = [];
@@ -197,16 +181,6 @@ export class ShopService {
         eq(
           products.categoryId,
           sql`(SELECT id FROM ${categories} WHERE id = ${categoryId})`
-        )
-      );
-    }
-
-    // Filter by categoryName
-    if (categoryName) {
-      conditions.push(
-        eq(
-          products.categoryId,
-          sql`(SELECT id FROM ${categories} WHERE Lower(name) = Lower(${categoryName}))`
         )
       );
     }

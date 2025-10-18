@@ -20,6 +20,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { SWRResponse } from "@/types/swr";
 import { ShopProductsData } from "@/app/api/shop/types";
 import { CLIENT_SIDE_URL_UPDATE_OPTIONS } from "@/lib/nuqs";
+import { error } from "console";
 
 export function ShopWrapper({
   categoryName,
@@ -34,10 +35,7 @@ export function ShopWrapper({
   const [filters, setFilters] = useQueryState(
     "filters",
     parseAsJson(shopFiltersUrlSchema)
-      .withDefault({
-        ...DEFAULT_SHOP_FILTERS,
-        categoryName: categoryName,
-      })
+      .withDefault(DEFAULT_SHOP_FILTERS)
       .withOptions(CLIENT_SIDE_URL_UPDATE_OPTIONS)
   );
 
@@ -61,7 +59,7 @@ export function ShopWrapper({
   const filtersUrlData = useMemo(() => {
     return {
       ...filters,
-      categoryName: filters.categoryName !== "all" ? filters.categoryName : "",
+      categoryId: filters.categoryId !== "all" ? filters.categoryId : "",
     } as ShopFiltersUrlSchema;
   }, [filters]);
 
@@ -89,12 +87,9 @@ export function ShopWrapper({
   );
 
   const handleResetFilters = useCallback(() => {
-    setFilters({
-      ...DEFAULT_SHOP_FILTERS,
-      categoryName: categoryName,
-    });
+    setFilters(DEFAULT_SHOP_FILTERS);
     setPagination(DEFAULT_PAGINATION);
-  }, [categoryName, setFilters, setPagination]);
+  }, [setFilters, setPagination]);
 
   const handleSearchChange = useCallback(
     (search: string) => {
@@ -155,7 +150,7 @@ export function ShopWrapper({
           </div>
         ) : (
           <Filters
-            selectedCategory={filtersUrlData.categoryName}
+            selectedCategory={filtersUrlData.categoryId}
             priceRange={filtersUrlData.priceRange}
             onCategoryChange={handleCategoryChange}
             onPriceRangeChange={handlePriceRangeChange}

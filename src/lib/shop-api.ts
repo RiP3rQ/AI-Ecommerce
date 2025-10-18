@@ -18,7 +18,6 @@ export function buildShopUrl({
     sortField: filters.sortField,
     search: filters.search,
     categoryId: filters.categoryId,
-    categoryName: filters.categoryName,
     priceMin: filters.priceRange?.min?.toString(),
     priceMax: filters.priceRange?.max?.toString(),
   };
