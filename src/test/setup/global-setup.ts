@@ -24,8 +24,12 @@ export async function setup() {
     console.log("🔗 Connecting to test database...");
     const client = postgres(process.env.DATABASE_URL!, {
       prepare: false,
+      // Suppress NOTICE messages from PostgreSQL
+      connection: {
+        client_min_messages: "warning",
+      },
     });
-    const db = drizzle(client, { schema });
+    const db = drizzle(client, { schema, logger: false });
 
     // Run migrations to ensure schema is up to date
     console.log("📦 Running database migrations...");
@@ -56,7 +60,14 @@ export async function teardown() {
 
   try {
     // Create database connection for cleanup
-    const client = postgres(env.DATABASE_URL, { prepare: false, max: 1 });
+    const client = postgres(env.DATABASE_URL, {
+      prepare: false,
+      max: 1,
+      // Suppress NOTICE messages from PostgreSQL
+      connection: {
+        client_min_messages: "warning",
+      },
+    });
     const db = drizzle(client, { schema });
 
     // Clean all data from tables

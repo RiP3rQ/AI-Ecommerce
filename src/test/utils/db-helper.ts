@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { sql, eq, and } from "drizzle-orm";
+import { sql, eq, and, DrizzleError } from "drizzle-orm";
 import { env } from "../../env";
 import * as schema from "../../database/schema";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
@@ -15,8 +15,15 @@ export type TestDatabase = PostgresJsDatabase<typeof schema>;
  * This should be used for test-specific database operations.
  */
 export function createTestDb(): TestDatabase {
-  const client = postgres(env.DATABASE_URL, { prepare: false, max: 1 });
-  return drizzle(client, { schema });
+  const client = postgres(process.env.DATABASE_URL!, {
+    prepare: false,
+    max: 1,
+    // Suppress NOTICE messages from PostgreSQL
+    connection: {
+      client_min_messages: "warning",
+    },
+  });
+  return drizzle(client, { schema, logger: false });
 }
 
 /**
@@ -39,8 +46,13 @@ export async function createTestableUnit(
       // since we don't commit it
     });
   } catch (error) {
-    console.error("[createTestableUnit] Test unit error:", error);
-    throw error;
+    if (error instanceof DrizzleError) {
+      // ignore
+      console.log("[Drizzle] DB Error:", error.message);
+    } else {
+      console.error("[TEST] Error:", error);
+      throw error;
+    }
   }
 }
 
