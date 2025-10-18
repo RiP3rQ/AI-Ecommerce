@@ -10,8 +10,6 @@ import * as schema from "../../database/schema";
  * Initializes test database with migrations and ensures clean state.
  */
 export async function setup() {
-  console.log("🧪 Setting up test environment...");
-
   // Ensure we're in test environment
   if (process.env.NODE_ENV !== "test") {
     throw new Error(
@@ -21,7 +19,6 @@ export async function setup() {
 
   try {
     // Create database connection for migrations
-    console.log("🔗 Connecting to test database...");
     const client = postgres(process.env.DATABASE_URL!, {
       prepare: false,
       // Suppress NOTICE messages from PostgreSQL
@@ -32,13 +29,11 @@ export async function setup() {
     const db = drizzle(client, { schema, logger: false });
 
     // Run migrations to ensure schema is up to date
-    console.log("📦 Running database migrations...");
     await migrate(db, {
       migrationsFolder: "./src/database/migrations",
     });
 
     // Clean all data from tables to ensure clean test state
-    console.log("🗄️  Cleaning test database data...");
     await cleanAllTables(db);
 
     // Close the connection
@@ -56,8 +51,6 @@ export async function setup() {
  * Cleans up after all tests are complete.
  */
 export async function teardown() {
-  console.log("🧹 Global teardown...");
-
   try {
     // Create database connection for cleanup
     const client = postgres(env.DATABASE_URL, {
@@ -71,17 +64,14 @@ export async function teardown() {
     const db = drizzle(client, { schema });
 
     // Clean all data from tables
-    console.log("🗄️ Cleaning test database data after tests...");
     await cleanAllTables(db);
 
     // Close the connection
     await client.end();
-    console.log("🔌 Database connection closed");
   } catch (error) {
     console.warn("⚠️  Failed to clean database during teardown:", error);
   }
 
-  console.log("✅ Global teardown complete");
   console.log("🏁 Finished tests");
   process.exit(0);
 }

@@ -25,6 +25,8 @@ export async function createCategoryFixture({
   const categoryData = {
     name: overrides.name ?? faker.commerce.department(),
     description: overrides.description ?? faker.commerce.productDescription(),
+    createdAt: overrides.createdAt ?? new Date(),
+    updatedAt: overrides.updatedAt ?? new Date(),
   } satisfies InsertCategory;
 
   const [category] = await db

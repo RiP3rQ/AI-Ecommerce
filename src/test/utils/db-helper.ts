@@ -31,7 +31,7 @@ export function createTestDb(): TestDatabase {
  * The transaction is automatically rolled back after the test function completes,
  * ensuring test isolation without affecting other tests.
  *
- * @param func - Test function that receives a database transaction
+ * @param func - Test function that receives a database connection
  * @returns Promise that resolves when the test function completes
  */
 export async function createTestableUnit(
@@ -42,8 +42,7 @@ export async function createTestableUnit(
   try {
     await db.transaction(async (tx) => {
       await func(tx);
-      // Transaction will be rolled back automatically when it goes out of scope
-      // since we don't commit it
+      tx.rollback();
     });
   } catch (error) {
     if (error instanceof DrizzleError) {
