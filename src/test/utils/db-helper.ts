@@ -1,28 +1,46 @@
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
-import { sql, eq, and, DrizzleError } from "drizzle-orm";
-import { env } from "../../env";
+import { drizzle, NodePgDatabase } from "drizzle-orm/node-postgres";
+import { sql, eq, DrizzleError } from "drizzle-orm";
 import * as schema from "../../database/schema";
-import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import { Pool, PoolClient } from "pg";
+import process from "node:process";
 
 /**
  * Database connection type for testing
  */
-export type TestDatabase = PostgresJsDatabase<typeof schema>;
+export type TestDatabase = NodePgDatabase<typeof schema>;
+
+// Create a pool of connections to the database
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL!,
+  max: 20,
+  idleTimeoutMillis: 10000,
+  connectionTimeoutMillis: 10000,
+});
+
+// Test connection on startup (skip logging in test environment)
+pool
+  .connect()
+  .then((client: PoolClient) => {
+    client.release();
+    if (process.env.NODE_ENV !== "test") {
+      console.log(
+        `🗄️ Connected to ${
+          String(process.env.NODE_ENV) === "test" ? "test" : "development"
+        } database`
+      );
+    }
+  })
+  .catch((error: unknown) => {
+    console.error("❌ Failed to connect to database:", error);
+    process.exit(1);
+  });
 
 /**
  * Creates a test database connection.
  * This should be used for test-specific database operations.
  */
 export function createTestDb(): TestDatabase {
-  const client = postgres(process.env.DATABASE_URL!, {
-    prepare: false,
-    // Suppress NOTICE messages from PostgreSQL
-    connection: {
-      client_min_messages: "warning",
-    },
-  });
-  return drizzle(client, { schema, logger: false });
+  return drizzle(pool, { schema, logger: false });
 }
 
 /**

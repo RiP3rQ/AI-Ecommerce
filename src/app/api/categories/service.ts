@@ -1,4 +1,4 @@
-import { drizzleDbClient } from "@/database/index";
+import { DrizzleDbClient, drizzleDbClient } from "@/database/index";
 import { categories, SelectCategory } from "@/database/schemas/categories";
 import { desc, asc } from "drizzle-orm";
 import { InvalidSortFieldError } from "@/lib/errors";
@@ -21,7 +21,7 @@ export class CategoriesService {
     db = drizzleDbClient(),
   }: Readonly<{
     dto: GetCategoriesDto;
-    db?: TestDatabase;
+    db?: DrizzleDbClient | TestDatabase;
   }>): Promise<SelectCategory[]> {
     const { sortDirection, sortField } = dto;
 

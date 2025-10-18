@@ -36,3 +36,34 @@ export async function createCategoryFixture({
 
   return category;
 }
+
+/**
+ * Creates multiple test categories in batch for better performance.
+ * Allows overriding default fixture data with provided props.
+ *
+ * @param db - Database connection
+ * @param count - Number of categories to create
+ * @param overrides - Array of override objects, one per category
+ * @returns Created category records
+ */
+export async function createCategoryFixtures({
+  db,
+  count,
+  overrides = [],
+}: {
+  db: TestDatabase;
+  count: number;
+  overrides?: Partial<InsertCategory>[];
+}): Promise<SelectCategory[]> {
+  const categoriesData = Array.from({ length: count }, (_, index) => {
+    const override = overrides[index] || {};
+    return {
+      name: override.name ?? faker.commerce.department(),
+      description: override.description ?? faker.commerce.productDescription(),
+      createdAt: override.createdAt ?? new Date(),
+      updatedAt: override.updatedAt ?? new Date(),
+    } satisfies InsertCategory;
+  });
+
+  return await db.insert(categories).values(categoriesData).returning();
+}
