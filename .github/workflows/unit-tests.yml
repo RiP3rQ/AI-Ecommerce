@@ -40,9 +40,6 @@ jobs:
       - name: TypeScript type check
         run: pnpm run type:check
 
-      - name: Run unit tests
-        run: pnpm run test
-
       - name: Wait for database to be ready
         run: |
           for i in {1..30}; do
@@ -57,6 +54,9 @@ jobs:
             echo "Database failed to start"
             exit 1
           fi
+
+      - name: Run unit tests
+        run: pnpm run test
 
       - name: Stop PostgreSQL database
         if: always()
