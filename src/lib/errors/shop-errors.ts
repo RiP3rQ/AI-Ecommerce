@@ -37,3 +37,12 @@ export class CategoryNotFoundError extends ApiError {
     super(message, 404);
   }
 }
+
+/**
+ * Thrown when a product is not found.
+ */
+export class ProductNotFoundError extends ApiError {
+  constructor(message: string = "Product not found.") {
+    super(message, 404);
+  }
+}
