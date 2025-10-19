@@ -1,9 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { handleApiError } from "@/lib/errors";
 import { mainPageService } from "./service";
 import type { MainPageResponse } from "./types";
 import { drizzleDbClient } from "@/database";
 import { validateServerSession } from "@/lib/api-helpers";
+import { getMainPageSchema } from "./dto";
 
 /**
  * GET /api/main-page
@@ -14,13 +15,31 @@ import { validateServerSession } from "@/lib/api-helpers";
  * @param request - The incoming request
  * @returns Latest products data for main page
  */
-export async function GET(): Promise<NextResponse<MainPageResponse | unknown>> {
+export async function GET(
+  request: NextRequest,
+): Promise<NextResponse<MainPageResponse | unknown>> {
   try {
     // Step 1: Validate user session
     await validateServerSession();
 
+    // Step 2: Parse and validate query parameters
+    const searchParams = request.nextUrl.searchParams;
+
+    const queryParams = {
+      limit: searchParams.get("limit")
+        ? Number.parseInt(searchParams.get("limit")!)
+        : 3,
+      skipFirstNumberOfProducts: searchParams.get("skipFirstNumberOfProducts")
+        ? Number.parseInt(searchParams.get("skipFirstNumberOfProducts")!)
+        : 0,
+    };
+
+    // Step 2: Validate query parameters
+    const validatedDto = getMainPageSchema.parse(queryParams);
+
     // Step 2: Get main page data from service
     const latestProducts = await mainPageService.getLatestProducts({
+      dto: validatedDto,
       db: drizzleDbClient(),
     });
 

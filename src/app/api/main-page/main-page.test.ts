@@ -24,6 +24,7 @@ import { mockValidateServerSession } from "@/test/setup/test-setup";
 import { UnauthorizedError } from "@/lib/errors/cart-errors";
 import { createCategoryFixture } from "@/test/fixtures/categories";
 import { faker } from "@faker-js/faker";
+import { NextRequest } from "next/server";
 
 /**
  * Comprehensive test suite for the main-page API endpoint.
@@ -120,6 +121,10 @@ describe("/api/main-page", () => {
           // Act: Call service
           const result = await mainPageService.getLatestProducts({
             db,
+            dto: {
+              limit: 3,
+              skipFirstNumberOfProducts: 0,
+            },
           });
 
           // Assert: Returns exactly 3 products (latest first)
@@ -155,6 +160,10 @@ describe("/api/main-page", () => {
           // Act: Call service
           const result = await mainPageService.getLatestProducts({
             db,
+            dto: {
+              limit: 3,
+              skipFirstNumberOfProducts: 0,
+            },
           });
 
           // Assert: Returns empty array
@@ -177,12 +186,61 @@ describe("/api/main-page", () => {
           // Act: Call service
           const result = await mainPageService.getLatestProducts({
             db,
+            dto: {
+              limit: 3,
+              skipFirstNumberOfProducts: 0,
+            },
           });
 
           // Assert: Returns exactly 2 products
           expect(result).toHaveLength(2);
           expect(result[0].products.title).toBe("Product 2"); // newer first
           expect(result[1].products.title).toBe("Product 1");
+        });
+      });
+
+      it("should return 20 products skipping the first 3 when using limit=20 and offset=3", async () => {
+        await createTestableUnit(async (db) => {
+          // Arrange: Create 25 products with different creation times
+          const baseTime = new Date();
+          const products = [];
+          for (let i = 1; i <= 25; i++) {
+            const product = await createProductFixture({
+              db,
+              overrides: {
+                title: `Product ${i}`,
+                createdAt: new Date(baseTime.getTime() - (25 - i) * 1000), // Product 25 is newest, Product 1 is oldest
+              },
+            });
+            products.push(product);
+          }
+
+          // Act: Call service with limit=20 and skipFirstNumberOfProducts=3
+          const result = await mainPageService.getLatestProducts({
+            db,
+            dto: {
+              limit: 20,
+              skipFirstNumberOfProducts: 3,
+            },
+          });
+
+          // Assert: Returns exactly 20 products
+          expect(result).toHaveLength(20);
+
+          // Assert: Skipped the 3 latest products (Product 25, 24, 23)
+          // Should start with Product 22 (4th latest)
+          expect(result[0].products.title).toBe("Product 22");
+          expect(result[1].products.title).toBe("Product 21");
+          expect(result[2].products.title).toBe("Product 20");
+
+          // Assert: Ends with Product 3 (23rd latest, since we have 25 total, skip 3, take 20 = positions 4-23)
+          expect(result[19].products.title).toBe("Product 3");
+
+          // Assert: Does NOT contain the 3 skipped products
+          const titles = result.map((item) => item.products.title);
+          expect(titles).not.toContain("Product 25");
+          expect(titles).not.toContain("Product 24");
+          expect(titles).not.toContain("Product 23");
         });
       });
     });
@@ -213,7 +271,9 @@ describe("/api/main-page", () => {
           });
 
           // Act: Make GET request to main-page endpoint
-          const response = await GET();
+          const response = await GET(
+            new NextRequest("http://localhost:3000/api/main-page"),
+          );
           const result = (await response.json()) as MainPageResponse;
 
           // Assert: Response status is 200
@@ -235,7 +295,9 @@ describe("/api/main-page", () => {
         mockValidateServerSession.mockRejectedValue(new UnauthorizedError());
 
         // Act: Make GET request to main-page endpoint
-        const response = await GET();
+        const response = await GET(
+          new NextRequest("http://localhost:3000/api/main-page"),
+        );
         const result = await response.json();
 
         // Assert: Response status is 401

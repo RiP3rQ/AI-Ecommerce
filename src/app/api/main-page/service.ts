@@ -1,8 +1,9 @@
-import { DrizzleDbClient, drizzleDbClient } from "@/database/index";
+import { DrizzleDbClient } from "@/database/index";
 import { productImages, products, productVariants } from "@/database/schema";
 import { and, desc, eq } from "drizzle-orm";
 import type { LatestProductsItem } from "./types";
 import type { TestDatabase } from "@/test/utils/db-helper";
+import type { GetMainPageSchema } from "./dto";
 
 /**
  * Service class for main page operations.
@@ -16,10 +17,14 @@ export class MainPageService {
    * @returns Array of latest products with joined data
    */
   public async getLatestProducts({
+    dto,
     db,
   }: Readonly<{
+    dto: GetMainPageSchema;
     db: DrizzleDbClient | TestDatabase;
   }>): Promise<LatestProductsItem[]> {
+    const { limit, skipFirstNumberOfProducts } = dto;
+
     // Get latest 3 products with main image (order = 1)
     const latestProducts = await db
       .select()
@@ -33,7 +38,8 @@ export class MainPageService {
       )
       .leftJoin(productVariants, eq(products.id, productVariants.productId))
       .orderBy(desc(products.createdAt))
-      .limit(3);
+      .limit(limit)
+      .offset(skipFirstNumberOfProducts);
 
     return latestProducts;
   }
