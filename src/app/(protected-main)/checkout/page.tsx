@@ -4,6 +4,7 @@ import { OrderSummary } from "@/components/checkout/order-summary";
 import { SuggestedProducts } from "@/components/checkout/suggested-products";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { CheckoutActions } from "@/components/checkout/checkout-actions";
 
 /**
  * Checkout page component that displays cart items and suggested products.
@@ -40,14 +41,7 @@ export default function CheckoutPage(): ReactNode {
         <OrderSummary />
 
         {/* Checkout Actions */}
-        <div className="flex flex-col sm:flex-row gap-4">
-          <Button className="flex-1" size="lg">
-            Complete Purchase
-          </Button>
-          <Button variant="outline" className="flex-1" size="lg">
-            Continue Shopping
-          </Button>
-        </div>
+        <CheckoutActions />
       </div>
     </div>
   );

@@ -12,6 +12,7 @@ import {
 } from "@/lib/cart-api";
 import React, {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -21,6 +22,8 @@ import useSWR from "swr";
 import { transformCartResponse } from "@/lib/cart-helpers";
 
 type CartContextType = {
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
   cart: FrontendCart | undefined;
   isLoading: boolean;
   error: Error | null;
@@ -36,11 +39,14 @@ type CartContextType = {
   ) => Promise<void>;
   updateItemQuantity: (cartItemId: string, quantity: number) => Promise<void>;
   removeItem: (cartItemId: string) => Promise<void>;
+  openCart: () => void;
+  closeCart: () => void;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const cartUrl = `${BASE_URL}/api/cart`;
 
   // Use SWR to fetch cart data initially
@@ -286,16 +292,39 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const openCart = useCallback(() => {
+    setIsOpen(true);
+  }, []);
+
+  const closeCart = useCallback(() => {
+    setIsOpen(false);
+  }, []);
+
   const contextValue = useMemo(
     () => ({
+      isOpen,
+      setIsOpen,
       cart,
       isLoading,
       error,
       addItem,
       updateItemQuantity,
       removeItem,
+      openCart,
+      closeCart,
     }),
-    [cart, isLoading, error, addItem, updateItemQuantity, removeItem],
+    [
+      isOpen,
+      setIsOpen,
+      cart,
+      isLoading,
+      error,
+      addItem,
+      updateItemQuantity,
+      removeItem,
+      openCart,
+      closeCart,
+    ],
   );
 
   return (
