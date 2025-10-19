@@ -10,7 +10,13 @@ import {
   updateCartItemQuantity,
   removeCartItem,
 } from "@/lib/cart-api";
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import useSWR from "swr";
 import { transformCartResponse } from "@/lib/cart-helpers";
 
@@ -67,9 +73,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     },
   ) => {
     try {
-      await addItemToCart({
+      // Fire-and-forget add item to cart
+      addItemToCart({
         productVariantId: variant.id,
         quantity: 1,
+      }).then((data) => {
+        setCart(transformCartResponse(data));
       });
 
       // Update local cart state
@@ -163,10 +172,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const updateItemQuantity = async (cartItemId: string, quantity: number) => {
     try {
+      // Fire-and-forget update item quantity or remove item if quantity is 0
       if (quantity === 0) {
-        await removeCartItem({ cartItemId });
+        removeCartItem({ cartItemId });
       } else {
-        await updateCartItemQuantity({ cartItemId, quantity });
+        updateCartItemQuantity({ cartItemId, quantity });
       }
 
       // Update local cart state
@@ -232,7 +242,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const removeItem = async (cartItemId: string) => {
     try {
-      await removeCartItem({ cartItemId });
+      // Fire-and-forget remove item from cart
+      removeCartItem({ cartItemId });
 
       // Update local cart state
       setCart((currentCart) => {

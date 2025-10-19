@@ -75,7 +75,7 @@ export function AddToCart({
 }) {
   const { availableForSale } = product;
   const { state } = useProductProvider();
-  const { cart, addItem , updateItemQuantity} = useCart();
+  const { cart, addItem, updateItemQuantity } = useCart();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -109,13 +109,14 @@ export function AddToCart({
 
     try {
       // Check if item already exists in cart
-      const existingItem = cart?.lines.find((item) => item.merchandise.id === finalVariant.id);
+      const existingItem = cart?.lines.find(
+        (item) => item.merchandise.id === finalVariant.id,
+      );
       if (existingItem && existingItem.id) {
         await updateItemQuantity(existingItem.id, existingItem.quantity + 1);
       } else {
         await addItem(finalVariant, product, featuredImage);
       }
-
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to add item";
@@ -128,12 +129,12 @@ export function AddToCart({
 
   return (
     <div>
-        <SubmitButton
-          availableForSale={availableForSale}
-          selectedVariantId={selectedVariantId}
-          isLoading={isLoading}
-          onClick={handleAddToCart}
-        />
+      <SubmitButton
+        availableForSale={availableForSale}
+        selectedVariantId={selectedVariantId}
+        isLoading={isLoading}
+        onClick={handleAddToCart}
+      />
       {error && (
         <p aria-live="polite" className="text-sm text-red-500 mt-2">
           {error}
