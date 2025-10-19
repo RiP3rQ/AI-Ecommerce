@@ -1,16 +1,20 @@
+"use client";
+
 import { GridTileImage } from "@/components/grid/single-tile";
-import type { SelectProduct } from "@/database/schema";
 import Link from "next/link";
-import { getLatest3Products, Latest3ProductsReturnType } from "./actions";
+import type { LatestProductsItem } from "@/app/api/main-page/types";
 import { ReactNode } from "react";
 import { Skeleton } from "../ui/skeleton";
+import useSWR, { SWRResponse } from "swr";
+import { swrFetcher } from "@/lib/swr-fetcher";
+import { BASE_URL } from "@/lib/utils";
 
 function HeroGridItem({
   item,
   size,
   priority,
 }: {
-  item: Latest3ProductsReturnType;
+  item: LatestProductsItem;
   size: "full" | "half";
   priority?: boolean;
 }): ReactNode {
@@ -49,13 +53,18 @@ function HeroGridItem({
   );
 }
 
-export async function HeroThreeItemGrid(): Promise<ReactNode> {
-  // Collections that start with `hidden-*` are hidden from the search page.
-  const homepageItems = await getLatest3Products();
+export function HeroThreeItemGrid(): ReactNode {
+  // ============================= SWR DATA =============================
+  const { data, isLoading } = useSWR<SWRResponse<LatestProductsItem[]>>(
+    `${BASE_URL}/api/main-page`,
+    swrFetcher,
+  );
 
-  if (!homepageItems[0] || !homepageItems[1] || !homepageItems[2]) return null;
+  if (isLoading) return <HeroThreeItemGridSkeleton />;
 
-  const [firstProduct, secondProduct, thirdProduct] = homepageItems;
+  if (!data?.data?.length || data?.data?.length < 3) return null;
+
+  const [firstProduct, secondProduct, thirdProduct] = data.data || [];
 
   return (
     <section className="mx-auto grid max-w-(--breakpoint-2xl) gap-4 px-4 pb-4 md:grid-cols-6 md:grid-rows-2 lg:max-h-[calc(100vh-200px)]">

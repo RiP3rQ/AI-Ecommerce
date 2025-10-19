@@ -1,17 +1,25 @@
+"use client";
+
 import { ReactNode } from "react";
-import { getLatest20Products } from "./actions";
 import { Skeleton } from "../ui/skeleton";
 import Link from "next/link";
 import { GridTileImage } from "../grid/single-tile";
+import { LatestProductsItem } from "@/app/api/main-page/types";
+import { swrFetcher } from "@/lib/swr-fetcher";
+import { BASE_URL } from "@/lib/utils";
+import useSWR, { SWRResponse } from "swr";
 
-export async function ItemsMarquee(): Promise<ReactNode> {
-  // Collections that start with `hidden-*` are hidden from the search page.
-  const products = await getLatest20Products();
+export function ItemsMarquee(): ReactNode {
+  // ============================= SWR DATA =============================
+  const { data, isLoading } = useSWR<SWRResponse<LatestProductsItem[]>>(
+    `${BASE_URL}/api/main-page?limit=20&skipFirstNumberOfProducts=3`,
+    swrFetcher,
+  );
 
-  if (!products?.length) return null;
+  if (!data?.data?.length) return null;
 
   // Purposefully duplicating products to make the carousel loop and not run out of products on wide screens.
-  const carouselProducts = [...products];
+  const carouselProducts = [...data.data];
 
   if (!carouselProducts?.length)
     return (
