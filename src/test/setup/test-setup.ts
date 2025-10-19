@@ -1,6 +1,7 @@
 import { beforeEach, beforeAll, vi } from "vitest";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { UnauthorizedError } from "@/lib/errors";
+import { createTestDb } from "@/test/utils/db-helper";
 
 // Mock Supabase auth client to prevent actual API calls during tests
 const mockSupabaseClient = {
@@ -54,6 +55,11 @@ vi.mock("next/navigation", () => ({
     forward: vi.fn(),
     prefetch: vi.fn(),
   })),
+}));
+
+// Mock drizzleDbClient to use test database
+vi.mock("../../database/index", () => ({
+  drizzleDbClient: vi.fn(() => createTestDb()),
 }));
 
 // Mock API helpers for session validation

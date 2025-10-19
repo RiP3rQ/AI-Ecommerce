@@ -58,7 +58,7 @@ export default defineConfig({
     pool: "threads",
     poolOptions: {
       threads: {
-        singleThread: false, // Enable parallel execution within limits
+        singleThread: true, // [Temporary] Disable parallel execution within limits
         minThreads: 1, // Start with minimal threads
         maxThreads: 4, // Max 4 threads (optimal for transaction-based DB work)
       },
