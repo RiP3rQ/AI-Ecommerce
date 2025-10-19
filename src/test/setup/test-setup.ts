@@ -98,7 +98,7 @@ beforeAll(() => {
 
   // Set default mock for session validation (unauthenticated)
   mockValidateServerSession.mockRejectedValue(
-    new Error("User is not authenticated.")
+    new Error("User is not authenticated."),
   );
 });
 

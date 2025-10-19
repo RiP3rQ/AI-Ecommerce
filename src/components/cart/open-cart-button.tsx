@@ -13,7 +13,7 @@ export default function OpenCart({
       <ShoppingBasket
         className={clsx(
           "h-4 transition-all ease-in-out hover:scale-110",
-          className
+          className,
         )}
       />
 

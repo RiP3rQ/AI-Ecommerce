@@ -29,11 +29,11 @@ const ProductContext = createContext<ProductContextType | undefined>(undefined);
 export function ProductProvider({ children }: { children: React.ReactNode }) {
   const [urlImage, setUrlImage] = useQueryState(
     "image",
-    parseAsInteger.withDefault(0)
+    parseAsInteger.withDefault(0),
   );
   const [selectedProductOption, setSelectedProductOption] = useQueryState(
     "selectedProductOption",
-    parseAsJson(productUrlSchema)
+    parseAsJson(productUrlSchema),
   );
 
   const getInitialState = () => {
@@ -49,7 +49,7 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
     (prevState: ProductState, update: ProductState) => ({
       ...prevState,
       ...update,
-    })
+    }),
   );
 
   const updateOption = (name: string, value: string) => {
@@ -72,7 +72,7 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
       updateOption,
       updateImage,
     }),
-    [state]
+    [state],
   );
 
   return (

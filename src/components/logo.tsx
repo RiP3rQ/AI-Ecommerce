@@ -1,5 +1,4 @@
 import clsx from "clsx";
-import LogoImage from "../../public/images/logo.png";
 import { ReactNode } from "react";
 import Image from "next/image";
 
@@ -16,11 +15,11 @@ export function LogoSquare({
           "h-[40px] w-[40px] rounded-xl": !size,
           "h-[30px] w-[30px] rounded-lg": size === "sm",
           "h-[50px] w-[50px] rounded-xl": size === "md",
-        }
+        },
       )}
     >
       <Image
-        src={LogoImage}
+        src="/images/logo.png"
         className={clsx({
           "h-[16px] w-[16px]": !size,
           "h-[10px] w-[10px]": size === "sm",

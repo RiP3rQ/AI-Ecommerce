@@ -7,9 +7,7 @@ import { products } from "./products";
 export const productImages = pgTable(
   "product_images",
   {
-    id: uuid("id")
-      .default(sql`gen_random_uuid()`)
-      .primaryKey(),
+    id: uuid("id").default(sql`gen_random_uuid()`).primaryKey(),
     productId: uuid("product_id")
       .notNull()
       .references(() => products.id, { onDelete: "cascade" }),
@@ -23,13 +21,13 @@ export const productImages = pgTable(
   (table) => ({
     // Indexes for performance
     productIdIndex: index("product_images_product_id_index").on(
-      table.productId
+      table.productId,
     ),
     orderIndex: index("product_images_order_index").on(
       table.productId,
-      table.order
+      table.order,
     ),
-  })
+  }),
 );
 
 export const productImagesRelations = relations(productImages, ({ one }) => ({

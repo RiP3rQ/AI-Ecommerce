@@ -72,8 +72,8 @@ export function CartModalWithTrigger(): ReactNode {
               {cart.lines
                 .sort((a, b) =>
                   a.merchandise.product.title.localeCompare(
-                    b.merchandise.product.title
-                  )
+                    b.merchandise.product.title,
+                  ),
                 )
                 .map((item, i) => {
                   const merchandiseSearchParams = {} as Record<string, string>;
@@ -83,12 +83,12 @@ export function CartModalWithTrigger(): ReactNode {
                       if (value !== DEFAULT_OPTION) {
                         merchandiseSearchParams[name.toLowerCase()] = value;
                       }
-                    }
+                    },
                   );
 
                   const merchandiseUrl = createUrl(
                     `/product/${item.merchandise.product.handle}`,
-                    new URLSearchParams(merchandiseSearchParams)
+                    new URLSearchParams(merchandiseSearchParams),
                   );
 
                   return (

@@ -4,9 +4,7 @@ import { DEFAULT_DATE_TABLES } from "../helpers/dates";
 import { products } from "./products";
 
 export const categories = pgTable("categories", {
-  id: uuid("id")
-    .default(sql`gen_random_uuid()`)
-    .primaryKey(),
+  id: uuid("id").default(sql`gen_random_uuid()`).primaryKey(),
   name: varchar("name", { length: 255 }).notNull().unique(),
   description: text("description"),
   ...DEFAULT_DATE_TABLES,

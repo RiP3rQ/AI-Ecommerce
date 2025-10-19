@@ -37,7 +37,7 @@ export function VariantSelector({
         ...accumulator,
         [option.name.toLowerCase()]: option.value,
       }),
-      {}
+      {},
     ),
   }));
 
@@ -58,14 +58,14 @@ export function VariantSelector({
                 options.find(
                   (option) =>
                     option.name.toLowerCase() === key &&
-                    option.values.includes(value as string)
-                )
+                    option.values.includes(value as string),
+                ),
             );
             const isAvailableForSale = combinations.find((combination) =>
               filtered.every(
                 ([key, value]) =>
-                  combination[key] === value && combination.availableForSale
-              )
+                  combination[key] === value && combination.availableForSale,
+              ),
             );
 
             // The option is active if it's in the selected options.
@@ -90,7 +90,7 @@ export function VariantSelector({
                       !isActive && isAvailableForSale,
                     "relative z-10 cursor-not-allowed overflow-hidden bg-neutral-100 text-neutral-500 ring-1 ring-neutral-300 before:absolute before:inset-x-0 before:-z-10 before:h-px before:-rotate-45 before:bg-neutral-300 before:transition-transform dark:bg-neutral-900 dark:text-neutral-400 dark:ring-neutral-700 dark:before:bg-neutral-700":
                       !isAvailableForSale,
-                  }
+                  },
                 )}
               >
                 {value}

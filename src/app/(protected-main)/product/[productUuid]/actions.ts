@@ -24,7 +24,7 @@ export interface GetProductDataReturnType extends SelectProduct {
 }
 
 export async function getProductData(
-  productUuid: string
+  productUuid: string,
 ): Promise<GetProductDataReturnType> {
   try {
     // Step 1: Validate session
@@ -69,7 +69,7 @@ export async function getProductData(
       }
     }
     const product_images = Array.from(imagesMap.values()).sort(
-      (a, b) => a.order - b.order
+      (a, b) => a.order - b.order,
     );
 
     // Deduplicate options by ID and sort by position
@@ -80,7 +80,7 @@ export async function getProductData(
       }
     }
     const product_options = Array.from(optionsMap.values()).sort(
-      (a, b) => a.position - b.position
+      (a, b) => a.position - b.position,
     );
 
     //Step 4: Calculate the price range

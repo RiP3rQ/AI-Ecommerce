@@ -78,13 +78,13 @@ export function AddToCart({
 
   const variant = variants.find((variant: SelectProductVariant) =>
     variant.selectedOptions.every(
-      (option) => option.value === state[option.name.toLowerCase()]
-    )
+      (option) => option.value === state[option.name.toLowerCase()],
+    ),
   );
   const defaultVariantId = variants.length === 1 ? variants[0]?.id : undefined;
   const selectedVariantId = variant?.id || defaultVariantId;
   const finalVariant = variants.find(
-    (variant) => variant.id === selectedVariantId
+    (variant) => variant.id === selectedVariantId,
   )!;
 
   // Get featured image from product images

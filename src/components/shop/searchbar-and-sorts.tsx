@@ -33,7 +33,7 @@ export function SearchbarAndSorts({
   const debouncedSearchRef = useRef(
     debounce((value: string) => {
       onSearchChange(value);
-    }, 500)
+    }, 500),
   );
 
   // Cleanup debounced function on unmount
@@ -55,7 +55,7 @@ export function SearchbarAndSorts({
       setLocalSearch(newValue);
       debouncedSearchRef.current(newValue);
     },
-    []
+    [],
   );
 
   const handleSortChange = (value: string): void => {

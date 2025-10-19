@@ -15,9 +15,7 @@ import { products } from "./products";
 export const productOptions = pgTable(
   "product_options",
   {
-    id: uuid("id")
-      .default(sql`gen_random_uuid()`)
-      .primaryKey(),
+    id: uuid("id").default(sql`gen_random_uuid()`).primaryKey(),
     productId: uuid("product_id")
       .notNull()
       .references(() => products.id, { onDelete: "cascade" }),
@@ -30,17 +28,17 @@ export const productOptions = pgTable(
     // Unique constraints
     productIdNameUnique: unique("product_options_product_id_name_unique").on(
       table.productId,
-      table.name
+      table.name,
     ),
     // Indexes for performance
     productIdIndex: index("product_options_product_id_index").on(
-      table.productId
+      table.productId,
     ),
     positionIndex: index("product_options_position_index").on(
       table.productId,
-      table.position
+      table.position,
     ),
-  })
+  }),
 );
 
 export const productOptionsRelations = relations(productOptions, ({ one }) => ({

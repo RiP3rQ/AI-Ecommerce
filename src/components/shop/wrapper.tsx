@@ -30,13 +30,13 @@ export function ShopWrapper({
     "pagination",
     parseAsJson(paginationUrlSchema)
       .withDefault(DEFAULT_PAGINATION)
-      .withOptions(CLIENT_SIDE_URL_UPDATE_OPTIONS)
+      .withOptions(CLIENT_SIDE_URL_UPDATE_OPTIONS),
   );
   const [filters, setFilters] = useQueryState(
     "filters",
     parseAsJson(shopFiltersUrlSchema)
       .withDefault(DEFAULT_SHOP_FILTERS)
-      .withOptions(CLIENT_SIDE_URL_UPDATE_OPTIONS)
+      .withOptions(CLIENT_SIDE_URL_UPDATE_OPTIONS),
   );
 
   // ============================= DATA FETCHING =============================
@@ -45,7 +45,7 @@ export function ShopWrapper({
       pagination: pagination as PaginationUrlSchema,
       filters: filters as ShopFiltersUrlSchema,
     }),
-    swrFetcher
+    swrFetcher,
   );
 
   // ============================= MEMOIZED DATA =============================
@@ -54,7 +54,7 @@ export function ShopWrapper({
 
   const paginationUrlData = useMemo(
     () => pagination as PaginationUrlSchema,
-    [pagination]
+    [pagination],
   );
   const filtersUrlData = useMemo(() => {
     return {
@@ -72,7 +72,7 @@ export function ShopWrapper({
       });
       setPagination({ ...(paginationUrlData as PaginationUrlSchema), page: 1 });
     },
-    [filtersUrlData, paginationUrlData, setFilters, setPagination]
+    [filtersUrlData, paginationUrlData, setFilters, setPagination],
   );
 
   const handlePriceRangeChange = useCallback(
@@ -83,7 +83,7 @@ export function ShopWrapper({
       });
       setPagination({ ...(paginationUrlData as PaginationUrlSchema), page: 1 });
     },
-    [filtersUrlData, paginationUrlData, setFilters, setPagination]
+    [filtersUrlData, paginationUrlData, setFilters, setPagination],
   );
 
   const handleResetFilters = useCallback(() => {
@@ -99,7 +99,7 @@ export function ShopWrapper({
       });
       setPagination({ ...(paginationUrlData as PaginationUrlSchema), page: 1 });
     },
-    [filtersUrlData, paginationUrlData, setFilters, setPagination]
+    [filtersUrlData, paginationUrlData, setFilters, setPagination],
   );
 
   const handleSortChange = useCallback(
@@ -110,7 +110,7 @@ export function ShopWrapper({
         sortDirection,
       });
     },
-    [filtersUrlData, setFilters]
+    [filtersUrlData, setFilters],
   );
 
   const handlePageChange = useCallback(
@@ -118,7 +118,7 @@ export function ShopWrapper({
       setPagination({ ...(paginationUrlData as PaginationUrlSchema), page });
       window.scrollTo({ top: 0, behavior: "smooth" });
     },
-    [paginationUrlData, setPagination]
+    [paginationUrlData, setPagination],
   );
 
   if (error) {

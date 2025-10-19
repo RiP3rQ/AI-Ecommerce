@@ -24,9 +24,7 @@ export const embeddingStatusEnum = pgEnum("embedding_status", [
 export const reviews = pgTable(
   "reviews",
   {
-    id: uuid("id")
-      .default(sql`gen_random_uuid()`)
-      .primaryKey(),
+    id: uuid("id").default(sql`gen_random_uuid()`).primaryKey(),
     productId: uuid("product_id")
       .notNull()
       .references(() => products.id, { onDelete: "cascade" }),
@@ -44,17 +42,15 @@ export const reviews = pgTable(
     userIdIndex: index("reviews_user_id_index").on(table.userId),
     embeddingIndex: index("embeddingIndex").using(
       "hnsw",
-      table.embedding.op("vector_cosine_ops")
+      table.embedding.op("vector_cosine_ops"),
     ),
-  })
+  }),
 );
 
 export const reviewSummaries = pgTable(
   "review_summaries",
   {
-    id: uuid("id")
-      .default(sql`gen_random_uuid()`)
-      .primaryKey(),
+    id: uuid("id").default(sql`gen_random_uuid()`).primaryKey(),
     productId: uuid("product_id")
       .notNull()
       .references(() => products.id, { onDelete: "cascade" })
@@ -64,17 +60,15 @@ export const reviewSummaries = pgTable(
   },
   (table) => ({
     productIdIndex: index("review_summaries_product_id_index").on(
-      table.productId
+      table.productId,
     ),
-  })
+  }),
 );
 
 export const reviewSummaryFeedback = pgTable(
   "review_summary_feedback",
   {
-    id: uuid("id")
-      .default(sql`gen_random_uuid()`)
-      .primaryKey(),
+    id: uuid("id").default(sql`gen_random_uuid()`).primaryKey(),
     summaryId: uuid("summary_id")
       .notNull()
       .references(() => reviewSummaries.id, { onDelete: "cascade" }),
@@ -86,12 +80,12 @@ export const reviewSummaryFeedback = pgTable(
   },
   (table) => ({
     summaryIdIndex: index("review_summary_feedback_summary_id_index").on(
-      table.summaryId
+      table.summaryId,
     ),
     userIdIndex: index("review_summary_feedback_user_id_index").on(
-      table.userId
+      table.userId,
     ),
-  })
+  }),
 );
 
 // Relations
@@ -114,7 +108,7 @@ export const reviewSummariesRelations = relations(
       references: [products.id],
     }),
     feedbacks: many(reviewSummaryFeedback),
-  })
+  }),
 );
 
 export const reviewSummaryFeedbackRelations = relations(
@@ -128,7 +122,7 @@ export const reviewSummaryFeedbackRelations = relations(
       fields: [reviewSummaryFeedback.userId],
       references: [profiles.id],
     }),
-  })
+  }),
 );
 
 export type SelectReview = typeof reviews.$inferSelect;

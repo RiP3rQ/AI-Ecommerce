@@ -1,0 +1,63 @@
+name: Type Check & Unit Tests
+
+on:
+  push:
+    branches: [main, ai-24-github-ci]
+  pull_request:
+    branches: [main, ai-24-github-ci]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: test
+      CI: 1
+      DATABASE_URL: postgres://postgres:password@localhost:5432/ai_ecommerce_test
+      NEXT_PUBLIC_SUPABASE_URL: https://test.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: test-publishable-key
+      NEXT_PUBLIC_SITE_NAME: AI Ecommerce Test
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Start PostgreSQL database
+        run: docker compose up -d
+
+      - name: TypeScript type check
+        run: pnpm run type:check
+
+      - name: Wait for database to be ready
+        run: |
+          for i in {1..30}; do
+            if docker compose exec -T postgres-test pg_isready -U postgres -h localhost; then
+              echo "Database is ready!"
+              break
+            fi
+            echo "Waiting for database... ($i/30)"
+            sleep 2
+          done
+          if [ $i -eq 30 ]; then
+            echo "Database failed to start"
+            exit 1
+          fi
+
+      - name: Run unit tests
+        run: pnpm run test
+
+      - name: Stop PostgreSQL database
+        if: always()
+        run: docker compose down

@@ -166,9 +166,7 @@
       "uniqueConstraints": {
         "products_url_handle_unique": {
           "name": "products_url_handle_unique",
-          "columns": [
-            "url_handle"
-          ],
+          "columns": ["url_handle"],
           "nullsNotDistinct": false
         }
       },
@@ -308,13 +306,9 @@
         "product_variants_product_id_products_id_fk": {
           "name": "product_variants_product_id_products_id_fk",
           "tableFrom": "product_variants",
-          "columnsFrom": [
-            "product_id"
-          ],
+          "columnsFrom": ["product_id"],
           "tableTo": "products",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -430,13 +424,9 @@
         "product_images_product_id_products_id_fk": {
           "name": "product_images_product_id_products_id_fk",
           "tableFrom": "product_images",
-          "columnsFrom": [
-            "product_id"
-          ],
+          "columnsFrom": ["product_id"],
           "tableTo": "products",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -540,13 +530,9 @@
         "product_options_product_id_products_id_fk": {
           "name": "product_options_product_id_products_id_fk",
           "tableFrom": "product_options",
-          "columnsFrom": [
-            "product_id"
-          ],
+          "columnsFrom": ["product_id"],
           "tableTo": "products",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -555,10 +541,7 @@
       "uniqueConstraints": {
         "product_options_product_id_name_unique": {
           "name": "product_options_product_id_name_unique",
-          "columns": [
-            "product_id",
-            "name"
-          ],
+          "columns": ["product_id", "name"],
           "nullsNotDistinct": false
         }
       },

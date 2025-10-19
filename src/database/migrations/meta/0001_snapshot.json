@@ -167,9 +167,7 @@
         "products_url_handle_unique": {
           "name": "products_url_handle_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "url_handle"
-          ]
+          "columns": ["url_handle"]
         }
       },
       "policies": {},
@@ -309,12 +307,8 @@
           "name": "product_variants_product_id_products_id_fk",
           "tableFrom": "product_variants",
           "tableTo": "products",
-          "columnsFrom": [
-            "product_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["product_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -431,12 +425,8 @@
           "name": "product_images_product_id_products_id_fk",
           "tableFrom": "product_images",
           "tableTo": "products",
-          "columnsFrom": [
-            "product_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["product_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -541,12 +531,8 @@
           "name": "product_options_product_id_products_id_fk",
           "tableFrom": "product_options",
           "tableTo": "products",
-          "columnsFrom": [
-            "product_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["product_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -556,10 +542,7 @@
         "product_options_product_id_name_unique": {
           "name": "product_options_product_id_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "product_id",
-            "name"
-          ]
+          "columns": ["product_id", "name"]
         }
       },
       "policies": {},

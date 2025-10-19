@@ -112,7 +112,7 @@ function calculateItemCost(quantity: number, priceInCents: number): string {
 
 function updateCartItem(
   item: SelectCartItem,
-  updateType: UpdateType
+  updateType: UpdateType,
 ): SelectCartItem | null {
   if (updateType === "delete") return null;
 
@@ -145,7 +145,7 @@ function createOrUpdateCartItem(
     altText?: string;
     width?: number;
     height?: number;
-  }
+  },
 ): SelectCartItem {
   const quantity = existingItem ? existingItem.quantity + 1 : 1;
   const totalAmount = calculateItemCost(quantity, variant.price);
@@ -174,12 +174,12 @@ function createOrUpdateCartItem(
 }
 
 function updateCartTotals(
-  lines: SelectCartItem[]
+  lines: SelectCartItem[],
 ): Pick<FrontendCart, "totalQuantity" | "cost"> {
   const totalQuantity = lines.reduce((sum, item) => sum + item.quantity, 0);
   const totalAmount = lines.reduce(
     (sum, item) => sum + Number(item.cost.totalAmount.amount),
-    0
+    0,
   );
   const currencyCode = lines[0]?.cost.totalAmount.currencyCode ?? "USD";
 
@@ -209,7 +209,7 @@ function createEmptyCart(): FrontendCart {
 
 function cartReducer(
   state: FrontendCart | undefined,
-  action: CartAction
+  action: CartAction,
 ): FrontendCart {
   const currentCart = state || createEmptyCart();
 
@@ -220,7 +220,7 @@ function cartReducer(
         .map((item) =>
           item.merchandise.id === merchandiseId
             ? updateCartItem(item, updateType)
-            : item
+            : item,
         )
         .filter(Boolean) as SelectCartItem[];
 
@@ -245,18 +245,18 @@ function cartReducer(
     case "ADD_ITEM": {
       const { variant, product, featuredImage } = action.payload;
       const existingItem = currentCart.lines.find(
-        (item) => item.merchandise.id === variant.id
+        (item) => item.merchandise.id === variant.id,
       );
       const updatedItem = createOrUpdateCartItem(
         existingItem,
         variant,
         product,
-        featuredImage
+        featuredImage,
       );
 
       const updatedLines = existingItem
         ? currentCart.lines.map((item) =>
-            item.merchandise.id === variant.id ? updatedItem : item
+            item.merchandise.id === variant.id ? updatedItem : item,
           )
         : [...currentCart.lines, updatedItem];
 
@@ -300,7 +300,7 @@ export function useCart() {
 
   const [optimisticCart, updateOptimisticCart] = useOptimistic(
     initialCart,
-    cartReducer
+    cartReducer,
   );
 
   const updateCartItem = (merchandiseId: string, updateType: UpdateType) => {
@@ -320,7 +320,7 @@ export function useCart() {
       altText?: string;
       width?: number;
       height?: number;
-    }
+    },
   ) => {
     startTransition(() => {
       updateOptimisticCart({
@@ -343,6 +343,6 @@ export function useCart() {
       isLoading,
       error,
     }),
-    [optimisticCart, isLoading, error, context.cartUrl]
+    [optimisticCart, isLoading, error, context.cartUrl],
   );
 }

@@ -76,7 +76,7 @@ export function ProductCard({
                 className={cn(
                   "text-base font-bold",
                   !product.availableForSale &&
-                    "text-neutral-400 dark:text-neutral-600"
+                    "text-neutral-400 dark:text-neutral-600",
                 )}
               />
             </div>

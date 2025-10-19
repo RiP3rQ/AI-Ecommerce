@@ -7,9 +7,7 @@ import { productVariants } from "./product-variants";
 export const carts = pgTable(
   "carts",
   {
-    id: uuid("id")
-      .default(sql`gen_random_uuid()`)
-      .primaryKey(),
+    id: uuid("id").default(sql`gen_random_uuid()`).primaryKey(),
     userId: uuid("user_id")
       .notNull()
       .references(() => profiles.id, { onDelete: "cascade" })
@@ -18,15 +16,13 @@ export const carts = pgTable(
   },
   (table) => ({
     userIdIndex: index("carts_user_id_index").on(table.userId),
-  })
+  }),
 );
 
 export const cartItems = pgTable(
   "cart_items",
   {
-    id: uuid("id")
-      .default(sql`gen_random_uuid()`)
-      .primaryKey(),
+    id: uuid("id").default(sql`gen_random_uuid()`).primaryKey(),
     cartId: uuid("cart_id")
       .notNull()
       .references(() => carts.id, { onDelete: "cascade" }),
@@ -39,9 +35,9 @@ export const cartItems = pgTable(
   (table) => ({
     cartIdIndex: index("cart_items_cart_id_index").on(table.cartId),
     productVariantIdIndex: index("cart_items_product_variant_id_index").on(
-      table.productVariantId
+      table.productVariantId,
     ),
-  })
+  }),
 );
 
 // Relations

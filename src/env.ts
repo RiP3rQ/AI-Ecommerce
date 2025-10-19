@@ -53,6 +53,6 @@ export const env = createEnv({
   emptyStringAsUndefined: true,
   skipValidation: Boolean(
     (process.env.NODE_ENV as string) === "test" ||
-      (process.env.NODE_ENV as string) === "CI"
+      (process.env.NODE_ENV as string) === "CI",
   ),
 });

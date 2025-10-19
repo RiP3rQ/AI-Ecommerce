@@ -32,7 +32,7 @@ export class ProductVariantNotFoundError extends ApiError {
  */
 export class InsufficientInventoryError extends ApiError {
   constructor(
-    message: string = "Insufficient inventory for the requested quantity."
+    message: string = "Insufficient inventory for the requested quantity.",
   ) {
     super(message, 400);
   }
@@ -43,7 +43,7 @@ export class InsufficientInventoryError extends ApiError {
  */
 export class InvalidQuantityError extends ApiError {
   constructor(
-    message: string = "Invalid quantity. Quantity must be greater than 0."
+    message: string = "Invalid quantity. Quantity must be greater than 0.",
   ) {
     super(message, 400);
   }

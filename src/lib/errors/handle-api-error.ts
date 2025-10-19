@@ -11,7 +11,7 @@ export function handleApiError(error: unknown): NextResponse<unknown> {
     console.error("[ERROR HANDLER] API Error:", error);
     return NextResponse.json(
       { message: error.message },
-      { status: error.statusCode }
+      { status: error.statusCode },
     );
   }
 
@@ -22,7 +22,7 @@ export function handleApiError(error: unknown): NextResponse<unknown> {
         message: "Input validation failed",
         errors: error.flatten().fieldErrors,
       },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -30,7 +30,7 @@ export function handleApiError(error: unknown): NextResponse<unknown> {
     console.error("[ERROR HANDLER] JSON Parse Error:", error);
     return NextResponse.json(
       { message: "Invalid JSON in request body." },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -38,6 +38,6 @@ export function handleApiError(error: unknown): NextResponse<unknown> {
   console.error("[ERROR HANDLER] Unexpected API error:", error);
   return NextResponse.json(
     { message: "An unexpected internal server error occurred." },
-    { status: 500 }
+    { status: 500 },
   );
 }

@@ -57,5 +57,5 @@ export const getProductsSchemaRefined = getProductsSchema.refine(
   {
     message: "Minimum price must be less than or equal to maximum price.",
     path: ["priceMin"],
-  }
+  },
 );
