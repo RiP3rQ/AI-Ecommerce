@@ -678,8 +678,6 @@ describe("/api/cart", () => {
       // Act
       const response = await GET(request);
 
-      console.log("response", response);
-
       // Assert
       expect(response.status).toBe(401);
     });
@@ -1310,6 +1308,7 @@ describe("/api/cart", () => {
           await cartService.removeCartItem({
             userId: profile.id,
             dto: { cartItemId: cartItem.id },
+            db,
           });
 
           // Act: Get cart again

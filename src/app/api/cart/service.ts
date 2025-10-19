@@ -31,10 +31,10 @@ export class CartService {
    */
   public async getOrCreateCart({
     userId,
-    db = drizzleDbClient(),
+    db,
   }: Readonly<{
     userId: string;
-    db?: DrizzleDbClient | TestDatabase;
+    db: DrizzleDbClient | TestDatabase;
   }>): Promise<string> {
     const [existingCart] = await db
       .select()
@@ -62,10 +62,10 @@ export class CartService {
    */
   public async getCart({
     userId,
-    db = drizzleDbClient(),
+    db,
   }: Readonly<{
     userId: string;
-    db?: DrizzleDbClient | TestDatabase;
+    db: DrizzleDbClient | TestDatabase;
   }>): Promise<CartSummary> {
     const cartId = await this.getOrCreateCart({ userId, db });
 
@@ -118,11 +118,11 @@ export class CartService {
   public async addItemToCart({
     userId,
     dto,
-    db = drizzleDbClient(),
+    db,
   }: Readonly<{
     userId: string;
     dto: AddItemToCartDto;
-    db?: DrizzleDbClient | TestDatabase;
+    db: DrizzleDbClient | TestDatabase;
   }>): Promise<CartSummary> {
     if (dto.quantity <= 0) {
       throw new InvalidQuantityError();
@@ -197,11 +197,11 @@ export class CartService {
   public async updateCartItem({
     userId,
     dto,
-    db = drizzleDbClient(),
+    db,
   }: Readonly<{
     userId: string;
     dto: UpdateCartItemDto;
-    db?: DrizzleDbClient | TestDatabase;
+    db: DrizzleDbClient | TestDatabase;
   }>): Promise<CartSummary> {
     if (dto.quantity <= 0) {
       throw new InvalidQuantityError();
@@ -251,11 +251,11 @@ export class CartService {
   public async removeCartItem({
     userId,
     dto,
-    db = drizzleDbClient(),
+    db,
   }: Readonly<{
     userId: string;
     dto: RemoveCartItemDto;
-    db?: DrizzleDbClient | TestDatabase;
+    db: DrizzleDbClient | TestDatabase;
   }>): Promise<CartSummary> {
     const cartId = await this.getOrCreateCart({ userId, db });
 

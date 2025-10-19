@@ -8,6 +8,7 @@ import {
 } from "./dto";
 import type { CartResponse, DeleteCartItemResponse } from "./types";
 import { validateServerSession } from "@/lib/api-helpers";
+import { drizzleDbClient } from "@/database";
 
 /**
  * GET /api/cart
@@ -27,7 +28,10 @@ export async function GET(
     const user = await validateServerSession();
 
     // Step 2: Get cart from service
-    const cartSummary = await cartService.getCart({ userId: user.id });
+    const cartSummary = await cartService.getCart({
+      userId: user.id,
+      db: drizzleDbClient(),
+    });
 
     return NextResponse.json(
       {
@@ -67,6 +71,7 @@ export async function POST(
     const cartSummary = await cartService.addItemToCart({
       userId: user.id,
       dto: validatedDto,
+      db: drizzleDbClient(),
     });
 
     return NextResponse.json(
@@ -107,6 +112,7 @@ export async function PATCH(
     const cartSummary = await cartService.updateCartItem({
       userId: user.id,
       dto: validatedDto,
+      db: drizzleDbClient(),
     });
 
     return NextResponse.json(
@@ -146,6 +152,7 @@ export async function DELETE(
     const cartSummary = await cartService.removeCartItem({
       userId: user.id,
       dto: validatedDto,
+      db: drizzleDbClient(),
     });
 
     return NextResponse.json(
