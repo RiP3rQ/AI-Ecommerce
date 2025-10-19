@@ -19,17 +19,19 @@ import { validateServerSession } from "@/lib/api-helpers";
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ productUuid: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse<ProductResponse | unknown>> {
   try {
     // Step 1: Validate user session
     await validateServerSession();
 
     // Step 2: Extract and validate path parameters
-    const { productUuid } = await params;
+    const { id } = await params;
+
+    console.log("id", id);
 
     // Step 3: Validate parameters
-    const validatedDto = getProductSchema.parse({ productUuid });
+    const validatedDto = getProductSchema.parse({ id });
 
     // Step 4: Get product from service
     const productData = await productService.getProduct({

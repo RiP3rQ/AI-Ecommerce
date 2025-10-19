@@ -1,7 +1,7 @@
 "use client";
 
 import { SelectProductVariant } from "@/database/schema";
-import { ProductData } from "@/app/api/product/[productUuid]/types";
+import { ProductData } from "@/app/api/product/[id]/types";
 import { useCart } from "@/providers/cart-provider";
 import { useProductProvider } from "@/providers/product-provider";
 import { addItemToCart } from "@/lib/cart-api";

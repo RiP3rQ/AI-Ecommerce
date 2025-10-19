@@ -95,7 +95,7 @@ describe("/api/product/[productUuid]", () => {
 
           // Act: Call service
           const result = await productService.getProduct({
-            dto: { productUuid: product.id },
+            dto: { id: product.id },
             db,
           });
 
@@ -141,7 +141,7 @@ describe("/api/product/[productUuid]", () => {
 
           // Act: Call service
           const result = await productService.getProduct({
-            dto: { productUuid: product.id },
+            dto: { id: product.id },
             db,
           });
 
@@ -165,7 +165,7 @@ describe("/api/product/[productUuid]", () => {
 
           // Act: Call service
           const result = await productService.getProduct({
-            dto: { productUuid: product.id },
+            dto: { id: product.id },
             db,
           });
 
@@ -184,7 +184,7 @@ describe("/api/product/[productUuid]", () => {
 
           // Act: Call service
           const result = await productService.getProduct({
-            dto: { productUuid: product.id },
+            dto: { id: product.id },
             db,
           });
 
@@ -212,7 +212,7 @@ describe("/api/product/[productUuid]", () => {
 
           // Act: Call service
           const result = await productService.getProduct({
-            dto: { productUuid: product.id },
+            dto: { id: product.id },
             db,
           });
 
@@ -247,7 +247,7 @@ describe("/api/product/[productUuid]", () => {
 
           // Act: Call service
           const result = await productService.getProduct({
-            dto: { productUuid: product.id },
+            dto: { id: product.id },
             db,
           });
 
@@ -278,7 +278,7 @@ describe("/api/product/[productUuid]", () => {
 
           // Act: Call service
           const result = await productService.getProduct({
-            dto: { productUuid: product.id },
+            dto: { id: product.id },
             db,
           });
 
@@ -296,7 +296,7 @@ describe("/api/product/[productUuid]", () => {
           // Act & Assert: Call service with non-existent UUID
           await expect(
             productService.getProduct({
-              dto: { productUuid: "non-existent-uuid" },
+              dto: { id: "non-existent-uuid" },
               db,
             }),
           ).rejects.toThrow("Product not found");
@@ -308,7 +308,7 @@ describe("/api/product/[productUuid]", () => {
           // Act & Assert: Call service with invalid UUID
           await expect(
             productService.getProduct({
-              dto: { productUuid: "invalid-uuid" },
+              dto: { id: "invalid-uuid" },
               db,
             }),
           ).rejects.toThrow(); // Zod validation error
@@ -342,7 +342,7 @@ describe("/api/product/[productUuid]", () => {
           `http://localhost:3000/api/product/${productId}`,
         );
         const response = await GET(request, {
-          params: Promise.resolve({ productUuid: productId }),
+          params: Promise.resolve({ id: productId }),
         });
         const result = (await response.json()) as ProductResponse;
 
@@ -368,7 +368,7 @@ describe("/api/product/[productUuid]", () => {
           `http://localhost:3000/api/product/${productId}`,
         );
         const response = await GET(request, {
-          params: Promise.resolve({ productUuid: productId }),
+          params: Promise.resolve({ id: productId }),
         });
         const result = await response.json();
 
@@ -388,7 +388,7 @@ describe("/api/product/[productUuid]", () => {
           new NextRequest("http://localhost:3000/api/product/some-uuid"),
           {
             params: Promise.resolve({
-              productUuid: faker.string.uuid().toString(),
+              id: faker.string.uuid().toString(),
             }),
           },
         );
@@ -408,14 +408,14 @@ describe("/api/product/[productUuid]", () => {
           "http://localhost:3000/api/product/invalid-uuid",
         );
         const response = await GET(request, {
-          params: Promise.resolve({ productUuid: "invalid-uuid" }),
+          params: Promise.resolve({ id: "invalid-uuid" }),
         });
         const result = await response.json();
 
         // Assert: Response status is 403
         expect(response.status).toBe(403);
         expect(result.message).toBe("Input validation failed");
-        expect(result.errors.productUuid).toContain(
+        expect(result.errors.id).toContain(
           "Invalid product UUID format",
         );
       });

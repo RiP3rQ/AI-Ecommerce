@@ -1,6 +1,5 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
 import React, {
   createContext,
   useContext,
@@ -8,9 +7,7 @@ import React, {
   useOptimistic,
 } from "react";
 import { parseAsInteger, parseAsJson, useQueryState } from "nuqs";
-import { index } from "drizzle-orm/gel-core";
 import {
-  ProductUrlSchema,
   productUrlSchema,
 } from "@/schemas/product-url-schema";
 

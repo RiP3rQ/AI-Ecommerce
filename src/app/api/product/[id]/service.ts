@@ -15,6 +15,7 @@ import type { GetProductDto } from "./dto";
 import type { ProductData } from "./types";
 import { eq } from "drizzle-orm";
 import type { TestDatabase } from "@/test/utils/db-helper";
+import { id } from "zod/v4/locales";
 
 /**
  * Service class for product operations.
@@ -34,20 +35,20 @@ export class ProductService {
     dto: GetProductDto;
     db: DrizzleDbClient | TestDatabase;
   }>): Promise<ProductData> {
-    const { productUuid } = dto;
+    const { id } = dto;
 
     // Step 1: Get product data with joins
     const productData = await db
       .select()
       .from(products)
-      .where(eq(products.id, productUuid))
+      .where(eq(products.id, id))
       .leftJoin(productVariants, eq(products.id, productVariants.productId))
       .leftJoin(productImages, eq(products.id, productImages.productId))
       .leftJoin(productOptions, eq(products.id, productOptions.productId));
 
     if (!productData || productData.length === 0) {
       throw new ProductNotFoundError(
-        `Product with uuid ${productUuid} not found`,
+        `Product with uuid ${id} not found`,
       );
     }
 

@@ -2,7 +2,7 @@ import { Price } from "@/components/custom-price";
 import { VariantSelector } from "./variant-selector";
 import Prose from "@/components/global/prose";
 import { AddToCart } from "./add-to-cart";
-import { ProductData } from "@/app/api/product/[productUuid]/types";
+import { ProductData } from "@/app/api/product/[id]/types";
 
 export function ProductDescription({ product }: { product: ProductData }) {
   return (
