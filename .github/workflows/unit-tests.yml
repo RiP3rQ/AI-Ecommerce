@@ -13,6 +13,8 @@ jobs:
     env:
       NODE_ENV: test
       CI: 1
+      DATABASE_URL: postgres://postgres:password@localhost:5432/ai_ecommerce_test
+      NEXT_PUBLIC_SITE_NAME: AI Ecommerce Test
 
     steps:
       - name: Check out code
@@ -30,8 +32,30 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Start PostgreSQL database
+        run: docker-compose up -d
+
       - name: TypeScript type check
         run: pnpm run type:check
 
       - name: Run unit tests
         run: pnpm run test
+
+      - name: Wait for database to be ready
+        run: |
+          for i in {1..30}; do
+            if docker-compose exec -T postgres-test pg_isready -U postgres -h localhost; then
+              echo "Database is ready!"
+              break
+            fi
+            echo "Waiting for database... ($i/30)"
+            sleep 2
+          done
+          if [ $i -eq 30 ]; then
+            echo "Database failed to start"
+            exit 1
+          fi
+
+      - name: Stop PostgreSQL database
+        if: always()
+        run: docker-compose down
