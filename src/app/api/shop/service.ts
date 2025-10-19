@@ -63,7 +63,7 @@ export class ShopService {
 
       if (!categoryExists) {
         throw new CategoryNotFoundError(
-          `Category with id "${categoryId}" does not exist.`
+          `Category with id "${categoryId}" does not exist.`,
         );
       }
     }
@@ -119,7 +119,7 @@ export class ShopService {
 
     // Transform products to include computed fields
     const productsWithDetails = filteredProducts.map((product) =>
-      this.transformProductWithDetails(product)
+      this.transformProductWithDetails(product),
     );
 
     // Build pagination metadata
@@ -157,8 +157,8 @@ export class ShopService {
       conditions.push(
         or(
           ilike(products.title, `%${search}%`),
-          ilike(products.description, `%${search}%`)
-        )
+          ilike(products.description, `%${search}%`),
+        ),
       );
     }
 
@@ -167,8 +167,8 @@ export class ShopService {
       conditions.push(
         eq(
           products.categoryId,
-          sql`(SELECT id FROM ${categories} WHERE id = ${categoryId})`
-        )
+          sql`(SELECT id FROM ${categories} WHERE id = ${categoryId})`,
+        ),
       );
     }
 
@@ -206,7 +206,7 @@ export class ShopService {
         return [direction(products.createdAt)]; // Default to createdAt for now
       default:
         throw new InvalidSortFieldError(
-          `Sort field "${sortField}" is not supported.`
+          `Sort field "${sortField}" is not supported.`,
         );
     }
   }
@@ -279,14 +279,14 @@ export class ShopService {
    * The featured image is the one with the lowest order value.
    */
   private getFeaturedImage(
-    images: readonly SelectProductImage[]
+    images: readonly SelectProductImage[],
   ): SelectProductImage | null {
     if (!images || images.length === 0) {
       return null;
     }
 
     return images.reduce((featured, current) =>
-      current.order < featured.order ? current : featured
+      current.order < featured.order ? current : featured,
     );
   }
 }

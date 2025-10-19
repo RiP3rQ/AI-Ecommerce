@@ -23,7 +23,7 @@ export class InvalidSortFieldError extends ApiError {
  */
 export class InvalidPriceRangeError extends ApiError {
   constructor(
-    message: string = "Invalid price range. Minimum price must be less than maximum price."
+    message: string = "Invalid price range. Minimum price must be less than maximum price.",
   ) {
     super(message, 400);
   }

@@ -635,9 +635,9 @@ describe("/api/shop", () => {
                 priceMax: 1000, // Invalid: min > max
               },
               db,
-            })
+            }),
           ).rejects.toThrow(
-            "Invalid price range. Minimum price must be less than maximum price."
+            "Invalid price range. Minimum price must be less than maximum price.",
           );
         });
       });
@@ -655,9 +655,9 @@ describe("/api/shop", () => {
                 categoryId: "non-existent-category-id",
               },
               db,
-            })
+            }),
           ).rejects.toThrow(
-            'Category with id "non-existent-category-id" does not exist.'
+            'Category with id "non-existent-category-id" does not exist.',
           );
         });
       });
@@ -674,7 +674,7 @@ describe("/api/shop", () => {
                 sortField: "invalidField" as any,
               },
               db,
-            })
+            }),
           ).rejects.toThrow('Sort field "invalidField" is not supported.');
         });
       });
@@ -762,7 +762,7 @@ describe("/api/shop", () => {
           expect(productWithDetails.variantCount).toBe(2);
           expect(productWithDetails.category?.name).toBe("Electronics");
           expect(productWithDetails.featuredImage?.url).toBe(
-            "https://example.com/image2.jpg"
+            "https://example.com/image2.jpg",
           );
         });
       });
@@ -851,7 +851,7 @@ describe("/api/shop", () => {
         }
 
         const request = new NextRequest(
-          "http://localhost:3000/api/shop?search=Apple"
+          "http://localhost:3000/api/shop?search=Apple",
         );
 
         // Act
@@ -910,7 +910,7 @@ describe("/api/shop", () => {
         });
 
         const request = new NextRequest(
-          `http://localhost:3000/api/shop?categoryId=${category1Id}`
+          `http://localhost:3000/api/shop?categoryId=${category1Id}`,
         );
 
         // Act
@@ -966,7 +966,7 @@ describe("/api/shop", () => {
         });
 
         const request = new NextRequest(
-          "http://localhost:3000/api/shop?priceMin=1000&priceMax=2000"
+          "http://localhost:3000/api/shop?priceMin=1000&priceMax=2000",
         );
 
         // Act
@@ -1012,7 +1012,7 @@ describe("/api/shop", () => {
         }
 
         const request = new NextRequest(
-          "http://localhost:3000/api/shop?page=1&limit=2"
+          "http://localhost:3000/api/shop?page=1&limit=2",
         );
 
         // Act
@@ -1066,7 +1066,7 @@ describe("/api/shop", () => {
         }
 
         const request = new NextRequest(
-          "http://localhost:3000/api/shop?sortField=title&sortDirection=asc"
+          "http://localhost:3000/api/shop?sortField=title&sortDirection=asc",
         );
 
         // Act
@@ -1126,7 +1126,7 @@ describe("/api/shop", () => {
         }
 
         const request = new NextRequest(
-          "http://localhost:3000/api/shop?availableForSale=true"
+          "http://localhost:3000/api/shop?availableForSale=true",
         );
 
         // Act
@@ -1145,7 +1145,7 @@ describe("/api/shop", () => {
     it("returns 400 for invalid price range", async () => {
       // Arrange
       const request = new NextRequest(
-        "http://localhost:3000/api/shop?priceMin=2000&priceMax=1000"
+        "http://localhost:3000/api/shop?priceMin=2000&priceMax=1000",
       );
 
       // Act
@@ -1158,7 +1158,7 @@ describe("/api/shop", () => {
     it("returns 400 for invalid pagination parameters", async () => {
       // Arrange
       const request = new NextRequest(
-        "http://localhost:3000/api/shop?page=0&limit=150"
+        "http://localhost:3000/api/shop?page=0&limit=150",
       );
 
       // Act
@@ -1171,7 +1171,7 @@ describe("/api/shop", () => {
     it("returns 400 for invalid sort parameters", async () => {
       // Arrange
       const request = new NextRequest(
-        "http://localhost:3000/api/shop?sortField=invalid&sortDirection=up"
+        "http://localhost:3000/api/shop?sortField=invalid&sortDirection=up",
       );
 
       // Act
@@ -1184,7 +1184,7 @@ describe("/api/shop", () => {
     it("returns 400 for invalid category UUID", async () => {
       // Arrange
       const request = new NextRequest(
-        "http://localhost:3000/api/shop?categoryId=non-existent-category"
+        "http://localhost:3000/api/shop?categoryId=non-existent-category",
       );
 
       // Act
@@ -1263,7 +1263,7 @@ describe("/api/shop", () => {
         });
 
         const request = new NextRequest(
-          "http://localhost:3000/api/shop?search=iPhone&priceMin=1500&priceMax=2500&availableForSale=true&sortField=title&sortDirection=asc&page=1&limit=10"
+          "http://localhost:3000/api/shop?search=iPhone&priceMin=1500&priceMax=2500&availableForSale=true&sortField=title&sortDirection=asc&page=1&limit=10",
         );
 
         // Act
@@ -1312,7 +1312,7 @@ describe("/api/shop", () => {
           });
 
           const request = new NextRequest(
-            "http://localhost:3000/api/shop?search=nonexistent"
+            "http://localhost:3000/api/shop?search=nonexistent",
           );
 
           // Act
@@ -1358,7 +1358,7 @@ describe("/api/shop", () => {
           });
 
           const request = new NextRequest(
-            "http://localhost:3000/api/shop?categoryId=non-existent-id"
+            "http://localhost:3000/api/shop?categoryId=non-existent-id",
           );
 
           // Act
@@ -1376,7 +1376,7 @@ describe("/api/shop", () => {
       it("handles negative price values", async () => {
         // Arrange
         const request = new NextRequest(
-          "http://localhost:3000/api/shop?priceMin=-100&priceMax=1000"
+          "http://localhost:3000/api/shop?priceMin=-100&priceMax=1000",
         );
 
         // Act
@@ -1389,7 +1389,7 @@ describe("/api/shop", () => {
       it("handles invalid limit values", async () => {
         // Arrange
         const request = new NextRequest(
-          "http://localhost:3000/api/shop?limit=0"
+          "http://localhost:3000/api/shop?limit=0",
         );
 
         // Act
@@ -1402,7 +1402,7 @@ describe("/api/shop", () => {
       it("handles invalid page values", async () => {
         // Arrange
         const request = new NextRequest(
-          "http://localhost:3000/api/shop?page=-1"
+          "http://localhost:3000/api/shop?page=-1",
         );
 
         // Act
@@ -1444,7 +1444,7 @@ describe("/api/shop", () => {
           }
 
           const request = new NextRequest(
-            "http://localhost:3000/api/shop?page=2&limit=10"
+            "http://localhost:3000/api/shop?page=2&limit=10",
           );
 
           // Act
@@ -1546,7 +1546,7 @@ describe("/api/shop", () => {
       it("handles malformed query parameters gracefully", async () => {
         // Arrange: Invalid page number
         const request = new NextRequest(
-          "http://localhost:3000/api/shop?page=abc&limit=10"
+          "http://localhost:3000/api/shop?page=abc&limit=10",
         );
 
         // Act
@@ -1570,7 +1570,7 @@ describe("/api/shop", () => {
       it("handles extreme parameter values", async () => {
         // Arrange: Very large page number
         const request = new NextRequest(
-          "http://localhost:3000/api/shop?page=999999&limit=10"
+          "http://localhost:3000/api/shop?page=999999&limit=10",
         );
 
         // Act

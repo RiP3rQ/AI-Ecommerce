@@ -29,7 +29,7 @@ pool
       console.log(
         `🗄️ Connected to ${
           String(process.env.NODE_ENV) === "test" ? "test" : "development"
-        } database`
+        } database`,
       );
     }
   })
@@ -66,7 +66,7 @@ export async function closePool(): Promise<void> {
  * @returns Promise that resolves when the test function completes
  */
 export async function createTestableUnit(
-  func: (db: TestDatabase) => Promise<void>
+  func: (db: TestDatabase) => Promise<void>,
 ): Promise<void> {
   const db = createTestDb();
 
@@ -146,7 +146,7 @@ export const dbHelpers = {
     profileData: {
       id: string;
       acceptedDataPolicy?: boolean;
-    }
+    },
   ) {
     const [profile] = await db
       .insert(schema.profiles)
@@ -171,7 +171,7 @@ export const dbHelpers = {
     categoryData: {
       name: string;
       description?: string;
-    }
+    },
   ) {
     const [category] = await db
       .insert(schema.categories)
@@ -197,7 +197,7 @@ export const dbHelpers = {
       tags?: string[];
       categoryId?: string;
       availableForSale?: boolean;
-    }
+    },
   ) {
     const [product] = await db
       .insert(schema.products)
@@ -229,7 +229,7 @@ export const dbHelpers = {
       currencyCode?: string;
       availableForSale?: boolean;
       inventoryQuantity?: number;
-    }
+    },
   ) {
     const variantValues = {
       productId: variantData.productId,

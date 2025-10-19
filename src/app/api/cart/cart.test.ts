@@ -358,9 +358,9 @@ describe("/api/cart", () => {
               userId: profile.id,
               dto: { productVariantId: variant.id, quantity: 0 },
               db,
-            })
+            }),
           ).rejects.toThrow(
-            "Invalid quantity. Quantity must be greater than 0."
+            "Invalid quantity. Quantity must be greater than 0.",
           );
         });
       });
@@ -400,7 +400,7 @@ describe("/api/cart", () => {
               userId: profile.id,
               dto: { productVariantId: variant.id, quantity: 1 },
               db,
-            })
+            }),
           ).rejects.toThrow("Product variant not found or unavailable.");
         });
       });
@@ -440,7 +440,7 @@ describe("/api/cart", () => {
               userId: profile.id,
               dto: { productVariantId: variant.id, quantity: 10 },
               db,
-            })
+            }),
           ).rejects.toThrow("Only 5 units available.");
         });
       });
@@ -555,9 +555,9 @@ describe("/api/cart", () => {
               userId: profile.id,
               dto: { cartItemId: cartItem.id, quantity: 0 },
               db,
-            })
+            }),
           ).rejects.toThrow(
-            "Invalid quantity. Quantity must be greater than 0."
+            "Invalid quantity. Quantity must be greater than 0.",
           );
         });
       });
@@ -576,7 +576,7 @@ describe("/api/cart", () => {
               userId: profile.id,
               dto: { cartItemId: "non-existent-id", quantity: 1 },
               db,
-            })
+            }),
           ).rejects.toThrow("Cart item not found.");
         });
       });
@@ -655,7 +655,7 @@ describe("/api/cart", () => {
               userId: profile.id,
               dto: { cartItemId: "non-existent-id" },
               db,
-            })
+            }),
           ).rejects.toThrow("Cart item not found.");
         });
       });
@@ -841,7 +841,7 @@ describe("/api/cart", () => {
       it("handles optional cartId query parameter", async () => {
         // Arrange
         const request = new NextRequest(
-          "http://localhost:3000/api/cart?cartId=some-cart-id"
+          "http://localhost:3000/api/cart?cartId=some-cart-id",
         );
 
         // Act
@@ -1142,9 +1142,9 @@ describe("/api/cart", () => {
               userId: profile.id,
               dto: { productVariantId: variant.id, quantity: 3 },
               db,
-            })
+            }),
           ).rejects.toThrow(
-            "Only 5 units available. You already have 3 in your cart."
+            "Only 5 units available. You already have 3 in your cart.",
           );
         });
       });

@@ -16,9 +16,7 @@ import { products } from "./products";
 export const productVariants = pgTable(
   "product_variants",
   {
-    id: uuid("id")
-      .default(sql`gen_random_uuid()`)
-      .primaryKey(),
+    id: uuid("id").default(sql`gen_random_uuid()`).primaryKey(),
     productId: uuid("product_id")
       .notNull()
       .references(() => products.id, { onDelete: "cascade" }),
@@ -37,15 +35,15 @@ export const productVariants = pgTable(
   (table) => ({
     // Indexes for performance
     productIdIndex: index("product_variants_product_id_index").on(
-      table.productId
+      table.productId,
     ),
     availableForSaleIndex: index(
-      "product_variants_available_for_sale_index"
+      "product_variants_available_for_sale_index",
     ).on(table.availableForSale),
     inventoryQuantityIndex: index(
-      "product_variants_inventory_quantity_index"
+      "product_variants_inventory_quantity_index",
     ).on(table.inventoryQuantity),
-  })
+  }),
 );
 
 export const productVariantsRelations = relations(
@@ -55,7 +53,7 @@ export const productVariantsRelations = relations(
       fields: [productVariants.productId],
       references: [products.id],
     }),
-  })
+  }),
 );
 
 export type SelectProductVariant = typeof productVariants.$inferSelect;

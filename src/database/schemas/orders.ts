@@ -13,9 +13,7 @@ export const orderStatusEnum = pgEnum("order_status", [
 export const orders = pgTable(
   "orders",
   {
-    id: uuid("id")
-      .default(sql`gen_random_uuid()`)
-      .primaryKey(),
+    id: uuid("id").default(sql`gen_random_uuid()`).primaryKey(),
     userId: uuid("user_id")
       .notNull()
       .references(() => profiles.id, { onDelete: "cascade" }),
@@ -25,15 +23,13 @@ export const orders = pgTable(
   },
   (table) => ({
     userIdIndex: index("orders_user_id_index").on(table.userId),
-  })
+  }),
 );
 
 export const orderItems = pgTable(
   "order_items",
   {
-    id: uuid("id")
-      .default(sql`gen_random_uuid()`)
-      .primaryKey(),
+    id: uuid("id").default(sql`gen_random_uuid()`).primaryKey(),
     orderId: uuid("order_id")
       .notNull()
       .references(() => orders.id, { onDelete: "cascade" }),
@@ -46,7 +42,7 @@ export const orderItems = pgTable(
   },
   (table) => ({
     orderIdIndex: index("order_items_order_id_index").on(table.orderId),
-  })
+  }),
 );
 
 // Relations

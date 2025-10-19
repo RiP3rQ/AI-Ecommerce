@@ -98,7 +98,7 @@ export class CartService {
       items: cart.items.map((item) => ({
         ...item,
         featuredImage: this.getFeaturedImage(
-          item.productVariant.product.images
+          item.productVariant.product.images,
         ),
       })),
     };
@@ -146,7 +146,7 @@ export class CartService {
       variant.inventoryQuantity < dto.quantity
     ) {
       throw new InsufficientInventoryError(
-        `Only ${variant.inventoryQuantity} units available.`
+        `Only ${variant.inventoryQuantity} units available.`,
       );
     }
 
@@ -156,7 +156,7 @@ export class CartService {
     const existingItem = await db.query.cartItems.findFirst({
       where: and(
         eq(cartItems.cartId, cartId),
-        eq(cartItems.productVariantId, dto.productVariantId)
+        eq(cartItems.productVariantId, dto.productVariantId),
       ),
     });
 
@@ -169,7 +169,7 @@ export class CartService {
         variant.inventoryQuantity < newQuantity
       ) {
         throw new InsufficientInventoryError(
-          `Only ${variant.inventoryQuantity} units available. You already have ${existingItem.quantity} in your cart.`
+          `Only ${variant.inventoryQuantity} units available. You already have ${existingItem.quantity} in your cart.`,
         );
       }
 
@@ -213,7 +213,7 @@ export class CartService {
     const cartItem = await db.query.cartItems.findFirst({
       where: and(
         eq(cartItems.id, dto.cartItemId),
-        eq(cartItems.cartId, cartId)
+        eq(cartItems.cartId, cartId),
       ),
       with: {
         productVariant: true,
@@ -230,7 +230,7 @@ export class CartService {
       cartItem.productVariant.inventoryQuantity < dto.quantity
     ) {
       throw new InsufficientInventoryError(
-        `Only ${cartItem.productVariant.inventoryQuantity} units available.`
+        `Only ${cartItem.productVariant.inventoryQuantity} units available.`,
       );
     }
 
@@ -263,7 +263,7 @@ export class CartService {
     const cartItem = await db.query.cartItems.findFirst({
       where: and(
         eq(cartItems.id, dto.cartItemId),
-        eq(cartItems.cartId, cartId)
+        eq(cartItems.cartId, cartId),
       ),
     });
 
@@ -283,14 +283,14 @@ export class CartService {
    * @returns Featured image or null if no images exist
    */
   private getFeaturedImage(
-    images: readonly SelectProductImage[]
+    images: readonly SelectProductImage[],
   ): SelectProductImage | null {
     if (!images || images.length === 0) {
       return null;
     }
 
     return images.reduce((featured, current) =>
-      current.order < featured.order ? current : featured
+      current.order < featured.order ? current : featured,
     );
   }
 
@@ -307,7 +307,7 @@ export class CartService {
     const totalItems = cart.items.reduce((sum, item) => sum + item.quantity, 0);
     const totalPrice = cart.items.reduce(
       (sum, item) => sum + item.productVariant.price * item.quantity,
-      0
+      0,
     );
 
     const currencyCode =

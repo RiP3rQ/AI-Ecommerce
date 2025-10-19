@@ -21,7 +21,7 @@ export async function setup() {
   // Ensure we're in test environment
   if (process.env.NODE_ENV !== "test") {
     throw new Error(
-      "Global setup can only be used in test environment. Set NODE_ENV=test"
+      "Global setup can only be used in test environment. Set NODE_ENV=test",
     );
   }
 
@@ -29,7 +29,7 @@ export async function setup() {
     // OPTIMIZATION: Skip migrations if already initialized in this session
     if (migrationCache.isInitialized) {
       console.log(
-        "✅ Test environment already initialized (skipping migrations)"
+        "✅ Test environment already initialized (skipping migrations)",
       );
       return;
     }

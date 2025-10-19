@@ -130,10 +130,10 @@ describe("/api/categories", () => {
 
           // Assert: Categories are sorted from oldest to newest by createdAt
           expect(result[0].createdAt.getTime()).toBeLessThanOrEqual(
-            result[1].createdAt.getTime()
+            result[1].createdAt.getTime(),
           );
           expect(result[1].createdAt.getTime()).toBeLessThanOrEqual(
-            result[2].createdAt.getTime()
+            result[2].createdAt.getTime(),
           );
 
           // Assert: The results are in chronological order by name
@@ -170,7 +170,7 @@ describe("/api/categories", () => {
 
           // Assert: Categories are sorted from newest to oldest by createdAt
           expect(result[0].createdAt.getTime()).toBeGreaterThanOrEqual(
-            result[1].createdAt.getTime()
+            result[1].createdAt.getTime(),
           );
 
           // Assert: The first result should be the newer category, second should be the older one
@@ -260,7 +260,7 @@ describe("/api/categories", () => {
             categoriesService.getCategories({
               dto: { sortDirection: "asc", sortField: "invalidField" as any },
               db,
-            })
+            }),
           ).rejects.toThrow('Sort field "invalidField" is not supported.');
         });
       });
@@ -320,7 +320,7 @@ describe("Integration Tests - Route Handler", () => {
 
         // Act: Make GET request with uppercase parameters
         const request = new NextRequest(
-          "http://localhost:3000/api/categories?sortField=NAME&sortDirection=DESC"
+          "http://localhost:3000/api/categories?sortField=NAME&sortDirection=DESC",
         );
         const response = await GET(request);
         const result = (await response.json()) as CategoriesResponse;

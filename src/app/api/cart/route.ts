@@ -21,7 +21,7 @@ import { drizzleDbClient } from "@/database";
  * @returns Cart summary with items
  */
 export async function GET(
-  request: NextRequest
+  request: NextRequest,
 ): Promise<NextResponse<CartResponse | unknown>> {
   try {
     // Step 1: Validate session
@@ -38,7 +38,7 @@ export async function GET(
         success: true,
         data: cartSummary,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error: unknown) {
     return handleApiError(error);
@@ -57,7 +57,7 @@ export async function GET(
  * @returns Updated cart summary
  */
 export async function POST(
-  request: NextRequest
+  request: NextRequest,
 ): Promise<NextResponse<CartResponse | unknown>> {
   try {
     // Step 1: Validate session
@@ -79,7 +79,7 @@ export async function POST(
         success: true,
         data: cartSummary,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error: unknown) {
     return handleApiError(error);
@@ -98,7 +98,7 @@ export async function POST(
  * @returns Updated cart summary
  */
 export async function PATCH(
-  request: NextRequest
+  request: NextRequest,
 ): Promise<NextResponse<CartResponse | unknown>> {
   try {
     // Step 1: Validate session
@@ -120,7 +120,7 @@ export async function PATCH(
         success: true,
         data: cartSummary,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error: unknown) {
     return handleApiError(error);
@@ -138,7 +138,7 @@ export async function PATCH(
  * @returns Updated cart summary with success message
  */
 export async function DELETE(
-  request: NextRequest
+  request: NextRequest,
 ): Promise<NextResponse<DeleteCartItemResponse | unknown>> {
   try {
     // Step 1: Validate session
@@ -161,7 +161,7 @@ export async function DELETE(
         data: cartSummary,
         message: "Item removed from cart successfully.",
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error: unknown) {
     return handleApiError(error);

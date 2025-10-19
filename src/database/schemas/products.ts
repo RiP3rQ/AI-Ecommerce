@@ -19,9 +19,7 @@ import { categories } from "./categories";
 export const products = pgTable(
   "products",
   {
-    id: uuid("id")
-      .default(sql`gen_random_uuid()`)
-      .primaryKey(),
+    id: uuid("id").default(sql`gen_random_uuid()`).primaryKey(),
     availableForSale: boolean("available_for_sale").notNull().default(true),
     title: varchar("title", { length: 255 }).notNull(),
     description: text("description"),
@@ -36,13 +34,13 @@ export const products = pgTable(
   (table) => ({
     // Indexes for performance
     availableForSaleIndex: index("products_available_for_sale_index").on(
-      table.availableForSale
+      table.availableForSale,
     ),
     titleIndex: index("products_title_index").on(table.title),
     createdAtIndex: index("products_created_at_index").on(table.createdAt),
     updatedAtIndex: index("products_updated_at_index").on(table.updatedAt),
     categoryIdIndex: index("products_category_id_index").on(table.categoryId),
-  })
+  }),
 );
 
 // Relations definitions for Drizzle ORM

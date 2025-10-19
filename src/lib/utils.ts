@@ -78,7 +78,7 @@ export const BASE_URL = process.env.VERCEL_PROJECT_PRODUCTION_URL
  */
 export const createUrl = (
   pathname: string,
-  params: URLSearchParams | ReadonlyURLSearchParams
+  params: URLSearchParams | ReadonlyURLSearchParams,
 ) => {
   const paramsString = params.toString();
   const queryString = `${paramsString.length ? "?" : ""}${paramsString}`;

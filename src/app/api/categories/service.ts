@@ -64,7 +64,7 @@ export class CategoriesService {
         return [direction(categories.updatedAt)];
       default:
         throw new InvalidSortFieldError(
-          `Sort field "${sortField}" is not supported.`
+          `Sort field "${sortField}" is not supported.`,
         );
     }
   }

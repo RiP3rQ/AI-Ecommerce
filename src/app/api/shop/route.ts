@@ -24,7 +24,7 @@ import { drizzleDbClient } from "@/database";
  * @returns Paginated products with filtering and sorting applied
  */
 export async function GET(
-  request: NextRequest
+  request: NextRequest,
 ): Promise<NextResponse<ShopProductsResponse | unknown>> {
   try {
     // Step 1: Parse and validate query parameters
@@ -80,7 +80,7 @@ export async function GET(
         success: true,
         data: productsData,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error: unknown) {
     return handleApiError(error);

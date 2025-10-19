@@ -35,14 +35,14 @@ export function Filters({
   // ============================= SWR DATA =============================
   const { data, isLoading, error } = useSWR<SWRResponse<SelectCategory[]>>(
     `${BASE_URL}/api/categories`,
-    swrFetcher
+    swrFetcher,
   );
 
   useEffect(() => {
     if (searchParamCategoryName && data?.data) {
       const categoryId = data.data.find(
         (category) =>
-          category.name.toLowerCase() === searchParamCategoryName.toLowerCase()
+          category.name.toLowerCase() === searchParamCategoryName.toLowerCase(),
       )?.id;
       if (categoryId) {
         console.log("categoryId", categoryId);
@@ -104,7 +104,7 @@ export function Filters({
                   "flex w-full items-center justify-between rounded-lg border px-4 py-2.5 text-sm transition-all",
                   isSelected
                     ? "border-blue-600 bg-blue-50 text-blue-900 dark:bg-blue-950 dark:text-blue-100"
-                    : "border-neutral-200 bg-white text-neutral-700 hover:border-neutral-300 hover:bg-neutral-50 dark:border-neutral-800 dark:bg-black dark:text-neutral-300 dark:hover:border-neutral-700 dark:hover:bg-neutral-900"
+                    : "border-neutral-200 bg-white text-neutral-700 hover:border-neutral-300 hover:bg-neutral-50 dark:border-neutral-800 dark:bg-black dark:text-neutral-300 dark:hover:border-neutral-700 dark:hover:bg-neutral-900",
                 )}
               >
                 <span className="font-medium">{category.name}</span>

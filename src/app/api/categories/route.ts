@@ -17,7 +17,7 @@ import { drizzleDbClient } from "@/database";
  * @returns List of categories
  */
 export async function GET(
-  request: NextRequest
+  request: NextRequest,
 ): Promise<NextResponse<CategoriesResponse | unknown>> {
   try {
     // Step 1: Parse and validate query parameters
@@ -52,7 +52,7 @@ export async function GET(
         success: true,
         data: categoriesData,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error: unknown) {
     return handleApiError(error);

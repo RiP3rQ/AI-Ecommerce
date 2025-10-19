@@ -24,7 +24,7 @@ function SubmitButton({
         "ease flex h-full min-w-[36px] max-w-[36px] flex-none items-center justify-center rounded-full p-2 transition-all duration-200 hover:border-neutral-800 hover:opacity-80 disabled:opacity-50",
         {
           "ml-auto": type === "minus",
-        }
+        },
       )}
     >
       {type === "plus" ? (
@@ -46,7 +46,7 @@ export function EditItemQuantityButton({
   type: "plus" | "minus";
   optimisticUpdate: (
     merchandiseId: string,
-    updateType: "plus" | "minus"
+    updateType: "plus" | "minus",
   ) => void;
   refreshCart: () => void;
 }) {

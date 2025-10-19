@@ -23,10 +23,10 @@ export function buildShopUrl({
   };
 
   const nonEmptyParams = Object.fromEntries(
-    Object.entries(params).filter(([_, value]) => value !== "")
+    Object.entries(params).filter(([_, value]) => value !== ""),
   );
 
   return `${BASE_URL}/api/shop?${new URLSearchParams(
-    nonEmptyParams
+    nonEmptyParams,
   ).toString()}`;
 }
