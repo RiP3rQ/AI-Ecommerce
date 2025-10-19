@@ -26,6 +26,8 @@ export function LogoSquare({
           "h-[25px] w-[25px]": size === "md",
         })}
         alt="Logo"
+        width={100}
+        height={100}
       />
     </div>
   );

@@ -1,5 +1,6 @@
+"use client";
+
 import { GridTileImage } from "@/components/grid/single-tile";
-import type { SelectProduct } from "@/database/schema";
 import Link from "next/link";
 import type { LatestProductsItem } from "@/app/api/main-page/types";
 import { ReactNode } from "react";
@@ -54,7 +55,7 @@ function HeroGridItem({
 
 export function HeroThreeItemGrid(): ReactNode {
   // ============================= SWR DATA =============================
-  const { data, isLoading, error } = useSWR<SWRResponse<LatestProductsItem[]>>(
+  const { data, isLoading } = useSWR<SWRResponse<LatestProductsItem[]>>(
     `${BASE_URL}/api/main-page`,
     swrFetcher,
   );
