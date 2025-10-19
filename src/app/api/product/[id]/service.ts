@@ -47,9 +47,7 @@ export class ProductService {
       .leftJoin(productOptions, eq(products.id, productOptions.productId));
 
     if (!productData || productData.length === 0) {
-      throw new ProductNotFoundError(
-        `Product with uuid ${id} not found`,
-      );
+      throw new ProductNotFoundError(`Product with uuid ${id} not found`);
     }
 
     // Step 2: Transform the joined result into the expected format

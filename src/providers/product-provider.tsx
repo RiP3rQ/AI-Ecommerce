@@ -7,9 +7,7 @@ import React, {
   useOptimistic,
 } from "react";
 import { parseAsInteger, parseAsJson, useQueryState } from "nuqs";
-import {
-  productUrlSchema,
-} from "@/schemas/product-url-schema";
+import { productUrlSchema } from "@/schemas/product-url-schema";
 
 type ProductState = {
   image?: string;
