@@ -1,14 +1,13 @@
 import { Price } from "@/components/custom-price";
-import { SelectProduct, SelectProductVariant } from "@/database/schema";
 import { VariantSelector } from "./variant-selector";
 import Prose from "@/components/global/prose";
 import { AddToCart } from "./add-to-cart";
-import { GetProductDataReturnType } from "@/app/(protected-main)/product/[productUuid]/actions";
+import { ProductData } from "@/app/api/product/[productUuid]/types";
 
 export function ProductDescription({
   product,
 }: {
-  product: GetProductDataReturnType;
+  product: ProductData;
 }) {
   return (
     <>

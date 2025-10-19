@@ -19,23 +19,14 @@ import { validateServerSession } from "@/lib/api-helpers";
  */
 export async function GET(
   request: NextRequest,
+  { params }: { params: Promise<{ productUuid: string }> },
 ): Promise<NextResponse<ProductResponse | unknown>> {
   try {
     // Step 1: Validate user session
     await validateServerSession();
 
     // Step 2: Extract and validate path parameters
-    const searchParams = request.nextUrl.searchParams;
-    const productUuid = searchParams.get("productUuid")?.trim();
-    if (!productUuid) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Product UUID is required",
-        },
-        { status: 400 },
-      );
-    }
+    const { productUuid } = await params;
 
     // Step 3: Validate parameters
     const validatedDto = getProductSchema.parse({ productUuid });

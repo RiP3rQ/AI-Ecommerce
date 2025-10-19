@@ -33,7 +33,7 @@ export async function createProductFixture({
     descriptionHtml:
       overrides.descriptionHtml ?? faker.commerce.productDescription(),
     tags: overrides.tags ?? [faker.commerce.productMaterial()],
-    categoryId: overrides.categoryId ?? faker.string.uuid(),
+    categoryId: overrides.categoryId ?? null,
     availableForSale: overrides.availableForSale ?? true,
   } satisfies InsertProduct;
 
