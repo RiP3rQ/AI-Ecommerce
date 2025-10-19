@@ -24,7 +24,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import Link from "next/link";
 
 export function CartModalWithTrigger(): ReactNode {
-  const { cart, updateCartItem, refreshCart } = useCart();
+  const { cart } = useCart();
 
   const [isOpen, setIsOpen] = useState(false);
   const quantityRef = useRef(cart?.totalQuantity);
@@ -98,11 +98,7 @@ export function CartModalWithTrigger(): ReactNode {
                     >
                       <div className="relative flex w-full flex-row justify-between px-1 py-4">
                         <div className="absolute z-40 -ml-2 -mt-4 overflow-visible">
-                          <DeleteItemButton
-                            item={item}
-                            optimisticUpdate={updateCartItem}
-                            refreshCart={refreshCart}
-                          />
+                          <DeleteItemButton item={item} />
                         </div>
                         <div className="flex flex-row">
                           <div className="relative h-16 w-16 overflow-hidden rounded-md border border-neutral-300 bg-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:bg-neutral-800">
@@ -144,23 +140,13 @@ export function CartModalWithTrigger(): ReactNode {
                             currencyCode={item.cost.totalAmount.currencyCode}
                           />
                           <div className="ml-auto flex h-9 flex-row items-center rounded-full border border-neutral-200 dark:border-neutral-700">
-                            <EditItemQuantityButton
-                              item={item}
-                              type="minus"
-                              optimisticUpdate={updateCartItem}
-                              refreshCart={refreshCart}
-                            />
+                            <EditItemQuantityButton item={item} type="minus" />
                             <p className="w-6 text-center">
                               <span className="w-full text-sm">
                                 {item.quantity}
                               </span>
                             </p>
-                            <EditItemQuantityButton
-                              item={item}
-                              type="plus"
-                              optimisticUpdate={updateCartItem}
-                              refreshCart={refreshCart}
-                            />
+                            <EditItemQuantityButton item={item} type="plus" />
                           </div>
                         </div>
                       </div>

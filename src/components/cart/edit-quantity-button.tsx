@@ -4,7 +4,7 @@ import { SelectCartItem } from "@/types/cart";
 import { MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import { useState } from "react";
-import { updateCartItemQuantity, removeCartItem } from "@/lib/cart-api";
+import { useCart } from "@/providers/cart-provider";
 
 function SubmitButton({
   type,
@@ -39,20 +39,13 @@ function SubmitButton({
 export function EditItemQuantityButton({
   item,
   type,
-  optimisticUpdate,
-  refreshCart,
 }: {
   item: SelectCartItem;
   type: "plus" | "minus";
-  optimisticUpdate: (
-    merchandiseId: string,
-    updateType: "plus" | "minus",
-  ) => void;
-  refreshCart: () => void;
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const merchandiseId = item.merchandise.id;
+  const { updateItemQuantity } = useCart();
 
   if (!item.id) {
     console.error("Cart item ID is missing");
@@ -67,18 +60,9 @@ export function EditItemQuantityButton({
 
     setIsLoading(true);
     setError(null);
-    optimisticUpdate(merchandiseId, type);
 
     try {
-      if (newQuantity === 0) {
-        await removeCartItem({ cartItemId });
-      } else {
-        await updateCartItemQuantity({
-          cartItemId,
-          quantity: newQuantity,
-        });
-      }
-      refreshCart();
+      await updateItemQuantity(cartItemId, newQuantity);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to update quantity";

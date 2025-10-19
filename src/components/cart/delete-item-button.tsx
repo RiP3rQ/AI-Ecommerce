@@ -2,22 +2,14 @@
 
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
-import { removeCartItem } from "@/lib/cart-api";
+import { useCart } from "@/providers/cart-provider";
 import { SelectCartItem } from "@/types/cart";
 
-export function DeleteItemButton({
-  item,
-  optimisticUpdate,
-  refreshCart,
-}: {
-  item: SelectCartItem;
-  optimisticUpdate: (merchandiseId: string, updateType: "delete") => void;
-  refreshCart: () => void;
-}) {
+export function DeleteItemButton({ item }: { item: SelectCartItem }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { removeItem } = useCart();
   const cartItemId = item.id;
-  const merchandiseId = item.merchandise.id;
 
   if (!cartItemId) {
     console.error("Cart item ID is missing");
@@ -29,11 +21,9 @@ export function DeleteItemButton({
 
     setIsLoading(true);
     setError(null);
-    optimisticUpdate(merchandiseId, "delete");
 
     try {
-      await removeCartItem({ cartItemId });
-      refreshCart();
+      await removeItem(cartItemId);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to remove item";

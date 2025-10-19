@@ -19,7 +19,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useCart } from "@/providers/cart-provider";
-import { addItemToCart } from "@/lib/cart-api";
 import { Price } from "@/components/custom-price";
 import { cn } from "@/lib/utils";
 import { ShoppingCart, Plus } from "lucide-react";
@@ -52,7 +51,7 @@ export function ProductCardWithAddToCart({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedVariantId, setSelectedVariantId] = useState<string>("");
   const [isAddingToCart, setIsAddingToCart] = useState(false);
-  const { addCartItem, refreshCart } = useCart();
+  const { addItem } = useCart();
 
   const hasImage = !!product.featuredImage?.url;
   const hasVariants = product.variants && product.variants.length > 0;
@@ -89,8 +88,8 @@ export function ProductCardWithAddToCart({
       );
       if (!variant) throw new Error("Selected variant not found");
 
-      // Add to cart using the cart provider
-      addCartItem(
+      // Call the provider method
+      await addItem(
         variant,
         product,
         product.featuredImage
@@ -102,14 +101,6 @@ export function ProductCardWithAddToCart({
             }
           : undefined,
       );
-
-      // Also call the API directly
-      await addItemToCart({
-        productVariantId: variantId,
-        quantity: 1,
-      });
-
-      refreshCart();
       setIsModalOpen(false);
       setSelectedVariantId("");
     } catch (error) {

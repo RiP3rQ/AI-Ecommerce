@@ -4,19 +4,21 @@ import { SelectProductVariant } from "@/database/schema";
 import { ProductData } from "@/app/api/product/[id]/types";
 import { useCart } from "@/providers/cart-provider";
 import { useProductProvider } from "@/providers/product-provider";
-import { addItemToCart } from "@/lib/cart-api";
 import clsx from "clsx";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
+import { Button } from "../ui/button";
 
 function SubmitButton({
   availableForSale,
   selectedVariantId,
   isLoading,
+  onClick,
 }: {
   availableForSale: boolean;
   selectedVariantId: string | undefined;
   isLoading: boolean;
+  onClick: () => void;
 }) {
   const buttonClasses =
     "relative flex w-full items-center justify-center rounded-full bg-blue-600 p-4 tracking-wide text-white cursor-pointer";
@@ -24,15 +26,15 @@ function SubmitButton({
 
   if (!availableForSale) {
     return (
-      <button disabled className={clsx(buttonClasses, disabledClasses)}>
+      <Button disabled className={clsx(buttonClasses, disabledClasses)}>
         Out Of Stock
-      </button>
+      </Button>
     );
   }
 
   if (!selectedVariantId) {
     return (
-      <button
+      <Button
         aria-label="Please select an option"
         disabled
         className={clsx(buttonClasses, disabledClasses)}
@@ -41,12 +43,12 @@ function SubmitButton({
           <PlusIcon className="h-5" />
         </div>
         Add To Cart
-      </button>
+      </Button>
     );
   }
 
   return (
-    <button
+    <Button
       type="button"
       aria-label="Add to cart"
       disabled={isLoading}
@@ -54,12 +56,13 @@ function SubmitButton({
         "hover:opacity-90": !isLoading,
         "opacity-60": isLoading,
       })}
+      onClick={onClick}
     >
       <div className="absolute left-0 ml-4">
         <PlusIcon className="h-5" />
       </div>
       {isLoading ? "Adding..." : "Add To Cart"}
-    </button>
+    </Button>
   );
 }
 
@@ -71,8 +74,8 @@ export function AddToCart({
   variants: SelectProductVariant[];
 }) {
   const { availableForSale } = product;
-  const { addCartItem, refreshCart } = useCart();
   const { state } = useProductProvider();
+  const { cart, addItem, updateItemQuantity } = useCart();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -99,18 +102,21 @@ export function AddToCart({
       : undefined;
 
   const handleAddToCart = async () => {
-    if (!selectedVariantId || isLoading) return;
+    if (!selectedVariantId || !finalVariant || isLoading) return;
 
     setIsLoading(true);
     setError(null);
-    addCartItem(finalVariant, product, featuredImage);
 
     try {
-      await addItemToCart({
-        productVariantId: selectedVariantId,
-        quantity: 1,
-      });
-      refreshCart();
+      // Check if item already exists in cart
+      const existingItem = cart?.lines.find(
+        (item) => item.merchandise.id === finalVariant.id,
+      );
+      if (existingItem && existingItem.id) {
+        await updateItemQuantity(existingItem.id, existingItem.quantity + 1);
+      } else {
+        await addItem(finalVariant, product, featuredImage);
+      }
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to add item";
@@ -123,13 +129,12 @@ export function AddToCart({
 
   return (
     <div>
-      <div onClick={handleAddToCart}>
-        <SubmitButton
-          availableForSale={availableForSale}
-          selectedVariantId={selectedVariantId}
-          isLoading={isLoading}
-        />
-      </div>
+      <SubmitButton
+        availableForSale={availableForSale}
+        selectedVariantId={selectedVariantId}
+        isLoading={isLoading}
+        onClick={handleAddToCart}
+      />
       {error && (
         <p aria-live="polite" className="text-sm text-red-500 mt-2">
           {error}
