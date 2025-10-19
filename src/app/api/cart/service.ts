@@ -1,4 +1,4 @@
-import { drizzleDbClient } from "@/database/index";
+import { DrizzleDbClient, drizzleDbClient } from "@/database/index";
 import { carts, cartItems } from "@/database/schemas/cart";
 import { productVariants } from "@/database/schemas/product-variants";
 import { eq, and } from "drizzle-orm";
@@ -16,25 +16,27 @@ import type {
 } from "./dto";
 import type { CartSummary, CartWithItems, CartItemWithDetails } from "./types";
 import type { SelectProductImage } from "@/database/schemas/product-images";
+import type { TestDatabase } from "@/test/utils/db-helper";
 
 /**
  * Service class for cart operations.
  * Handles all business logic for cart management using DrizzleORM.
  */
 export class CartService {
-  private readonly db = drizzleDbClient();
-
   /**
    * Gets or creates a cart for a user.
    * @param userId - The user's ID
+   * @param db - Optional database connection (for testing)
    * @returns The cart ID
    */
   public async getOrCreateCart({
     userId,
+    db = drizzleDbClient(),
   }: Readonly<{
     userId: string;
+    db?: DrizzleDbClient | TestDatabase;
   }>): Promise<string> {
-    const [existingCart] = await this.db
+    const [existingCart] = await db
       .select()
       .from(carts)
       .where(eq(carts.userId, userId));
@@ -43,10 +45,7 @@ export class CartService {
       return existingCart.id;
     }
 
-    const [newCart] = await this.db
-      .insert(carts)
-      .values({ userId })
-      .returning();
+    const [newCart] = await db.insert(carts).values({ userId }).returning();
 
     if (!newCart) {
       throw new Error("Failed to create cart");
@@ -58,14 +57,19 @@ export class CartService {
   /**
    * Gets the full cart with all items and product details.
    * @param userId - The user's ID
+   * @param db - Optional database connection (for testing)
    * @returns Cart summary with items
    */
   public async getCart({
     userId,
-  }: Readonly<{ userId: string }>): Promise<CartSummary> {
-    const cartId = await this.getOrCreateCart({ userId });
+    db = drizzleDbClient(),
+  }: Readonly<{
+    userId: string;
+    db?: DrizzleDbClient | TestDatabase;
+  }>): Promise<CartSummary> {
+    const cartId = await this.getOrCreateCart({ userId, db });
 
-    const cart = await this.db.query.carts.findFirst({
+    const cart = await db.query.carts.findFirst({
       where: eq(carts.id, cartId),
       with: {
         items: {
@@ -108,21 +112,24 @@ export class CartService {
    * Adds an item to the cart or updates quantity if it already exists.
    * @param userId - The user's ID
    * @param dto - Add item DTO
+   * @param db - Optional database connection (for testing)
    * @returns Updated cart summary
    */
   public async addItemToCart({
     userId,
     dto,
+    db = drizzleDbClient(),
   }: Readonly<{
     userId: string;
     dto: AddItemToCartDto;
+    db?: DrizzleDbClient | TestDatabase;
   }>): Promise<CartSummary> {
     if (dto.quantity <= 0) {
       throw new InvalidQuantityError();
     }
 
     // Validate product variant exists and is available
-    const variant = await this.db.query.productVariants.findFirst({
+    const variant = await db.query.productVariants.findFirst({
       where: eq(productVariants.id, dto.productVariantId),
       with: {
         product: true,
@@ -146,7 +153,7 @@ export class CartService {
     const cartId = await this.getOrCreateCart({ userId });
 
     // Check if item already exists in cart
-    const existingItem = await this.db.query.cartItems.findFirst({
+    const existingItem = await db.query.cartItems.findFirst({
       where: and(
         eq(cartItems.cartId, cartId),
         eq(cartItems.productVariantId, dto.productVariantId)
@@ -166,12 +173,12 @@ export class CartService {
         );
       }
 
-      await this.db
+      await db
         .update(cartItems)
         .set({ quantity: newQuantity })
         .where(eq(cartItems.id, existingItem.id));
     } else {
-      await this.db.insert(cartItems).values({
+      await db.insert(cartItems).values({
         cartId,
         productVariantId: dto.productVariantId,
         quantity: dto.quantity,
@@ -190,9 +197,11 @@ export class CartService {
   public async updateCartItem({
     userId,
     dto,
+    db = drizzleDbClient(),
   }: Readonly<{
     userId: string;
     dto: UpdateCartItemDto;
+    db?: DrizzleDbClient | TestDatabase;
   }>): Promise<CartSummary> {
     if (dto.quantity <= 0) {
       throw new InvalidQuantityError();
@@ -201,7 +210,7 @@ export class CartService {
     const cartId = await this.getOrCreateCart({ userId });
 
     // Verify the cart item exists and belongs to the user's cart
-    const cartItem = await this.db.query.cartItems.findFirst({
+    const cartItem = await db.query.cartItems.findFirst({
       where: and(
         eq(cartItems.id, dto.cartItemId),
         eq(cartItems.cartId, cartId)
@@ -225,7 +234,7 @@ export class CartService {
       );
     }
 
-    await this.db
+    await db
       .update(cartItems)
       .set({ quantity: dto.quantity, updatedAt: new Date() })
       .where(eq(cartItems.id, dto.cartItemId));
@@ -242,14 +251,16 @@ export class CartService {
   public async removeCartItem({
     userId,
     dto,
+    db = drizzleDbClient(),
   }: Readonly<{
     userId: string;
     dto: RemoveCartItemDto;
+    db?: DrizzleDbClient | TestDatabase;
   }>): Promise<CartSummary> {
-    const cartId = await this.getOrCreateCart({ userId });
+    const cartId = await this.getOrCreateCart({ userId, db });
 
     // Verify the cart item exists and belongs to the user's cart
-    const cartItem = await this.db.query.cartItems.findFirst({
+    const cartItem = await db.query.cartItems.findFirst({
       where: and(
         eq(cartItems.id, dto.cartItemId),
         eq(cartItems.cartId, cartId)
@@ -260,7 +271,7 @@ export class CartService {
       throw new CartItemNotFoundError();
     }
 
-    await this.db.delete(cartItems).where(eq(cartItems.id, dto.cartItemId));
+    await db.delete(cartItems).where(eq(cartItems.id, dto.cartItemId));
 
     return this.getCart({ userId });
   }

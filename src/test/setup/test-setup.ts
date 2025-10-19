@@ -55,6 +55,12 @@ vi.mock("next/navigation", () => ({
   })),
 }));
 
+// Mock API helpers for session validation
+export const mockValidateServerSession = vi.fn();
+vi.mock("../../lib/api-helpers", () => ({
+  validateServerSession: mockValidateServerSession,
+}));
+
 // Setup runs before each test file
 beforeEach(() => {
   // Reset all mocks before each test
@@ -84,6 +90,11 @@ beforeEach(() => {
   (mockSupabaseClient.auth.signOut as any).mockResolvedValue({
     error: null,
   });
+
+  // Set default mock for session validation (unauthenticated)
+  mockValidateServerSession.mockRejectedValue(
+    new Error("User is not authenticated.")
+  );
 });
 
 /**
@@ -151,4 +162,41 @@ export function mockAuthError(error: { message: string; status?: number }) {
     data: { session: null },
     error,
   });
+}
+
+/**
+ * Helper function to mock authenticated user for API session validation
+ */
+export function mockAuthenticatedApiUser(user?: {
+  id?: string;
+  email?: string;
+  user_metadata?: Record<string, any>;
+  app_metadata?: Record<string, any>;
+  aud?: string;
+  created_at?: string;
+  updated_at?: string;
+  role?: string;
+}) {
+  const mockUser = {
+    id: user?.id || "test-user-id",
+    email: user?.email || "test@example.com",
+    user_metadata: user?.user_metadata || {},
+    app_metadata: user?.app_metadata || {},
+    aud: user?.aud || "authenticated",
+    created_at: user?.created_at || new Date().toISOString(),
+    updated_at: user?.updated_at || new Date().toISOString(),
+    role: user?.role || "authenticated",
+  };
+
+  mockValidateServerSession.mockResolvedValue(mockUser);
+  return mockUser;
+}
+
+/**
+ * Helper function to mock unauthenticated state for API session validation
+ */
+export function mockUnauthenticatedApiUser() {
+  mockValidateServerSession.mockRejectedValue(
+    new Error("User is not authenticated.")
+  );
 }
