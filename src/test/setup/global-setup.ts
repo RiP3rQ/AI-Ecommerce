@@ -4,6 +4,7 @@ import { migrate } from "drizzle-orm/postgres-js/migrator";
 import { env } from "../../env";
 import { sql } from "drizzle-orm";
 import * as schema from "../../database/schema";
+import { closePool } from "../utils/db-helper";
 
 // Cache to track if migrations have already been run in this test session
 let migrationCache = {
@@ -77,7 +78,10 @@ export async function setup() {
  */
 export async function teardown() {
   try {
-    // Create database connection for cleanup
+    // Close the shared connection pool first
+    await closePool();
+
+    // Create a separate connection for final cleanup
     const client = postgres(env.DATABASE_URL, {
       prepare: false,
       max: 1,
@@ -91,11 +95,13 @@ export async function teardown() {
     // Clean all data from tables
     await cleanAllTables(db);
 
-    // Close the connection
+    // Close the cleanup connection
     await client.end();
 
     // Reset migration cache
     migrationCache.isInitialized = false;
+
+    console.log("✅ Test environment teardown complete");
   } catch (error) {
     console.warn("⚠️  Failed to clean database during teardown:", error);
   }

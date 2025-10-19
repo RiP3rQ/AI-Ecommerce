@@ -48,6 +48,14 @@ export function createTestDb(): TestDatabase {
 }
 
 /**
+ * Closes the shared connection pool.
+ * Should be called during test teardown to prevent hanging connections.
+ */
+export async function closePool(): Promise<void> {
+  await pool.end();
+}
+
+/**
  * Creates a testable unit using database transactions.
  * The transaction is automatically rolled back after the test function completes,
  * ensuring test isolation without affecting other tests.
@@ -64,10 +72,12 @@ export async function createTestableUnit(
 
   try {
     await db.transaction(async (tx) => {
-      await func(tx);
-      // OPTIMIZATION: Always rollback to avoid test pollution
-      // This is much faster than manual cleanup
-      tx.rollback();
+      try {
+        await func(tx);
+      } finally {
+        // OPTIMIZATION: Always rollback to avoid test pollution
+        tx.rollback();
+      }
     });
   } catch (error) {
     if (process.env.DISABLE_DEBUG_LOGGING === "true") {
