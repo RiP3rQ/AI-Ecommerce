@@ -1,15 +1,10 @@
 import { Price } from "@/components/custom-price";
-import { SelectProduct, SelectProductVariant } from "@/database/schema";
 import { VariantSelector } from "./variant-selector";
 import Prose from "@/components/global/prose";
 import { AddToCart } from "./add-to-cart";
-import { GetProductDataReturnType } from "@/app/(protected-main)/product/[productUuid]/actions";
+import { ProductData } from "@/app/api/product/[id]/types";
 
-export function ProductDescription({
-  product,
-}: {
-  product: GetProductDataReturnType;
-}) {
+export function ProductDescription({ product }: { product: ProductData }) {
   return (
     <>
       <div className="mb-6 flex flex-col border-b pb-6 dark:border-neutral-700">

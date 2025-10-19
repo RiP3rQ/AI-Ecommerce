@@ -22,7 +22,7 @@ export function handleApiError(error: unknown): NextResponse<unknown> {
         message: "Input validation failed",
         errors: error.flatten().fieldErrors,
       },
-      { status: 400 },
+      { status: 403 },
     );
   }
 

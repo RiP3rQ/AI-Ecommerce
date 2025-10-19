@@ -18,7 +18,7 @@ export class CategoriesService {
    */
   public async getCategories({
     dto,
-    db = drizzleDbClient(),
+    db,
   }: Readonly<{
     dto: GetCategoriesDto;
     db: DrizzleDbClient | TestDatabase;

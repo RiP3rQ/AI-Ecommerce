@@ -1,6 +1,4 @@
-"use server";
-
-import { drizzleDbClient } from "@/database";
+import { DrizzleDbClient, drizzleDbClient } from "@/database/index";
 import {
   productImages,
   productOptions,
@@ -11,45 +9,48 @@ import {
   SelectProductOption,
   SelectProductVariant,
 } from "@/database/schema";
-import { getErrorMessage } from "@/lib/utils";
-import { createServerSupabaseClient } from "@/supabase-auth/server";
-import { PriceRange } from "@/types/products";
-import { asc, eq } from "drizzle-orm";
+import { ProductNotFoundError } from "@/lib/errors";
+import type { PriceRange } from "@/types/products";
+import type { GetProductDto } from "./dto";
+import type { ProductData } from "./types";
+import { eq } from "drizzle-orm";
+import type { TestDatabase } from "@/test/utils/db-helper";
+import { id } from "zod/v4/locales";
 
-export interface GetProductDataReturnType extends SelectProduct {
-  product_variants: SelectProductVariant[];
-  product_images: SelectProductImage[];
-  product_options: SelectProductOption[];
-  priceRange: PriceRange;
-}
+/**
+ * Service class for product operations.
+ * Handles all business logic for product retrieval and management.
+ */
+export class ProductService {
+  /**
+   * Gets a single product by UUID with all related data.
+   * @param dto - Product retrieval parameters
+   * @param db - Optional database connection (for testing)
+   * @returns Product data with variants, images, options, and price range
+   */
+  public async getProduct({
+    dto,
+    db,
+  }: Readonly<{
+    dto: GetProductDto;
+    db: DrizzleDbClient | TestDatabase;
+  }>): Promise<ProductData> {
+    const { id } = dto;
 
-export async function getProductData(
-  productUuid: string,
-): Promise<GetProductDataReturnType> {
-  try {
-    // Step 1: Validate session
-    const supabaseServer = await createServerSupabaseClient();
-    const {
-      data: { user },
-    } = await supabaseServer.auth.getUser();
-    if (!user) {
-      throw new Error("User is not authenticated");
-    }
-
-    // Step 2: Get product data
-    const productData = await drizzleDbClient()
+    // Step 1: Get product data with joins
+    const productData = await db
       .select()
       .from(products)
-      .where(eq(products.id, productUuid))
+      .where(eq(products.id, id))
       .leftJoin(productVariants, eq(products.id, productVariants.productId))
       .leftJoin(productImages, eq(products.id, productImages.productId))
       .leftJoin(productOptions, eq(products.id, productOptions.productId));
 
     if (!productData || productData.length === 0) {
-      throw new Error("Product with uuid " + productUuid + " not found");
+      throw new ProductNotFoundError(`Product with uuid ${id} not found`);
     }
 
-    //Step 3: Transform the joined result into the expected format
+    // Step 2: Transform the joined result into the expected format
     const product = productData[0].products;
 
     // Deduplicate variants by ID
@@ -83,7 +84,25 @@ export async function getProductData(
       (a, b) => a.position - b.position,
     );
 
-    //Step 4: Calculate the price range
+    // Step 3: Calculate the price range
+    const priceRange = this.calculatePriceRange(product_variants);
+
+    // Step 4: Return the product data
+    return {
+      ...product,
+      product_variants,
+      product_images,
+      product_options,
+      priceRange,
+    };
+  }
+
+  /**
+   * Calculates the minimum and maximum price range from product variants.
+   */
+  private calculatePriceRange(
+    product_variants: SelectProductVariant[],
+  ): PriceRange {
     // Calculate min and max variant price, ensuring the currencyCode matches the min/max value
     let minVariantPrice = {
       amount: Number.POSITIVE_INFINITY,
@@ -115,22 +134,11 @@ export async function getProductData(
       maxVariantPrice = { amount: 0, currencyCode: "USD" };
     }
 
-    // Step 5: Return the product data
-    const priceRange = {
+    return {
       minVariantPrice,
       maxVariantPrice,
     };
-
-    // Step 6: Return the product data
-    return {
-      ...product,
-      product_variants,
-      product_images,
-      product_options,
-      priceRange,
-    };
-  } catch (error: unknown) {
-    console.error(`[ERROR] Failed to get product data:`, error);
-    throw new Error(getErrorMessage(error));
   }
 }
+
+export const productService = new ProductService();

@@ -1,7 +1,7 @@
 "use client";
 
 import { SelectProductVariant } from "@/database/schema";
-import { GetProductDataReturnType } from "@/app/(protected-main)/product/[productUuid]/actions";
+import { ProductData } from "@/app/api/product/[id]/types";
 import { useCart } from "@/providers/cart-provider";
 import { useProductProvider } from "@/providers/product-provider";
 import { addItemToCart } from "@/lib/cart-api";
@@ -67,7 +67,7 @@ export function AddToCart({
   product,
   variants,
 }: {
-  product: GetProductDataReturnType;
+  product: ProductData;
   variants: SelectProductVariant[];
 }) {
   const { availableForSale } = product;

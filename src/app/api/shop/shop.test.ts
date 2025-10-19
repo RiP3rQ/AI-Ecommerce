@@ -1142,7 +1142,7 @@ describe("/api/shop", () => {
       }
     });
 
-    it("returns 400 for invalid price range", async () => {
+    it("returns 403 for invalid price range", async () => {
       // Arrange
       const request = new NextRequest(
         "http://localhost:3000/api/shop?priceMin=2000&priceMax=1000",
@@ -1152,10 +1152,10 @@ describe("/api/shop", () => {
       const response = await GET(request);
 
       // Assert
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(403);
     });
 
-    it("returns 400 for invalid pagination parameters", async () => {
+    it("returns 403 for invalid pagination parameters", async () => {
       // Arrange
       const request = new NextRequest(
         "http://localhost:3000/api/shop?page=0&limit=150",
@@ -1165,10 +1165,10 @@ describe("/api/shop", () => {
       const response = await GET(request);
 
       // Assert
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(403);
     });
 
-    it("returns 400 for invalid sort parameters", async () => {
+    it("returns 403 for invalid sort parameters", async () => {
       // Arrange
       const request = new NextRequest(
         "http://localhost:3000/api/shop?sortField=invalid&sortDirection=up",
@@ -1178,10 +1178,10 @@ describe("/api/shop", () => {
       const response = await GET(request);
 
       // Assert
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(403);
     });
 
-    it("returns 400 for invalid category UUID", async () => {
+    it("returns 403 for invalid category UUID", async () => {
       // Arrange
       const request = new NextRequest(
         "http://localhost:3000/api/shop?categoryId=non-existent-category",
@@ -1191,7 +1191,7 @@ describe("/api/shop", () => {
       const response = await GET(request);
 
       // Assert
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(403);
     });
 
     it("handles complex query with multiple filters", async () => {
@@ -1365,7 +1365,7 @@ describe("/api/shop", () => {
           const response = await GET(request);
 
           // Assert: Should return 400 error for invalid UUID
-          expect(response.status).toBe(400);
+          expect(response.status).toBe(403);
         } finally {
           await dbHelpers.truncateProductTables(db);
         }
@@ -1383,7 +1383,7 @@ describe("/api/shop", () => {
         const response = await GET(request);
 
         // Assert
-        expect(response.status).toBe(400);
+        expect(response.status).toBe(403);
       });
 
       it("handles invalid limit values", async () => {
@@ -1396,7 +1396,7 @@ describe("/api/shop", () => {
         const response = await GET(request);
 
         // Assert
-        expect(response.status).toBe(400);
+        expect(response.status).toBe(403);
       });
 
       it("handles invalid page values", async () => {
@@ -1409,7 +1409,7 @@ describe("/api/shop", () => {
         const response = await GET(request);
 
         // Assert
-        expect(response.status).toBe(400);
+        expect(response.status).toBe(403);
       });
     });
 
@@ -1553,7 +1553,7 @@ describe("/api/shop", () => {
         const response = await GET(request);
 
         // Assert
-        expect(response.status).toBe(400);
+        expect(response.status).toBe(403);
       });
 
       it("handles missing required parameters gracefully", async () => {

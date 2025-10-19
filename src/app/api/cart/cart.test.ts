@@ -905,7 +905,7 @@ describe("/api/cart", () => {
         }
       });
 
-      it("returns 400 for invalid request body", async () => {
+      it("returns 403 for invalid request body", async () => {
         // Arrange: Invalid quantity
         const request = new NextRequest("http://localhost:3000/api/cart", {
           method: "POST",
@@ -919,7 +919,7 @@ describe("/api/cart", () => {
         const response = await POST(request);
 
         // Assert
-        expect(response.status).toBe(400);
+        expect(response.status).toBe(403);
         expect(mockValidateServerSession).toHaveBeenCalledTimes(1);
       });
     });
@@ -1423,8 +1423,8 @@ describe("/api/cart", () => {
         // Act
         const response = await POST(request);
 
-        // Assert: Should return 400 due to validation error
-        expect(response.status).toBe(400);
+        // Assert: Should return 403 due to validation error
+        expect(response.status).toBe(403);
       });
 
       it("handles invalid UUID format in request body", async () => {
@@ -1440,8 +1440,8 @@ describe("/api/cart", () => {
         // Act
         const response = await POST(request);
 
-        // Assert: Should return 400 due to validation error
-        expect(response.status).toBe(400);
+        // Assert: Should return 403 due to validation error
+        expect(response.status).toBe(403);
       });
     });
   });
