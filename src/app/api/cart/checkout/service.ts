@@ -64,7 +64,10 @@ export class CheckoutService {
       await tx.insert(orderItems).values(orderItemsData);
 
       // Clear the cart
-      await cartService.clearCart({ userId, db: tx as DrizzleDbClient | TestDatabase });
+      await cartService.clearCart({
+        userId,
+        db: tx as DrizzleDbClient | TestDatabase,
+      });
 
       return {
         orderId: newOrder.id,
