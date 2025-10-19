@@ -29,7 +29,7 @@ export async function GET(): Promise<NextResponse<MainPageResponse | unknown>> {
         success: true,
         data: latestProducts,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error: unknown) {
     return handleApiError(error);
