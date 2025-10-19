@@ -13,7 +13,7 @@ export type TestDatabase = NodePgDatabase<typeof schema>;
 // This dramatically reduces connection overhead
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL!,
-  max: 10, // Reduced from 50 - optimal for transaction-based work
+  max: 5, // Reduced to 5 for transaction-based work
   min: 2, // Keep minimum ready
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 20000,
