@@ -7,15 +7,18 @@ import { useProductProvider } from "@/providers/product-provider";
 import clsx from "clsx";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
+import { Button } from "../ui/button";
 
 function SubmitButton({
   availableForSale,
   selectedVariantId,
   isLoading,
+  onClick,
 }: {
   availableForSale: boolean;
   selectedVariantId: string | undefined;
   isLoading: boolean;
+  onClick: () => void;
 }) {
   const buttonClasses =
     "relative flex w-full items-center justify-center rounded-full bg-blue-600 p-4 tracking-wide text-white cursor-pointer";
@@ -23,15 +26,15 @@ function SubmitButton({
 
   if (!availableForSale) {
     return (
-      <button disabled className={clsx(buttonClasses, disabledClasses)}>
+      <Button disabled className={clsx(buttonClasses, disabledClasses)}>
         Out Of Stock
-      </button>
+      </Button>
     );
   }
 
   if (!selectedVariantId) {
     return (
-      <button
+      <Button
         aria-label="Please select an option"
         disabled
         className={clsx(buttonClasses, disabledClasses)}
@@ -40,12 +43,12 @@ function SubmitButton({
           <PlusIcon className="h-5" />
         </div>
         Add To Cart
-      </button>
+      </Button>
     );
   }
 
   return (
-    <button
+    <Button
       type="button"
       aria-label="Add to cart"
       disabled={isLoading}
@@ -53,12 +56,13 @@ function SubmitButton({
         "hover:opacity-90": !isLoading,
         "opacity-60": isLoading,
       })}
+      onClick={onClick}
     >
       <div className="absolute left-0 ml-4">
         <PlusIcon className="h-5" />
       </div>
       {isLoading ? "Adding..." : "Add To Cart"}
-    </button>
+    </Button>
   );
 }
 
@@ -71,7 +75,7 @@ export function AddToCart({
 }) {
   const { availableForSale } = product;
   const { state } = useProductProvider();
-  const { addItem } = useCart();
+  const { cart, addItem , updateItemQuantity} = useCart();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -104,7 +108,14 @@ export function AddToCart({
     setError(null);
 
     try {
-      await addItem(finalVariant, product, featuredImage);
+      // Check if item already exists in cart
+      const existingItem = cart?.lines.find((item) => item.merchandise.id === finalVariant.id);
+      if (existingItem && existingItem.id) {
+        await updateItemQuantity(existingItem.id, existingItem.quantity + 1);
+      } else {
+        await addItem(finalVariant, product, featuredImage);
+      }
+
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to add item";
@@ -117,13 +128,12 @@ export function AddToCart({
 
   return (
     <div>
-      <div onClick={handleAddToCart}>
         <SubmitButton
           availableForSale={availableForSale}
           selectedVariantId={selectedVariantId}
           isLoading={isLoading}
+          onClick={handleAddToCart}
         />
-      </div>
       {error && (
         <p aria-live="polite" className="text-sm text-red-500 mt-2">
           {error}

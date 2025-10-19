@@ -4,315 +4,59 @@ import { CartResponse } from "@/app/api/cart/types";
 import { SelectProduct, SelectProductVariant } from "@/database/schema";
 import { swrFetcher } from "@/lib/swr-fetcher";
 import { BASE_URL } from "@/lib/utils";
+import { FrontendCart, SelectCartItem } from "@/types/cart";
 import {
-  CartCost,
-  CartItemCost,
-  CartMerchandise,
-  SelectCartItem,
-  FrontendCart,
-} from "@/types/cart";
-import React, {
-  createContext,
-  useContext,
-  useMemo,
-  useOptimistic,
-  startTransition,
-} from "react";
-import useSWR, { mutate } from "swr";
-
-type UpdateType = "plus" | "minus" | "delete";
-
-type CartAction =
-  | {
-      type: "UPDATE_ITEM";
-      payload: { merchandiseId: string; updateType: UpdateType };
-    }
-  | {
-      type: "ADD_ITEM";
-      payload: {
-        variant: SelectProductVariant;
-        product: SelectProduct;
-        featuredImage?: {
-          url: string;
-          altText?: string;
-          width?: number;
-          height?: number;
-        };
-      };
-    };
+  addItemToCart,
+  updateCartItemQuantity,
+  removeCartItem,
+} from "@/lib/cart-api";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import useSWR from "swr";
+import { transformCartResponse } from "@/lib/cart-helpers";
 
 type CartContextType = {
-  cartUrl: string;
+  cart: FrontendCart | undefined;
+  isLoading: boolean;
+  error: Error | null;
+  addItem: (
+    variant: SelectProductVariant,
+    product: SelectProduct,
+    featuredImage?: {
+      url: string;
+      altText?: string;
+      width?: number;
+      height?: number;
+    },
+  ) => Promise<void>;
+  updateItemQuantity: (cartItemId: string, quantity: number) => Promise<void>;
+  removeItem: (cartItemId: string) => Promise<void>;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-/**
- * Transforms CartResponse from API to FrontendCart structure
- */
-function transformCartResponse(response: CartResponse): FrontendCart {
-  const { cart, totalItems, totalPrice, currencyCode } = response.data;
-
-  const lines: SelectCartItem[] = cart.items.map((item) => {
-    const itemTotal = (item.productVariant.price / 100) * item.quantity;
-
-    return {
-      id: item.id,
-      quantity: item.quantity,
-      cost: {
-        totalAmount: {
-          amount: itemTotal.toString(),
-          currencyCode: item.productVariant.currencyCode,
-        },
-      },
-      merchandise: {
-        id: item.productVariant.id,
-        title: item.productVariant.title,
-        selectedOptions: item.productVariant.selectedOptions as Array<{
-          name: string;
-          value: string;
-        }>,
-        product: {
-          id: item.productVariant.product.id,
-          handle: item.productVariant.product.id,
-          title: item.productVariant.product.title,
-          featuredImage: item.featuredImage
-            ? {
-                url: item.featuredImage.url,
-                altText: item.featuredImage.altText || undefined,
-                width: item.featuredImage.width || undefined,
-                height: item.featuredImage.height || undefined,
-              }
-            : null,
-        },
-      },
-    };
-  });
-
-  const totalAmount = (totalPrice / 100).toString();
-
-  return {
-    id: cart.id,
-    checkoutUrl: "",
-    totalQuantity: totalItems,
-    lines,
-    cost: {
-      subtotalAmount: { amount: totalAmount, currencyCode },
-      totalAmount: { amount: totalAmount, currencyCode },
-      totalTaxAmount: { amount: "0", currencyCode },
-    },
-  };
-}
-
-function calculateItemCost(quantity: number, priceInCents: number): string {
-  // Convert from cents to dollars for display
-  const priceInDollars = priceInCents / 100;
-  return (priceInDollars * quantity).toString();
-}
-
-function updateCartItem(
-  item: SelectCartItem,
-  updateType: UpdateType,
-): SelectCartItem | null {
-  if (updateType === "delete") return null;
-
-  const newQuantity =
-    updateType === "plus" ? item.quantity + 1 : item.quantity - 1;
-  if (newQuantity === 0) return null;
-
-  const singleItemAmount = Number(item.cost.totalAmount.amount) / item.quantity;
-  const newTotalAmount = calculateItemCost(newQuantity, singleItemAmount * 100);
-
-  return {
-    ...item,
-    quantity: newQuantity,
-    cost: {
-      ...item.cost,
-      totalAmount: {
-        ...item.cost.totalAmount,
-        amount: newTotalAmount,
-      },
-    },
-  };
-}
-
-function createOrUpdateCartItem(
-  existingItem: SelectCartItem | undefined,
-  variant: SelectProductVariant,
-  product: SelectProduct,
-  featuredImage?: {
-    url: string;
-    altText?: string;
-    width?: number;
-    height?: number;
-  },
-): SelectCartItem {
-  const quantity = existingItem ? existingItem.quantity + 1 : 1;
-  const totalAmount = calculateItemCost(quantity, variant.price);
-
-  return {
-    id: existingItem?.id,
-    quantity,
-    cost: {
-      totalAmount: {
-        amount: totalAmount,
-        currencyCode: variant.currencyCode,
-      },
-    } as CartItemCost,
-    merchandise: {
-      id: variant.id,
-      title: variant.title,
-      selectedOptions: variant.selectedOptions,
-      product: {
-        id: product.id,
-        handle: product.id,
-        title: product.title,
-        featuredImage: featuredImage || null,
-      },
-    } as CartMerchandise,
-  };
-}
-
-function updateCartTotals(
-  lines: SelectCartItem[],
-): Pick<FrontendCart, "totalQuantity" | "cost"> {
-  const totalQuantity = lines.reduce((sum, item) => sum + item.quantity, 0);
-  const totalAmount = lines.reduce(
-    (sum, item) => sum + Number(item.cost.totalAmount.amount),
-    0,
-  );
-  const currencyCode = lines[0]?.cost.totalAmount.currencyCode ?? "USD";
-
-  return {
-    totalQuantity,
-    cost: {
-      subtotalAmount: { amount: totalAmount.toString(), currencyCode },
-      totalAmount: { amount: totalAmount.toString(), currencyCode },
-      totalTaxAmount: { amount: "0", currencyCode },
-    },
-  };
-}
-
-function createEmptyCart(): FrontendCart {
-  return {
-    id: undefined,
-    checkoutUrl: "",
-    totalQuantity: 0,
-    lines: [],
-    cost: {
-      subtotalAmount: { amount: "0", currencyCode: "USD" },
-      totalAmount: { amount: "0", currencyCode: "USD" },
-      totalTaxAmount: { amount: "0", currencyCode: "USD" },
-    } as CartCost,
-  };
-}
-
-function cartReducer(
-  state: FrontendCart | undefined,
-  action: CartAction,
-): FrontendCart {
-  const currentCart = state || createEmptyCart();
-
-  switch (action.type) {
-    case "UPDATE_ITEM": {
-      const { merchandiseId, updateType } = action.payload;
-      const updatedLines = currentCart.lines
-        .map((item) =>
-          item.merchandise.id === merchandiseId
-            ? updateCartItem(item, updateType)
-            : item,
-        )
-        .filter(Boolean) as SelectCartItem[];
-
-      if (updatedLines.length === 0) {
-        return {
-          ...currentCart,
-          lines: [],
-          totalQuantity: 0,
-          cost: {
-            ...currentCart.cost,
-            totalAmount: { ...currentCart.cost.totalAmount, amount: "0" },
-          },
-        };
-      }
-
-      return {
-        ...currentCart,
-        ...updateCartTotals(updatedLines),
-        lines: updatedLines,
-      };
-    }
-    case "ADD_ITEM": {
-      const { variant, product, featuredImage } = action.payload;
-      const existingItem = currentCart.lines.find(
-        (item) => item.merchandise.id === variant.id,
-      );
-      const updatedItem = createOrUpdateCartItem(
-        existingItem,
-        variant,
-        product,
-        featuredImage,
-      );
-
-      const updatedLines = existingItem
-        ? currentCart.lines.map((item) =>
-            item.merchandise.id === variant.id ? updatedItem : item,
-          )
-        : [...currentCart.lines, updatedItem];
-
-      return {
-        ...currentCart,
-        ...updateCartTotals(updatedLines),
-        lines: updatedLines,
-      };
-    }
-    default:
-      return currentCart;
-  }
-}
-
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  // Provide the cart API endpoint URL for SWR
   const cartUrl = `${BASE_URL}/api/cart`;
 
-  return (
-    <CartContext.Provider value={{ cartUrl }}>{children}</CartContext.Provider>
-  );
-}
-
-export function useCart() {
-  const context = useContext(CartContext);
-  if (context === undefined) {
-    throw new Error("useCart must be used within a CartProvider");
-  }
-
-  // Use SWR to fetch cart data asynchronously
+  // Use SWR to fetch cart data initially
   const {
     data: cartResponse,
     error,
     isLoading,
-  } = useSWR<CartResponse>(context.cartUrl, swrFetcher);
+  } = useSWR<CartResponse>(cartUrl, swrFetcher);
 
-  // Transform the API response to frontend format
-  const initialCart = cartResponse
-    ? transformCartResponse(cartResponse)
-    : undefined;
-
-  const [optimisticCart, updateOptimisticCart] = useOptimistic(
-    initialCart,
-    cartReducer,
+  // Local cart state that gets updated when we make changes
+  const [cart, setCart] = useState<FrontendCart | undefined>(
+    cartResponse ? transformCartResponse(cartResponse) : undefined,
   );
 
-  const updateCartItem = (merchandiseId: string, updateType: UpdateType) => {
-    startTransition(() => {
-      updateOptimisticCart({
-        type: "UPDATE_ITEM",
-        payload: { merchandiseId, updateType },
-      });
-    });
-  };
+  // Update local state when SWR data changes (initial load)
+  useEffect(() => {
+    if (cartResponse && !cart) {
+      setCart(transformCartResponse(cartResponse));
+    }
+  }, [cartResponse, cart]);
 
-  const addCartItem = (
+  const addItem = async (
     variant: SelectProductVariant,
     product: SelectProduct,
     featuredImage?: {
@@ -322,27 +66,240 @@ export function useCart() {
       height?: number;
     },
   ) => {
-    startTransition(() => {
-      updateOptimisticCart({
-        type: "ADD_ITEM",
-        payload: { variant, product, featuredImage },
+    try {
+      await addItemToCart({
+        productVariantId: variant.id,
+        quantity: 1,
       });
-    });
+
+      // Update local cart state
+      setCart((currentCart) => {
+        if (!currentCart) return currentCart;
+
+        const existingItem = currentCart.lines.find(
+          (item) => item.merchandise.id === variant.id,
+        );
+
+        let updatedLines: SelectCartItem[];
+
+        if (existingItem) {
+          // Update existing item quantity
+          updatedLines = currentCart.lines.map((item) =>
+            item.merchandise.id === variant.id
+              ? {
+                  ...item,
+                  quantity: item.quantity + 1,
+                  cost: {
+                    ...item.cost,
+                    totalAmount: {
+                      ...item.cost.totalAmount,
+                      amount: (
+                        (Number(item.cost.totalAmount.amount) / item.quantity) *
+                        (item.quantity + 1)
+                      ).toString(),
+                    },
+                  },
+                }
+              : item,
+          );
+        } else {
+          // Add new item
+          const newItem: SelectCartItem = {
+            id: `temp-${Date.now()}`, // Temporary ID, will be updated on next fetch
+            quantity: 1,
+            cost: {
+              totalAmount: {
+                amount: (variant.price / 100).toString(),
+                currencyCode: variant.currencyCode,
+              },
+            },
+            merchandise: {
+              id: variant.id,
+              title: variant.title,
+              selectedOptions: variant.selectedOptions,
+              product: {
+                id: product.id,
+                handle: product.id,
+                title: product.title,
+                featuredImage: featuredImage || null,
+              },
+            },
+          };
+          updatedLines = [...currentCart.lines, newItem];
+        }
+
+        // Update totals
+        const totalQuantity = updatedLines.reduce(
+          (sum, item) => sum + item.quantity,
+          0,
+        );
+        const totalAmount = updatedLines.reduce(
+          (sum, item) => sum + Number(item.cost.totalAmount.amount),
+          0,
+        );
+
+        return {
+          ...currentCart,
+          lines: updatedLines,
+          totalQuantity,
+          cost: {
+            ...currentCart.cost,
+            subtotalAmount: {
+              amount: totalAmount.toString(),
+              currencyCode: currentCart.cost.subtotalAmount.currencyCode,
+            },
+            totalAmount: {
+              amount: totalAmount.toString(),
+              currencyCode: currentCart.cost.totalAmount.currencyCode,
+            },
+          },
+        };
+      });
+    } catch (error) {
+      console.error("Failed to add item to cart:", error);
+      throw error;
+    }
   };
 
-  const refreshCart = () => {
-    mutate(context.cartUrl);
+  const updateItemQuantity = async (cartItemId: string, quantity: number) => {
+    try {
+      if (quantity === 0) {
+        await removeCartItem({ cartItemId });
+      } else {
+        await updateCartItemQuantity({ cartItemId, quantity });
+      }
+
+      // Update local cart state
+      setCart((currentCart) => {
+        if (!currentCart) return currentCart;
+
+        const updatedLines = currentCart.lines
+          .map((item) =>
+            item.id === cartItemId
+              ? quantity === 0
+                ? null // Will be filtered out
+                : {
+                    ...item,
+                    quantity,
+                    cost: {
+                      ...item.cost,
+                      totalAmount: {
+                        ...item.cost.totalAmount,
+                        amount: (
+                          (Number(item.cost.totalAmount.amount) /
+                            item.quantity) *
+                          quantity
+                        ).toString(),
+                      },
+                    },
+                  }
+              : item,
+          )
+          .filter(Boolean) as SelectCartItem[];
+
+        // Update totals
+        const totalQuantity = updatedLines.reduce(
+          (sum, item) => sum + item.quantity,
+          0,
+        );
+        const totalAmount = updatedLines.reduce(
+          (sum, item) => sum + Number(item.cost.totalAmount.amount),
+          0,
+        );
+
+        return {
+          ...currentCart,
+          lines: updatedLines,
+          totalQuantity,
+          cost: {
+            ...currentCart.cost,
+            subtotalAmount: {
+              amount: totalAmount.toString(),
+              currencyCode: currentCart.cost.subtotalAmount.currencyCode,
+            },
+            totalAmount: {
+              amount: totalAmount.toString(),
+              currencyCode: currentCart.cost.totalAmount.currencyCode,
+            },
+          },
+        };
+      });
+    } catch (error) {
+      console.error("Failed to update item quantity:", error);
+      throw error;
+    }
   };
 
-  return useMemo(
+  const removeItem = async (cartItemId: string) => {
+    try {
+      await removeCartItem({ cartItemId });
+
+      // Update local cart state
+      setCart((currentCart) => {
+        if (!currentCart) return currentCart;
+
+        const updatedLines = currentCart.lines.filter(
+          (item) => item.id !== cartItemId,
+        );
+
+        // Update totals
+        const totalQuantity = updatedLines.reduce(
+          (sum, item) => sum + item.quantity,
+          0,
+        );
+        const totalAmount = updatedLines.reduce(
+          (sum, item) => sum + Number(item.cost.totalAmount.amount),
+          0,
+        );
+
+        return {
+          ...currentCart,
+          lines: updatedLines,
+          totalQuantity,
+          cost: {
+            ...currentCart.cost,
+            subtotalAmount: {
+              amount: totalAmount.toString(),
+              currencyCode: currentCart.cost.subtotalAmount.currencyCode,
+            },
+            totalAmount: {
+              amount: totalAmount.toString(),
+              currencyCode: currentCart.cost.totalAmount.currencyCode,
+            },
+          },
+        };
+      });
+    } catch (error) {
+      console.error("Failed to remove item from cart:", error);
+      throw error;
+    }
+  };
+
+  const contextValue = useMemo(
     () => ({
-      cart: optimisticCart,
-      updateCartItem,
-      addCartItem,
-      refreshCart,
+      cart,
       isLoading,
       error,
+      addItem,
+      updateItemQuantity,
+      removeItem,
     }),
-    [optimisticCart, isLoading, error, context.cartUrl],
+    [cart, isLoading, error, addItem, updateItemQuantity, removeItem],
   );
+
+  return (
+    <CartContext.Provider value={contextValue}>{children}</CartContext.Provider>
+  );
+}
+
+/**
+ * Custom hook to access the cart context with type safety
+ */
+export function useCart(): CartContextType {
+  const context = useContext(CartContext);
+  if (context === undefined) {
+    throw new Error("useCart must be used within a CartProvider");
+  }
+
+  return context;
 }
