@@ -3,6 +3,7 @@ import { handleApiError } from "@/lib/errors";
 import { shopService } from "./service";
 import { getProductsSchemaRefined } from "./dto";
 import type { ShopProductsResponse } from "./types";
+import { drizzleDbClient } from "@/database";
 
 /**
  * GET /api/shop
@@ -69,7 +70,10 @@ export async function GET(
     const validatedDto = getProductsSchemaRefined.parse(queryParams);
 
     // Step 2: Get products from service
-    const productsData = await shopService.getProducts({ dto: validatedDto });
+    const productsData = await shopService.getProducts({
+      dto: validatedDto,
+      db: drizzleDbClient(),
+    });
 
     return NextResponse.json(
       {

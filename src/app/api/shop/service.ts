@@ -1,20 +1,8 @@
-import { drizzleDbClient } from "@/database/index";
+import { DrizzleDbClient } from "@/database/index";
 import { products } from "@/database/schemas/products";
 import { categories } from "@/database/schemas/categories";
 import { productVariants } from "@/database/schemas/product-variants";
-import { productImages } from "@/database/schemas/product-images";
-import {
-  eq,
-  and,
-  or,
-  gte,
-  lte,
-  ilike,
-  desc,
-  asc,
-  sql,
-  count,
-} from "drizzle-orm";
+import { eq, and, or, ilike, desc, asc, sql, count } from "drizzle-orm";
 import {
   InvalidPriceRangeError,
   CategoryNotFoundError,
@@ -27,16 +15,13 @@ import type {
   PaginationMeta,
 } from "./types";
 import type { SelectProductImage } from "@/database/schemas/product-images";
-import page from "@/app/(compliance)/about/page";
-import { any, readonly } from "zod";
+import { TestDatabase } from "@/test/utils/db-helper";
 
 /**
  * Service class for shop operations.
  * Handles all business logic for product filtering, sorting, and pagination.
  */
 export class ShopService {
-  private readonly db = drizzleDbClient();
-
   /**
    * Gets products with filtering, sorting, and pagination.
    * @param dto - Filter and pagination parameters
@@ -44,8 +29,10 @@ export class ShopService {
    */
   public async getProducts({
     dto,
+    db,
   }: Readonly<{
     dto: GetProductsDto;
+    db: DrizzleDbClient | TestDatabase;
   }>): Promise<ShopProductsData> {
     const {
       page,
@@ -70,7 +57,7 @@ export class ShopService {
 
     // Validate category if provided
     if (categoryId) {
-      const categoryExists = await this.db.query.categories.findFirst({
+      const categoryExists = await db.query.categories.findFirst({
         where: eq(categories.id, categoryId),
       });
 
@@ -89,7 +76,7 @@ export class ShopService {
     });
 
     // Get total count for pagination
-    const [countResult] = await this.db
+    const [countResult] = await db
       .select({ count: count() })
       .from(products)
       .where(conditions.length > 0 ? and(...conditions) : undefined);
@@ -104,7 +91,7 @@ export class ShopService {
     const orderByClause = this.buildOrderByClause({ sortField, sortDirection });
 
     // Query products with relations
-    const productsResult = await this.db.query.products.findMany({
+    const productsResult = await db.query.products.findMany({
       where: conditions.length > 0 ? and(...conditions) : undefined,
       with: {
         category: true,
