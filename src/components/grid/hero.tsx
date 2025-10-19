@@ -56,7 +56,7 @@ export function HeroThreeItemGrid(): ReactNode {
   // ============================= SWR DATA =============================
   const { data, isLoading, error } = useSWR<SWRResponse<LatestProductsItem[]>>(
     `${BASE_URL}/api/main-page`,
-    swrFetcher
+    swrFetcher,
   );
 
   if (isLoading) return <HeroThreeItemGridSkeleton />;

@@ -28,8 +28,8 @@ export class MainPageService {
         productImages,
         and(
           eq(products.id, productImages.productId),
-          eq(productImages.order, 1)
-        )
+          eq(productImages.order, 1),
+        ),
       )
       .leftJoin(productVariants, eq(products.id, productVariants.productId))
       .orderBy(desc(products.createdAt))

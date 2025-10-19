@@ -1,4 +1,4 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { handleApiError } from "@/lib/errors";
 import { mainPageService } from "./service";
 import type { MainPageResponse } from "./types";
@@ -14,9 +14,7 @@ import { validateServerSession } from "@/lib/api-helpers";
  * @param request - The incoming request
  * @returns Latest products data for main page
  */
-export async function GET(
-  request: NextRequest
-): Promise<NextResponse<MainPageResponse | unknown>> {
+export async function GET(): Promise<NextResponse<MainPageResponse | unknown>> {
   try {
     // Step 1: Validate user session
     await validateServerSession();
