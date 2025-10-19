@@ -4,11 +4,7 @@ import Prose from "@/components/global/prose";
 import { AddToCart } from "./add-to-cart";
 import { ProductData } from "@/app/api/product/[productUuid]/types";
 
-export function ProductDescription({
-  product,
-}: {
-  product: ProductData;
-}) {
+export function ProductDescription({ product }: { product: ProductData }) {
   return (
     <>
       <div className="mb-6 flex flex-col border-b pb-6 dark:border-neutral-700">

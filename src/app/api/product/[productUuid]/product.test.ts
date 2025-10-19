@@ -17,6 +17,7 @@ import { createProductOptionFixtures } from "@/test/fixtures/product-options";
 import type { ProductResponse } from "./types";
 import { mockValidateServerSession } from "@/test/setup/test-setup";
 import { UnauthorizedError } from "@/lib/errors/cart-errors";
+import { faker } from "@faker-js/faker";
 
 /**
  * Comprehensive test suite for the product API endpoint.
@@ -340,7 +341,9 @@ describe("/api/product/[productUuid]", () => {
         const request = new NextRequest(
           `http://localhost:3000/api/product/${productId}`,
         );
-        const response = await GET(request);
+        const response = await GET(request, {
+          params: Promise.resolve({ productUuid: productId }),
+        });
         const result = (await response.json()) as ProductResponse;
 
         // Assert: Response status is 200
@@ -358,16 +361,22 @@ describe("/api/product/[productUuid]", () => {
         // Arrange: Mock successful authentication
         mockValidateServerSession.mockResolvedValue({ id: "user-123" });
 
+        const productId = faker.string.uuid();
+
         // Act: Make GET request for non-existent product
         const request = new NextRequest(
-          "http://localhost:3000/api/product/non-existent-uuid",
+          `http://localhost:3000/api/product/${productId}`,
         );
-        const response = await GET(request);
+        const response = await GET(request, {
+          params: Promise.resolve({ productUuid: productId }),
+        });
         const result = await response.json();
 
         // Assert: Response status is 404
         expect(response.status).toBe(404);
-        expect(result.message).toBe("Product not found");
+        expect(result.message).toContain("Product with");
+        expect(result.message).toContain(productId);
+        expect(result.message).toContain("not found");
       });
 
       it("should return 401 when user is not authenticated", async () => {
@@ -376,7 +385,12 @@ describe("/api/product/[productUuid]", () => {
 
         // Act: Make GET request to product endpoint
         const response = await GET(
-          new NextRequest("http://localhost:3000/api/product/some-uuid")
+          new NextRequest("http://localhost:3000/api/product/some-uuid"),
+          {
+            params: Promise.resolve({
+              productUuid: faker.string.uuid().toString(),
+            }),
+          },
         );
         const result = await response.json();
 
@@ -385,7 +399,7 @@ describe("/api/product/[productUuid]", () => {
         expect(result.message).toBe("User is not authenticated.");
       });
 
-      it("should return 400 for invalid UUID format", async () => {
+      it("should return 403 for invalid UUID format", async () => {
         // Arrange: Mock successful authentication
         mockValidateServerSession.mockResolvedValue({ id: "user-123" });
 
@@ -393,12 +407,15 @@ describe("/api/product/[productUuid]", () => {
         const request = new NextRequest(
           "http://localhost:3000/api/product/invalid-uuid",
         );
-        const response = await GET(request);
+        const response = await GET(request, {
+          params: Promise.resolve({ productUuid: "invalid-uuid" }),
+        });
         const result = await response.json();
 
-        // Assert: Response status is 400
-        expect(response.status).toBe(400);
-        expect(result.message).toContain("Invalid product UUID format");
+        // Assert: Response status is 403
+        expect(response.status).toBe(403);
+        expect(result.message).toBe("Input validation failed");
+        expect(result.errors.productUuid).toContain("Invalid product UUID format");
       });
     });
   });
