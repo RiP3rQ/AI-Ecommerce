@@ -1,5 +1,6 @@
 import { beforeEach, beforeAll, vi } from "vitest";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { UnauthorizedError } from "@/lib/errors";
 
 // Mock Supabase auth client to prevent actual API calls during tests
 const mockSupabaseClient = {
@@ -201,7 +202,5 @@ export function mockAuthenticatedApiUser(user?: {
  * Helper function to mock unauthenticated state for API session validation
  */
 export function mockUnauthenticatedApiUser() {
-  mockValidateServerSession.mockRejectedValue(
-    new Error("User is not authenticated.")
-  );
+  mockValidateServerSession.mockRejectedValue(new UnauthorizedError());
 }

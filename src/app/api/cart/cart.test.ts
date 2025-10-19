@@ -650,6 +650,8 @@ describe("/api/cart", () => {
       // Act
       const response = await GET(request);
 
+      console.log("response", response);
+
       // Assert
       expect(response.status).toBe(401);
     });
@@ -705,7 +707,7 @@ describe("/api/cart", () => {
     });
   });
 
-  describe("Integration Tests - Route Handlers", () => {
+  describe.only("Integration Tests - Route Handlers", () => {
     const mockUser = mockAuthenticatedApiUser({ id: faker.string.uuid() });
 
     afterEach(() => {
