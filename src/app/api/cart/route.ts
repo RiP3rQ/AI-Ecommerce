@@ -5,7 +5,6 @@ import {
   addItemToCartSchema,
   updateCartItemSchema,
   removeCartItemSchema,
-  getCartSchema,
 } from "./dto";
 import type { CartResponse, DeleteCartItemResponse } from "./types";
 import { validateServerSession } from "@/lib/api-helpers";
@@ -27,12 +26,7 @@ export async function GET(
     // Step 1: Validate session
     const user = await validateServerSession();
 
-    // Step 2: Validate query parameters (optional)
-    const searchParams = request.nextUrl.searchParams;
-    const cartId = searchParams.get("cartId");
-    getCartSchema.parse({ cartId: cartId || undefined });
-
-    // Step 3: Get cart from service
+    // Step 2: Get cart from service
     const cartSummary = await cartService.getCart({ userId: user.id });
 
     return NextResponse.json(

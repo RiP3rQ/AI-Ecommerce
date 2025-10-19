@@ -32,6 +32,7 @@ import {
   mockValidateServerSession,
 } from "@/test/setup/test-setup";
 import { createCategoryFixture } from "@/test/fixtures/categories";
+import { profile } from "console";
 
 /**
  * Comprehensive test suite for the cart API endpoint.
@@ -150,7 +151,10 @@ describe("/api/cart", () => {
           const categoryId = faker.string.uuid();
           const category = await createCategoryFixture({
             db,
-            overrides: { name: "Test Category", id: categoryId },
+            overrides: {
+              name: `Test Category ${faker.string.uuid()}`,
+              id: categoryId,
+            },
           });
           const profile = await createProfileFixture({
             db,
@@ -221,7 +225,10 @@ describe("/api/cart", () => {
           const categoryId = faker.string.uuid();
           const category = await createCategoryFixture({
             db,
-            overrides: { name: "Test Category", id: categoryId },
+            overrides: {
+              name: `Test Category ${faker.string.uuid()}`,
+              id: categoryId,
+            },
           });
           const profile = await createProfileFixture({
             db,
@@ -269,7 +276,10 @@ describe("/api/cart", () => {
           const categoryId = faker.string.uuid();
           const category = await createCategoryFixture({
             db,
-            overrides: { name: "Test Category", id: categoryId },
+            overrides: {
+              name: `Test Category ${faker.string.uuid()}`,
+              id: categoryId,
+            },
           });
           const product = await createProductFixture({
             db,
@@ -323,7 +333,10 @@ describe("/api/cart", () => {
           const categoryId = faker.string.uuid();
           const category = await createCategoryFixture({
             db,
-            overrides: { name: "Test Category", id: categoryId },
+            overrides: {
+              name: `Test Category ${faker.string.uuid()}`,
+              id: categoryId,
+            },
           });
           const product = await createProductFixture({
             db,
@@ -363,7 +376,10 @@ describe("/api/cart", () => {
           const categoryId = faker.string.uuid();
           const category = await createCategoryFixture({
             db,
-            overrides: { name: "Test Category", id: categoryId },
+            overrides: {
+              name: `Test Category ${faker.string.uuid()}`,
+              id: categoryId,
+            },
           });
           const product = await createProductFixture({
             db,
@@ -400,7 +416,10 @@ describe("/api/cart", () => {
           const categoryId = faker.string.uuid();
           const category = await createCategoryFixture({
             db,
-            overrides: { name: "Test Category", id: categoryId },
+            overrides: {
+              name: `Test Category ${faker.string.uuid()}`,
+              id: categoryId,
+            },
           });
           const product = await createProductFixture({
             db,
@@ -439,7 +458,10 @@ describe("/api/cart", () => {
           const categoryId = faker.string.uuid();
           const category = await createCategoryFixture({
             db,
-            overrides: { name: "Test Category", id: categoryId },
+            overrides: {
+              name: `Test Category ${faker.string.uuid()}`,
+              id: categoryId,
+            },
           });
           const product = await createProductFixture({
             db,
@@ -494,7 +516,10 @@ describe("/api/cart", () => {
           const categoryId = faker.string.uuid();
           const category = await createCategoryFixture({
             db,
-            overrides: { name: "Test Category", id: categoryId },
+            overrides: {
+              name: `Test Category ${faker.string.uuid()}`,
+              id: categoryId,
+            },
           });
           const product = await createProductFixture({
             db,
@@ -569,7 +594,10 @@ describe("/api/cart", () => {
           const categoryId = faker.string.uuid();
           const category = await createCategoryFixture({
             db,
-            overrides: { name: "Test Category", id: categoryId },
+            overrides: {
+              name: `Test Category ${faker.string.uuid()}`,
+              id: categoryId,
+            },
           });
           const product = await createProductFixture({
             db,
@@ -707,8 +735,20 @@ describe("/api/cart", () => {
     });
   });
 
-  describe.only("Integration Tests - Route Handlers", () => {
-    const mockUser = mockAuthenticatedApiUser({ id: faker.string.uuid() });
+  describe("Integration Tests - Route Handlers", () => {
+    let mockUser: any;
+    let profile: any;
+
+    beforeEach(async () => {
+      mockUser = mockAuthenticatedApiUser({ id: faker.string.uuid() });
+      // Create a profile in the database that matches the mock user
+      const db = createTestDb();
+      profile = await createProfileFixture({
+        db,
+        overrides: { id: mockUser.id },
+      });
+      await dbHelpers.truncateCartTables(db);
+    });
 
     afterEach(() => {
       vi.clearAllMocks();
@@ -736,16 +776,15 @@ describe("/api/cart", () => {
         // Arrange: Seed data in test database
         const db = createTestDb();
         try {
-          const userId = faker.string.uuid();
           const categoryId = faker.string.uuid();
           const category = await createCategoryFixture({
             db,
-            overrides: { name: "Test Category", id: categoryId },
+            overrides: {
+              name: `Test Category ${faker.string.uuid()}`,
+              id: categoryId,
+            },
           });
-          const profile = await createProfileFixture({
-            db,
-            overrides: { id: userId },
-          });
+          // Note: Profile already created in beforeEach, so we don't create another one
 
           const product = await createProductFixture({
             db,
@@ -824,11 +863,14 @@ describe("/api/cart", () => {
           const categoryId = faker.string.uuid();
           const category = await createCategoryFixture({
             db,
-            overrides: { name: "Test Category", id: categoryId },
+            overrides: {
+              name: `Test Category ${faker.string.uuid()}`,
+              id: categoryId,
+            },
           });
           const product = await createProductFixture({
             db,
-            overrides: { title: "POST Test Product" },
+            overrides: { title: "POST Test Product", categoryId: category.id },
           });
 
           const variant = await createProductVariantFixture({
@@ -892,11 +934,14 @@ describe("/api/cart", () => {
           const categoryId = faker.string.uuid();
           const category = await createCategoryFixture({
             db,
-            overrides: { name: "Test Category", id: categoryId },
+            overrides: {
+              name: `Test Category ${faker.string.uuid()}`,
+              id: categoryId,
+            },
           });
           const product = await createProductFixture({
             db,
-            overrides: { title: "PATCH Test Product" },
+            overrides: { title: "PATCH Test Product", categoryId: category.id },
           });
 
           const variant = await createProductVariantFixture({
@@ -953,7 +998,7 @@ describe("/api/cart", () => {
         const request = new NextRequest("http://localhost:3000/api/cart", {
           method: "PATCH",
           body: JSON.stringify({
-            cartItemId: "non-existent-id",
+            cartItemId: faker.string.uuid(),
             quantity: 1,
           }),
         });
@@ -975,15 +1020,18 @@ describe("/api/cart", () => {
           const categoryId = faker.string.uuid();
           const category = await createCategoryFixture({
             db,
-            overrides: { name: "Test Category", id: categoryId },
+            overrides: {
+              name: `Test Category ${faker.string.uuid()}`,
+              id: categoryId,
+            },
           });
-          const profile = await createProfileFixture({
-            db,
-            overrides: { id: faker.string.uuid() },
-          });
+          // Note: Profile already created in beforeEach for mockUser
           const product = await createProductFixture({
             db,
-            overrides: { title: "DELETE Test Product", categoryId },
+            overrides: {
+              title: "DELETE Test Product",
+              categoryId: category.id,
+            },
           });
 
           const variant = await createProductVariantFixture({
@@ -995,10 +1043,10 @@ describe("/api/cart", () => {
             },
           });
 
-          // Create cart and cart item
+          // Create cart and cart item for the mock user
           const [cart] = await db
             .insert(carts)
-            .values({ userId: profile.id })
+            .values({ userId: mockUser.id })
             .returning();
 
           const [cartItem] = await db
@@ -1038,7 +1086,7 @@ describe("/api/cart", () => {
         const request = new NextRequest("http://localhost:3000/api/cart", {
           method: "DELETE",
           body: JSON.stringify({
-            cartItemId: "non-existent-id",
+            cartItemId: faker.string.uuid(),
           }),
         });
 
@@ -1065,7 +1113,10 @@ describe("/api/cart", () => {
           const categoryId = faker.string.uuid();
           const category = await createCategoryFixture({
             db,
-            overrides: { name: "Test Category", id: categoryId },
+            overrides: {
+              name: `Test Category ${faker.string.uuid()}`,
+              id: categoryId,
+            },
           });
           const product = await createProductFixture({
             db,
@@ -1111,7 +1162,10 @@ describe("/api/cart", () => {
           const categoryId = faker.string.uuid();
           const category = await createCategoryFixture({
             db,
-            overrides: { name: "Test Category", id: categoryId },
+            overrides: {
+              name: `Test Category ${faker.string.uuid()}`,
+              id: categoryId,
+            },
           });
           const product = await createProductFixture({
             db,
@@ -1151,7 +1205,10 @@ describe("/api/cart", () => {
           const categoryId = faker.string.uuid();
           const category = await createCategoryFixture({
             db,
-            overrides: { name: "Test Category", id: categoryId },
+            overrides: {
+              name: `Test Category ${faker.string.uuid()}`,
+              id: categoryId,
+            },
           });
           const product1 = await createProductFixture({
             db,
@@ -1215,7 +1272,10 @@ describe("/api/cart", () => {
           const categoryId = faker.string.uuid();
           const category = await createCategoryFixture({
             db,
-            overrides: { name: "Test Category", id: categoryId },
+            overrides: {
+              name: `Test Category ${faker.string.uuid()}`,
+              id: categoryId,
+            },
           });
           const product = await createProductFixture({
             db,
@@ -1278,7 +1338,10 @@ describe("/api/cart", () => {
           const categoryId = faker.string.uuid();
           const category = await createCategoryFixture({
             db,
-            overrides: { name: "Test Category", id: categoryId },
+            overrides: {
+              name: `Test Category ${faker.string.uuid()}`,
+              id: categoryId,
+            },
           });
           const product = await createProductFixture({
             db,

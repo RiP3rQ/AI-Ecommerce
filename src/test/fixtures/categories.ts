@@ -23,6 +23,7 @@ export async function createCategoryFixture({
 }): Promise<SelectCategory> {
   // Get the base fixture data
   const categoryData = {
+    id: overrides.id,
     name: overrides.name ?? faker.commerce.department(),
     description: overrides.description ?? faker.commerce.productDescription(),
     createdAt: overrides.createdAt ?? new Date(),
@@ -58,6 +59,7 @@ export async function createCategoryFixtures({
   const categoriesData = Array.from({ length: count }, (_, index) => {
     const override = overrides[index] || {};
     return {
+      id: override.id,
       name: override.name ?? faker.commerce.department(),
       description: override.description ?? faker.commerce.productDescription(),
       createdAt: override.createdAt ?? new Date(),

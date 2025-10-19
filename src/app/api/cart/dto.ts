@@ -28,12 +28,3 @@ export const removeCartItemSchema = z.object({
 });
 
 export type RemoveCartItemDto = z.infer<typeof removeCartItemSchema>;
-
-/**
- * Schema for getting cart by cart ID (optional query parameter).
- */
-export const getCartSchema = z.object({
-  cartId: z.uuid("Invalid cart ID format.").optional(),
-});
-
-export type GetCartDto = z.infer<typeof getCartSchema>;
