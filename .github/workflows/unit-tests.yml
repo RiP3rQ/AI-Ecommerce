@@ -2,9 +2,9 @@ name: Type Check & Unit Tests
 
 on:
   push:
-    branches: [main]
+    branches: [main, ai-24-github-ci]
   pull_request:
-    branches: [main]
+    branches: [main, ai-24-github-ci]
   workflow_dispatch:
 
 jobs:
