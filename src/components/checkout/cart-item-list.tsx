@@ -15,7 +15,7 @@ import { Minus, Plus, Trash2 } from "lucide-react";
  * Includes controls to modify quantities or remove items.
  */
 export function CartItemList(): ReactNode {
-  const { cart, updateCartItem, isLoading, error } = useCart();
+  const { cart, updateItemQuantity, removeItem, isLoading, error } = useCart();
 
   if (error) {
     return (
@@ -113,7 +113,9 @@ export function CartItemList(): ReactNode {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => updateCartItem(item.merchandise.id, "minus")}
+                  onClick={() =>
+                    updateItemQuantity(item.id!, item.quantity - 1)
+                  }
                   disabled={item.quantity <= 1}
                   className="h-8 w-8 p-0"
                 >
@@ -125,7 +127,9 @@ export function CartItemList(): ReactNode {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => updateCartItem(item.merchandise.id, "plus")}
+                  onClick={() =>
+                    updateItemQuantity(item.id!, item.quantity + 1)
+                  }
                   className="h-8 w-8 p-0"
                 >
                   <Plus className="h-3 w-3" />
@@ -133,7 +137,7 @@ export function CartItemList(): ReactNode {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => updateCartItem(item.merchandise.id, "delete")}
+                  onClick={() => removeItem(item.id!)}
                   className="h-8 w-8 p-0 text-destructive hover:text-destructive"
                 >
                   <Trash2 className="h-3 w-3" />

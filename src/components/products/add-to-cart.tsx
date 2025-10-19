@@ -4,7 +4,6 @@ import { SelectProductVariant } from "@/database/schema";
 import { ProductData } from "@/app/api/product/[id]/types";
 import { useCart } from "@/providers/cart-provider";
 import { useProductProvider } from "@/providers/product-provider";
-import { addItemToCart } from "@/lib/cart-api";
 import clsx from "clsx";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
@@ -71,8 +70,8 @@ export function AddToCart({
   variants: SelectProductVariant[];
 }) {
   const { availableForSale } = product;
-  const { addCartItem, refreshCart } = useCart();
   const { state } = useProductProvider();
+  const { addItem } = useCart();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -99,18 +98,13 @@ export function AddToCart({
       : undefined;
 
   const handleAddToCart = async () => {
-    if (!selectedVariantId || isLoading) return;
+    if (!selectedVariantId || !finalVariant || isLoading) return;
 
     setIsLoading(true);
     setError(null);
-    addCartItem(finalVariant, product, featuredImage);
 
     try {
-      await addItemToCart({
-        productVariantId: selectedVariantId,
-        quantity: 1,
-      });
-      refreshCart();
+      await addItem(finalVariant, product, featuredImage);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to add item";
