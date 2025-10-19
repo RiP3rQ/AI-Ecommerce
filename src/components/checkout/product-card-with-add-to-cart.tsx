@@ -5,8 +5,19 @@ import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useCart } from "@/providers/cart-provider";
 import { addItemToCart } from "@/lib/cart-api";
 import { Price } from "@/components/custom-price";
@@ -48,7 +59,12 @@ export function ProductCardWithAddToCart({
   const hasOptions = product.options && product.options.length > 0;
 
   // If product has variants with options, show modal for selection
-  const needsVariantSelection = hasVariants && hasOptions && product.options.some((option: SelectProductOption) => option.values.length > 1);
+  const needsVariantSelection =
+    hasVariants &&
+    hasOptions &&
+    product.options.some(
+      (option: SelectProductOption) => option.values.length > 1,
+    );
 
   const handleAddToCart = async () => {
     if (isAddingToCart) return;
@@ -68,16 +84,24 @@ export function ProductCardWithAddToCart({
         throw new Error("No variant available");
       }
 
-      const variant = product.variants.find((v: SelectProductVariant) => v.id === variantId);
+      const variant = product.variants.find(
+        (v: SelectProductVariant) => v.id === variantId,
+      );
       if (!variant) throw new Error("Selected variant not found");
 
       // Add to cart using the cart provider
-      addCartItem(variant, product, product.featuredImage ? {
-        url: product.featuredImage.url,
-        altText: product.featuredImage.altText || undefined,
-        width: product.featuredImage.width || undefined,
-        height: product.featuredImage.height || undefined,
-      } : undefined);
+      addCartItem(
+        variant,
+        product,
+        product.featuredImage
+          ? {
+              url: product.featuredImage.url,
+              altText: product.featuredImage.altText || undefined,
+              width: product.featuredImage.width || undefined,
+              height: product.featuredImage.height || undefined,
+            }
+          : undefined,
+      );
 
       // Also call the API directly
       await addItemToCart({
@@ -236,16 +260,21 @@ export function ProductCardWithAddToCart({
                       onValueChange={setSelectedVariantId}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder={`Select ${option.name.toLowerCase()}`} />
+                        <SelectValue
+                          placeholder={`Select ${option.name.toLowerCase()}`}
+                        />
                       </SelectTrigger>
                       <SelectContent>
                         {option.values.map((value: string) => {
                           // Find matching variant for this option value
-                          const matchingVariant = product.variants.find((variant: SelectProductVariant) =>
-                            variant.selectedOptions.some((opt) =>
-                              opt.name.toLowerCase() === option.name.toLowerCase() &&
-                              opt.value === value
-                            )
+                          const matchingVariant = product.variants.find(
+                            (variant: SelectProductVariant) =>
+                              variant.selectedOptions.some(
+                                (opt) =>
+                                  opt.name.toLowerCase() ===
+                                    option.name.toLowerCase() &&
+                                  opt.value === value,
+                              ),
                           );
 
                           return (
@@ -255,7 +284,8 @@ export function ProductCardWithAddToCart({
                               disabled={!matchingVariant?.availableForSale}
                             >
                               {value}
-                              {!matchingVariant?.availableForSale && " (Out of Stock)"}
+                              {!matchingVariant?.availableForSale &&
+                                " (Out of Stock)"}
                             </SelectItem>
                           );
                         })}

@@ -53,12 +53,10 @@ const mockSuggestedProducts: ProductWithVariantsAndOptions[] = [
         price: 19999,
         currencyCode: "USD",
         availableForSale: true,
-        selectedOptions: [
-          { name: "Size", value: "One Size" }
-        ],
+        selectedOptions: [{ name: "Size", value: "One Size" }],
         createdAt: new Date(),
         updatedAt: new Date(),
-      } as SelectProductVariant
+      } as SelectProductVariant,
     ],
     options: [
       {
@@ -68,7 +66,7 @@ const mockSuggestedProducts: ProductWithVariantsAndOptions[] = [
         values: ["One Size"],
         createdAt: new Date(),
         updatedAt: new Date(),
-      } as SelectProductOption
+      } as SelectProductOption,
     ],
     variantCount: 1,
   },
@@ -106,9 +104,7 @@ const mockSuggestedProducts: ProductWithVariantsAndOptions[] = [
         price: 29999,
         currencyCode: "USD",
         availableForSale: true,
-        selectedOptions: [
-          { name: "Size", value: "Small" }
-        ],
+        selectedOptions: [{ name: "Size", value: "Small" }],
         createdAt: new Date(),
         updatedAt: new Date(),
       } as SelectProductVariant,
@@ -118,9 +114,7 @@ const mockSuggestedProducts: ProductWithVariantsAndOptions[] = [
         price: 29999,
         currencyCode: "USD",
         availableForSale: true,
-        selectedOptions: [
-          { name: "Size", value: "Medium" }
-        ],
+        selectedOptions: [{ name: "Size", value: "Medium" }],
         createdAt: new Date(),
         updatedAt: new Date(),
       } as SelectProductVariant,
@@ -130,9 +124,7 @@ const mockSuggestedProducts: ProductWithVariantsAndOptions[] = [
         price: 29999,
         currencyCode: "USD",
         availableForSale: false,
-        selectedOptions: [
-          { name: "Size", value: "Large" }
-        ],
+        selectedOptions: [{ name: "Size", value: "Large" }],
         createdAt: new Date(),
         updatedAt: new Date(),
       } as SelectProductVariant,
@@ -145,7 +137,7 @@ const mockSuggestedProducts: ProductWithVariantsAndOptions[] = [
         values: ["Small", "Medium", "Large"],
         createdAt: new Date(),
         updatedAt: new Date(),
-      } as SelectProductOption
+      } as SelectProductOption,
     ],
     variantCount: 3,
   },
@@ -182,12 +174,10 @@ const mockSuggestedProducts: ProductWithVariantsAndOptions[] = [
         price: 4999,
         currencyCode: "USD",
         availableForSale: true,
-        selectedOptions: [
-          { name: "Capacity", value: "20000mAh" }
-        ],
+        selectedOptions: [{ name: "Capacity", value: "20000mAh" }],
         createdAt: new Date(),
         updatedAt: new Date(),
-      } as SelectProductVariant
+      } as SelectProductVariant,
     ],
     options: [
       {
@@ -197,7 +187,7 @@ const mockSuggestedProducts: ProductWithVariantsAndOptions[] = [
         values: ["20000mAh"],
         createdAt: new Date(),
         updatedAt: new Date(),
-      } as SelectProductOption
+      } as SelectProductOption,
     ],
     variantCount: 1,
   },
@@ -234,9 +224,7 @@ const mockSuggestedProducts: ProductWithVariantsAndOptions[] = [
         price: 2999,
         currencyCode: "USD",
         availableForSale: true,
-        selectedOptions: [
-          { name: "Color", value: "Black" }
-        ],
+        selectedOptions: [{ name: "Color", value: "Black" }],
         createdAt: new Date(),
         updatedAt: new Date(),
       } as SelectProductVariant,
@@ -246,9 +234,7 @@ const mockSuggestedProducts: ProductWithVariantsAndOptions[] = [
         price: 2999,
         currencyCode: "USD",
         availableForSale: true,
-        selectedOptions: [
-          { name: "Color", value: "White" }
-        ],
+        selectedOptions: [{ name: "Color", value: "White" }],
         createdAt: new Date(),
         updatedAt: new Date(),
       } as SelectProductVariant,
@@ -261,7 +247,7 @@ const mockSuggestedProducts: ProductWithVariantsAndOptions[] = [
         values: ["Black", "White"],
         createdAt: new Date(),
         updatedAt: new Date(),
-      } as SelectProductOption
+      } as SelectProductOption,
     ],
     variantCount: 2,
   },
