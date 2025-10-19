@@ -415,7 +415,9 @@ describe("/api/product/[productUuid]", () => {
         // Assert: Response status is 403
         expect(response.status).toBe(403);
         expect(result.message).toBe("Input validation failed");
-        expect(result.errors.productUuid).toContain("Invalid product UUID format");
+        expect(result.errors.productUuid).toContain(
+          "Invalid product UUID format",
+        );
       });
     });
   });
