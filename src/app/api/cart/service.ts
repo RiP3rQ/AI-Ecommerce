@@ -150,7 +150,7 @@ export class CartService {
       );
     }
 
-    const cartId = await this.getOrCreateCart({ userId });
+    const cartId = await this.getOrCreateCart({ userId, db });
 
     // Check if item already exists in cart
     const existingItem = await db.query.cartItems.findFirst({
@@ -185,7 +185,7 @@ export class CartService {
       });
     }
 
-    return this.getCart({ userId });
+    return this.getCart({ userId, db });
   }
 
   /**
@@ -207,7 +207,7 @@ export class CartService {
       throw new InvalidQuantityError();
     }
 
-    const cartId = await this.getOrCreateCart({ userId });
+    const cartId = await this.getOrCreateCart({ userId, db });
 
     // Verify the cart item exists and belongs to the user's cart
     const cartItem = await db.query.cartItems.findFirst({
@@ -239,7 +239,7 @@ export class CartService {
       .set({ quantity: dto.quantity, updatedAt: new Date() })
       .where(eq(cartItems.id, dto.cartItemId));
 
-    return this.getCart({ userId });
+    return this.getCart({ userId, db });
   }
 
   /**
@@ -273,7 +273,7 @@ export class CartService {
 
     await db.delete(cartItems).where(eq(cartItems.id, dto.cartItemId));
 
-    return this.getCart({ userId });
+    return this.getCart({ userId, db });
   }
 
   /**

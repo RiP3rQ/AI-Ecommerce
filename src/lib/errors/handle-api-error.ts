@@ -26,6 +26,14 @@ export function handleApiError(error: unknown): NextResponse<unknown> {
     );
   }
 
+  if (error instanceof SyntaxError) {
+    console.error("[ERROR HANDLER] JSON Parse Error:", error);
+    return NextResponse.json(
+      { message: "Invalid JSON in request body." },
+      { status: 400 }
+    );
+  }
+
   // Fallback for unexpected errors
   console.error("[ERROR HANDLER] Unexpected API error:", error);
   return NextResponse.json(
