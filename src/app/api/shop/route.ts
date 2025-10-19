@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { handleApiError } from "@/lib/errors";
 import { shopService } from "./service";
-import { getProductsSchemaRefined } from "./dto";
+import { GetProductsDto, getProductsSchemaRefined } from "./dto";
 import type { ShopProductsResponse } from "./types";
 import { drizzleDbClient } from "@/database";
 
@@ -30,27 +30,15 @@ export async function GET(
     // Step 1: Parse and validate query parameters
     const searchParams = request.nextUrl.searchParams;
 
-    let queryParams = {
+    let queryParams: Partial<GetProductsDto> = {
       page: searchParams.get("page")
         ? Number.parseInt(searchParams.get("page")!)
-        : undefined,
+        : 1,
       limit: searchParams.get("limit")
         ? Number.parseInt(searchParams.get("limit")!)
-        : undefined,
-      sortDirection: searchParams.get("sortDirection") as
-        | "asc"
-        | "desc"
-        | undefined,
-      sortField: searchParams.get("sortField") as
-        | "createdAt"
-        | "updatedAt"
-        | "title"
-        | "price"
-        | "availableForSale"
-        | undefined,
+        : 10,
       search: searchParams.get("search") || undefined,
       categoryId: searchParams.get("categoryId") || undefined,
-      categoryName: searchParams.get("categoryName") || undefined,
       priceMin: searchParams.get("priceMin")
         ? Number.parseInt(searchParams.get("priceMin")!)
         : undefined,
@@ -62,9 +50,21 @@ export async function GET(
         : undefined,
     };
 
-    // Make sure to remove 'all' category from the query params
-    if (queryParams.categoryName?.toLowerCase() === "all") {
-      queryParams.categoryName = undefined;
+    // Only add sortDirection if present
+    const sortDirectionParam = searchParams.get("sortDirection");
+    if (sortDirectionParam) {
+      queryParams.sortDirection = sortDirectionParam as "asc" | "desc";
+    }
+
+    // Only add sortField if present
+    const sortFieldParam = searchParams.get("sortField");
+    if (sortFieldParam) {
+      queryParams.sortField = sortFieldParam as
+        | "createdAt"
+        | "updatedAt"
+        | "title"
+        | "price"
+        | "availableForSale";
     }
 
     const validatedDto = getProductsSchemaRefined.parse(queryParams);

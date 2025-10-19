@@ -28,7 +28,7 @@ export const getProductsSchema = z.object({
 
   // Filtering
   search: z.string().optional(),
-  categoryId: z.string().optional(),
+  categoryId: z.string().uuid("Category ID must be a valid UUID.").optional(),
   priceMin: z
     .number()
     .int()
