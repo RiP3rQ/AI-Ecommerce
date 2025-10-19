@@ -1,5 +1,6 @@
-import { beforeEach, vi } from "vitest";
+import { beforeEach, beforeAll, vi } from "vitest";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { UnauthorizedError } from "@/lib/errors";
 
 // Mock Supabase auth client to prevent actual API calls during tests
 const mockSupabaseClient = {
@@ -55,11 +56,15 @@ vi.mock("next/navigation", () => ({
   })),
 }));
 
-// Setup runs before each test file
-beforeEach(() => {
-  // Reset all mocks before each test
-  vi.clearAllMocks();
+// Mock API helpers for session validation
+export const mockValidateServerSession = vi.fn();
+vi.mock("../../lib/api-helpers", () => ({
+  validateServerSession: mockValidateServerSession,
+}));
 
+// OPTIMIZATION: Initialize default mocks in beforeAll (runs once per test file)
+// This is significantly faster than running in beforeEach
+beforeAll(() => {
   // Set default mock implementations for auth methods
   (mockSupabaseClient.auth.getUser as any).mockResolvedValue({
     data: { user: null },
@@ -84,6 +89,18 @@ beforeEach(() => {
   (mockSupabaseClient.auth.signOut as any).mockResolvedValue({
     error: null,
   });
+
+  // Set default mock for session validation (unauthenticated)
+  mockValidateServerSession.mockRejectedValue(
+    new Error("User is not authenticated.")
+  );
+});
+
+// OPTIMIZATION: Only reset call counts in beforeEach, not entire mock implementations
+// This is much faster than full mock recreation
+beforeEach(() => {
+  // Clear call history but keep mock implementations
+  vi.clearAllMocks();
 });
 
 /**
@@ -151,4 +168,39 @@ export function mockAuthError(error: { message: string; status?: number }) {
     data: { session: null },
     error,
   });
+}
+
+/**
+ * Helper function to mock authenticated user for API session validation
+ */
+export function mockAuthenticatedApiUser(user?: {
+  id?: string;
+  email?: string;
+  user_metadata?: Record<string, any>;
+  app_metadata?: Record<string, any>;
+  aud?: string;
+  created_at?: string;
+  updated_at?: string;
+  role?: string;
+}) {
+  const mockUser = {
+    id: user?.id || "test-user-id",
+    email: user?.email || "test@example.com",
+    user_metadata: user?.user_metadata || {},
+    app_metadata: user?.app_metadata || {},
+    aud: user?.aud || "authenticated",
+    created_at: user?.created_at || new Date().toISOString(),
+    updated_at: user?.updated_at || new Date().toISOString(),
+    role: user?.role || "authenticated",
+  };
+
+  mockValidateServerSession.mockResolvedValue(mockUser);
+  return mockUser;
+}
+
+/**
+ * Helper function to mock unauthenticated state for API session validation
+ */
+export function mockUnauthenticatedApiUser() {
+  mockValidateServerSession.mockRejectedValue(new UnauthorizedError());
 }

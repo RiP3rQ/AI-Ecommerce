@@ -21,7 +21,7 @@ export class CategoriesService {
     db = drizzleDbClient(),
   }: Readonly<{
     dto: GetCategoriesDto;
-    db?: DrizzleDbClient | TestDatabase;
+    db: DrizzleDbClient | TestDatabase;
   }>): Promise<SelectCategory[]> {
     const { sortDirection, sortField } = dto;
 

@@ -3,6 +3,7 @@ import { handleApiError } from "@/lib/errors";
 import { categoriesService } from "./service";
 import { getCategoriesSchema } from "./dto";
 import type { CategoriesResponse } from "./types";
+import { drizzleDbClient } from "@/database";
 
 /**
  * GET /api/categories
@@ -43,6 +44,7 @@ export async function GET(
     // Step 2: Get categories from service
     const categoriesData = await categoriesService.getCategories({
       dto: validatedDto,
+      db: drizzleDbClient(),
     });
 
     return NextResponse.json(

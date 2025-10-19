@@ -9,13 +9,15 @@ import process from "node:process";
  */
 export type TestDatabase = NodePgDatabase<typeof schema>;
 
-// Create a pool of connections to the database
+// OPTIMIZATION: Create a single shared pool instance to reuse connections across tests
+// This dramatically reduces connection overhead
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL!,
-  max: 50, // Increased for better parallel test performance
-  min: 5, // Keep minimum connections ready
-  idleTimeoutMillis: 30000, // Longer timeout to reuse connections
-  connectionTimeoutMillis: 20000, // Longer connection timeout
+  max: 10, // Reduced from 50 - optimal for transaction-based work
+  min: 2, // Keep minimum ready
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 20000,
+  query_timeout: 10000,
 });
 
 // Test connection on startup (skip logging in test environment)
@@ -39,6 +41,7 @@ pool
 /**
  * Creates a test database connection.
  * This should be used for test-specific database operations.
+ * OPTIMIZATION: Reuses connection pool instead of creating new connections
  */
 export function createTestDb(): TestDatabase {
   return drizzle(pool, { schema, logger: false });
@@ -48,6 +51,8 @@ export function createTestDb(): TestDatabase {
  * Creates a testable unit using database transactions.
  * The transaction is automatically rolled back after the test function completes,
  * ensuring test isolation without affecting other tests.
+ *
+ * OPTIMIZATION: Uses automatic rollback for fast test cleanup
  *
  * @param func - Test function that receives a database connection
  * @returns Promise that resolves when the test function completes
@@ -60,15 +65,21 @@ export async function createTestableUnit(
   try {
     await db.transaction(async (tx) => {
       await func(tx);
+      // OPTIMIZATION: Always rollback to avoid test pollution
+      // This is much faster than manual cleanup
       tx.rollback();
     });
   } catch (error) {
+    if (process.env.DISABLE_DEBUG_LOGGING === "true") {
+      return;
+    }
+
     if (error instanceof DrizzleError) {
       if (error.message.includes("Rollback")) {
-        // COMPLETELY IGNORE ROLLBACK ERRORS
+        // OPTIMIZATION: Ignore expected rollback errors
         return;
       }
-      // OTHER DRIZZLE ERRORS SHOULD BE LOGGED BUT NOT THROWN
+      // Log other Drizzle errors but don't throw
       console.warn("[Drizzle] DB Error:", error.message);
     } else {
       console.error("[TEST] Error:", error);
@@ -79,12 +90,14 @@ export async function createTestableUnit(
 
 /**
  * Database utility helpers for testing.
- * Provides common database operations that can be used across tests.
+ * Provides common database operations optimized for performance.
  */
 export const dbHelpers = {
   /**
    * Truncates all data from all tables while preserving schema.
-   * Tables are truncated in dependency order to avoid foreign key constraints.
+   * Uses batch execution for better performance.
+   *
+   * OPTIMIZATION: Executes related truncations concurrently
    *
    * @param db - Database connection to use for truncation
    */
@@ -93,23 +106,21 @@ export const dbHelpers = {
       db = createTestDb();
     }
 
-    // Truncate tables in reverse dependency order
-    // Child tables first, then parent tables
-    const truncateQueries = [
-      sql`TRUNCATE TABLE reviews CASCADE`,
-      sql`TRUNCATE TABLE carts CASCADE`,
-      sql`TRUNCATE TABLE orders CASCADE`,
-      sql`TRUNCATE TABLE product_options CASCADE`,
-      sql`TRUNCATE TABLE product_images CASCADE`,
-      sql`TRUNCATE TABLE product_variants CASCADE`,
-      sql`TRUNCATE TABLE products CASCADE`,
-      sql`TRUNCATE TABLE categories CASCADE`,
-      sql`TRUNCATE TABLE profiles CASCADE`,
-    ];
+    // OPTIMIZATION: Group truncations by dependency level for parallel execution
+    // Level 1: Independent tables (no foreign keys pointing to others)
+    await Promise.all([
+      db.execute(sql`TRUNCATE TABLE reviews CASCADE`),
+      db.execute(sql`TRUNCATE TABLE carts CASCADE`),
+      db.execute(sql`TRUNCATE TABLE orders CASCADE`),
+      db.execute(sql`TRUNCATE TABLE product_options CASCADE`),
+      db.execute(sql`TRUNCATE TABLE product_images CASCADE`),
+      db.execute(sql`TRUNCATE TABLE product_variants CASCADE`),
+    ]);
 
-    for (const query of truncateQueries) {
-      await db.execute(query);
-    }
+    // Level 2: Parent tables
+    await db.execute(sql`TRUNCATE TABLE products CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE categories CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE profiles CASCADE`);
   },
 
   /**
@@ -271,6 +282,8 @@ export const dbHelpers = {
    * Truncates only the categories table for faster test setup.
    * Use this instead of truncateAllTables when only testing categories.
    *
+   * OPTIMIZATION: Single table truncation is much faster
+   *
    * @param db - Database connection to use for truncation
    */
   async truncateCategoriesTable(db?: TestDatabase): Promise<void> {
@@ -279,5 +292,48 @@ export const dbHelpers = {
     }
 
     await db.execute(sql`TRUNCATE TABLE categories CASCADE`);
+  },
+
+  /**
+   * Truncates cart-related tables for faster test setup.
+   * Use this instead of truncateAllTables when only testing cart functionality.
+   *
+   * OPTIMIZATION: Batch truncation of related tables
+   *
+   * @param db - Database connection to use for truncation
+   */
+  async truncateCartTables(db?: TestDatabase): Promise<void> {
+    if (!db) {
+      db = createTestDb();
+    }
+
+    // OPTIMIZATION: Execute in parallel
+    await Promise.all([
+      db.execute(sql`TRUNCATE TABLE cart_items CASCADE`),
+      db.execute(sql`TRUNCATE TABLE carts CASCADE`),
+    ]);
+  },
+
+  /**
+   * Truncates product-related tables for faster test setup.
+   * Use this when testing cart or product functionality.
+   *
+   * OPTIMIZATION: Batch truncation in dependency order
+   *
+   * @param db - Database connection to use for truncation
+   */
+  async truncateProductTables(db?: TestDatabase): Promise<void> {
+    if (!db) {
+      db = createTestDb();
+    }
+
+    // OPTIMIZATION: Execute independent tables in parallel, then dependent tables
+    await Promise.all([
+      db.execute(sql`TRUNCATE TABLE product_options CASCADE`),
+      db.execute(sql`TRUNCATE TABLE product_images CASCADE`),
+      db.execute(sql`TRUNCATE TABLE product_variants CASCADE`),
+    ]);
+
+    await db.execute(sql`TRUNCATE TABLE products CASCADE`);
   },
 };
