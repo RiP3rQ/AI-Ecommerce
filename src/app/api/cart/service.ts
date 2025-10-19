@@ -295,6 +295,23 @@ export class CartService {
   }
 
   /**
+   * Clears all items from a user's cart.
+   * @param userId - The user's ID
+   * @param db - Optional database connection (for testing)
+   */
+  public async clearCart({
+    userId,
+    db,
+  }: Readonly<{
+    userId: string;
+    db: DrizzleDbClient | TestDatabase;
+  }>): Promise<void> {
+    const cartId = await this.getOrCreateCart({ userId, db });
+
+    await db.delete(cartItems).where(eq(cartItems.cartId, cartId));
+  }
+
+  /**
    * Formats a cart with items into a cart summary.
    * @param cart - Cart with items
    * @returns Cart summary

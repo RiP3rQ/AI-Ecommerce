@@ -50,6 +50,15 @@ export class InvalidQuantityError extends ApiError {
 }
 
 /**
+ * Thrown when trying to checkout with an empty cart.
+ */
+export class EmptyCartError extends ApiError {
+  constructor(message: string = "Cannot checkout with an empty cart.") {
+    super(message, 400);
+  }
+}
+
+/**
  * Thrown when user is not authenticated.
  */
 export class UnauthorizedError extends ApiError {

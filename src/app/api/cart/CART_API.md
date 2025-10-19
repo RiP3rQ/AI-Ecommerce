@@ -192,3 +192,41 @@ The API returns standardized error responses.
 -   `400 Bad Request`: If `cartItemId` is invalid (`ZodError`).
 -   `401 Unauthorized`: If the user is not logged in.
 -   `404 Not Found`: If the `cartItemId` does not correspond to an item in the user's cart (`CartItemNotFoundError`).
+
+---
+
+## 5. Complete Checkout
+
+-   **Method**: `POST`
+-   **Path**: `/api/cart/checkout`
+-   **Description**: Completes the checkout process by creating an order from the user's current cart items and clearing the cart. This endpoint is used for MVP without payment gateway integration.
+
+### Request Body
+
+```json
+{}
+```
+
+The request body should be an empty object as the checkout processes the current user's cart.
+
+### Success Response
+
+-   **Status Code**: `200 OK`
+-   **Body**: `CheckoutResponse`
+
+```json
+{
+  "success": true,
+  "orderId": "string (uuid)",
+  "totalItems": "integer",
+  "totalPrice": "integer (in cents)",
+  "currencyCode": "string",
+  "message": "Purchase completed successfully"
+}
+```
+
+### Error Responses
+
+-   `400 Bad Request`: If the user's cart is empty (`EmptyCartError`).
+-   `401 Unauthorized`: If the user is not logged in.
+-   `500 Internal Server Error`: If there's an unexpected error during order creation or cart clearing.
