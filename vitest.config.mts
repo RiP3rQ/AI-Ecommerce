@@ -7,10 +7,10 @@ dotenv.config({ path: ".env.test" });
 
 export default defineConfig({
   test: {
-    // Global setup file to connect to the test DB and run migrations
+    // Global setup file to initialize test database (runs once)
     globalSetup: ["./src/test/setup/global-setup.ts"],
 
-    // Setup file to run before each test file (e.g., for app instantiation)
+    // Setup file to run before each test file
     setupFiles: ["./src/test/setup/test-setup.ts"],
 
     // Global test settings
@@ -21,8 +21,12 @@ export default defineConfig({
     include: ["src/**/*.test.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
     exclude: ["node_modules", "dist", "build"],
 
-    // Test timeout
-    testTimeout: 10000,
+    // OPTIMIZATION: Reduced timeout for faster feedback on hanging tests
+    // Transaction-based tests should complete quickly
+    testTimeout: 5000,
+
+    // OPTIMIZATION: Bail after 5 failures to save time on debugging
+    bail: 5,
 
     // Coverage configuration
     coverage: {
@@ -54,11 +58,18 @@ export default defineConfig({
     pool: "threads",
     poolOptions: {
       threads: {
-        singleThread: false, // Enable parallel execution
-        minThreads: 4,
-        maxThreads: 8, // Reduce thread count to avoid connection exhaustion
+        singleThread: false, // Enable parallel execution within limits
+        minThreads: 1, // Start with minimal threads
+        maxThreads: 4, // Max 4 threads (optimal for transaction-based DB work)
       },
     },
+
+    // OPTIMIZATION: Disable isolation per test for faster execution
+    // Tests use database transactions for isolation instead
+    isolate: false,
+
+    // OPTIMIZATION: Disable file isolation for faster parallel execution
+    fileParallelism: true,
   },
 
   // Resolve configuration

@@ -1,4 +1,4 @@
-import { beforeEach, vi } from "vitest";
+import { beforeEach, beforeAll, vi } from "vitest";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 // Mock Supabase auth client to prevent actual API calls during tests
@@ -61,11 +61,9 @@ vi.mock("../../lib/api-helpers", () => ({
   validateServerSession: mockValidateServerSession,
 }));
 
-// Setup runs before each test file
-beforeEach(() => {
-  // Reset all mocks before each test
-  vi.clearAllMocks();
-
+// OPTIMIZATION: Initialize default mocks in beforeAll (runs once per test file)
+// This is significantly faster than running in beforeEach
+beforeAll(() => {
   // Set default mock implementations for auth methods
   (mockSupabaseClient.auth.getUser as any).mockResolvedValue({
     data: { user: null },
@@ -95,6 +93,13 @@ beforeEach(() => {
   mockValidateServerSession.mockRejectedValue(
     new Error("User is not authenticated.")
   );
+});
+
+// OPTIMIZATION: Only reset call counts in beforeEach, not entire mock implementations
+// This is much faster than full mock recreation
+beforeEach(() => {
+  // Clear call history but keep mock implementations
+  vi.clearAllMocks();
 });
 
 /**
