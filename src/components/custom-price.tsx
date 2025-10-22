@@ -13,7 +13,10 @@ export function Price({
   currencyCode: string;
   currencyCodeClassName?: string;
 } & React.ComponentProps<"p">): ReactNode {
-  const formattedAmount = formatFullPrice({ price: Number(amount), currencyCode });
+  const formattedAmount = formatFullPrice({
+    price: Number(amount),
+    currencyCode,
+  });
 
   return (
     <p suppressHydrationWarning={true} className={className}>

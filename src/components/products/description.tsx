@@ -24,7 +24,9 @@ export function ProductDescription({ product }: { product: ProductData }) {
     }
 
     // Fallback to first available variant or price range
-    const firstAvailableVariant = product.product_variants.find(variant => variant.availableForSale);
+    const firstAvailableVariant = product.product_variants.find(
+      (variant) => variant.availableForSale,
+    );
     return firstAvailableVariant
       ? {
           amount: firstAvailableVariant.price.toString(),
