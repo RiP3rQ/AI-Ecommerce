@@ -6,6 +6,7 @@ import {
   GEMINI_MODEL_MAX_OUTPUT_TOKENS,
 } from "./constants";
 import { GenerateTextOptions, GenerateTextResultType } from "./types";
+import { getAiTools } from "./tools";
 
 export class AiSdkHandler {
   public async generateText(
@@ -21,7 +22,7 @@ export class AiSdkHandler {
         experimental_context: options.experimental_context,
         maxOutputTokens:
           options.maxOutputTokens ?? GEMINI_MODEL_MAX_OUTPUT_TOKENS,
-        tools: options.tools,
+        tools: options.tools ?? getAiTools(),
       });
 
       return {
