@@ -1,11 +1,12 @@
 import { z } from "zod";
+import { uuidSchema } from "../../product/[id]/dto";
 
 /**
  * Response schema for successful checkout completion.
  */
 export const checkoutResponseSchema = z.object({
   success: z.boolean(),
-  orderId: z.uuid().describe("The ID of the order created."),
+  orderId: uuidSchema,
   totalItems: z
     .number()
     .int()

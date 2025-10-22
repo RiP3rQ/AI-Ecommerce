@@ -30,7 +30,7 @@ export function CustomLabel({
         </h3>
         <Price
           className="flex-none rounded-full bg-blue-600 p-2 text-white"
-          amount={formatBasicPrice({ price: amount })}
+          amount={amount.toString()}
           currencyCode={currencyCode}
           currencyCodeClassName="hidden @[275px]/label:inline"
         />

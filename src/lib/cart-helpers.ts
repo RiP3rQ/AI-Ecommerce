@@ -8,14 +8,12 @@ export function transformCartResponse(response: CartResponse): FrontendCart {
   const { cart, totalItems, totalPrice, currencyCode } = response.data;
 
   const lines: SelectCartItem[] = cart.items.map((item) => {
-    const itemTotal = (item.productVariant.price / 100) * item.quantity;
-
     return {
       id: item.id,
       quantity: item.quantity,
       cost: {
         totalAmount: {
-          amount: itemTotal.toString(),
+          amount: String(item.productVariant.price * item.quantity),
           currencyCode: item.productVariant.currencyCode,
         },
       },
@@ -43,16 +41,14 @@ export function transformCartResponse(response: CartResponse): FrontendCart {
     };
   });
 
-  const totalAmount = (totalPrice / 100).toString();
-
   return {
     id: cart.id,
     checkoutUrl: "",
     totalQuantity: totalItems,
     lines,
     cost: {
-      subtotalAmount: { amount: totalAmount, currencyCode },
-      totalAmount: { amount: totalAmount, currencyCode },
+      subtotalAmount: { amount: totalPrice.toString(), currencyCode },
+      totalAmount: { amount: totalPrice.toString(), currencyCode },
       totalTaxAmount: { amount: "0", currencyCode },
     },
   };
