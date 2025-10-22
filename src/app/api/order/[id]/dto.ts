@@ -16,7 +16,7 @@ export const orderItemWithDetailsSchema = z.object({
       z.object({
         name: z.string(),
         value: z.string(),
-      })
+      }),
     ),
     product: z.object({
       id: z.string().uuid(),

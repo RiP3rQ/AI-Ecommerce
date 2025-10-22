@@ -1,20 +1,9 @@
-import {
-  describe,
-  it,
-  expect,
-  beforeAll,
-  afterAll,
-  beforeEach,
-} from "vitest";
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
 import { faker } from "@faker-js/faker";
 import { NextRequest } from "next/server";
 import { GET } from "./route";
 import { orderService } from "./service";
-import {
-  createTestableUnit,
-  dbHelpers,
-  createTestDb,
-} from "@/test/utils/db-helper";
+import { createTestableUnit, dbHelpers } from "@/test/utils/db-helper";
 import { createProfileFixture } from "@/test/fixtures/profiles";
 import {
   createProductFixture,
@@ -22,14 +11,12 @@ import {
 } from "@/test/fixtures/products";
 import { createProductImageFixture } from "@/test/fixtures/product-images";
 import { createCategoryFixture } from "@/test/fixtures/categories";
-import { carts, cartItems } from "@/database/schemas/cart";
 import { orders, orderItems } from "@/database/schemas/orders";
 import {
   mockAuthenticatedApiUser,
   mockUnauthenticatedApiUser,
 } from "@/test/setup/test-setup";
 import type { OrderDetailsResponse } from "./dto";
-import { eq } from "drizzle-orm";
 
 /**
  * Comprehensive test suite for the order details API endpoint.
@@ -182,25 +169,39 @@ describe("/api/order/[id]", () => {
           expect(result.items).toHaveLength(2);
 
           // Assert: First order item details
-          const item1 = result.items.find(item => item.productVariant.id === variant1.id);
+          const item1 = result.items.find(
+            (item) => item.productVariant.id === variant1.id,
+          );
           expect(item1).toBeDefined();
           expect(item1!.quantity).toBe(2);
           expect(item1!.priceAtPurchase).toBe(1500);
           expect(item1!.productVariant.title).toBe("Variant 1");
           expect(item1!.productVariant.price).toBe(1500);
-          expect(item1!.productVariant.product.title).toBe("Order Test Product 1");
-          expect(item1!.productVariant.product.description).toBe("Description for product 1");
-          expect(item1!.featuredImage?.url).toBe("https://example.com/image1.jpg");
+          expect(item1!.productVariant.product.title).toBe(
+            "Order Test Product 1",
+          );
+          expect(item1!.productVariant.product.description).toBe(
+            "Description for product 1",
+          );
+          expect(item1!.featuredImage?.url).toBe(
+            "https://example.com/image1.jpg",
+          );
 
           // Assert: Second order item details
-          const item2 = result.items.find(item => item.productVariant.id === variant2.id);
+          const item2 = result.items.find(
+            (item) => item.productVariant.id === variant2.id,
+          );
           expect(item2).toBeDefined();
           expect(item2!.quantity).toBe(3);
           expect(item2!.priceAtPurchase).toBe(750);
           expect(item2!.productVariant.title).toBe("Variant 2");
           expect(item2!.productVariant.price).toBe(750);
-          expect(item2!.productVariant.product.title).toBe("Order Test Product 2");
-          expect(item2!.featuredImage?.url).toBe("https://example.com/image2.jpg");
+          expect(item2!.productVariant.product.title).toBe(
+            "Order Test Product 2",
+          );
+          expect(item2!.featuredImage?.url).toBe(
+            "https://example.com/image2.jpg",
+          );
         });
       });
 

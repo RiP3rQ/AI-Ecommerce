@@ -90,14 +90,16 @@ export class OrderService {
    * @param images - Array of product images
    * @returns Featured image or null if no images
    */
-  private getFeaturedImage(images: SelectProductImage[]): SelectProductImage | null {
+  private getFeaturedImage(
+    images: SelectProductImage[],
+  ): SelectProductImage | null {
     if (images.length === 0) {
       return null;
     }
 
     // Find image with lowest order value
     return images.reduce((featured, current) =>
-      current.order < featured.order ? current : featured
+      current.order < featured.order ? current : featured,
     );
   }
 }
