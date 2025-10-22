@@ -5,6 +5,7 @@ import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
 import { completeCheckout } from "@/lib/checkout-api";
 import LoadingDots from "../loading-dots";
+import { toast } from "sonner";
 
 export function CheckoutActions(): ReactNode {
   const router = useRouter();
@@ -13,10 +14,14 @@ export function CheckoutActions(): ReactNode {
   const handleCompletePurchase = async (): Promise<void> => {
     setIsLoading(true);
     try {
-      await completeCheckout();
-      router.push("/checkout/complete");
-    } catch (error) {
-      console.error(error);
+      const result = await completeCheckout();
+      if (result.success) {
+        router.push(`/checkout/complete?orderId=${result.orderId}`);
+      } else {
+        throw new Error(result.message);
+      }
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : "An error occurred");
     } finally {
       setIsLoading(false);
     }
