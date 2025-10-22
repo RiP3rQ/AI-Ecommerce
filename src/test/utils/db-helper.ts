@@ -191,4 +191,24 @@ export const dbHelpers = {
 
     await db.execute(sql`TRUNCATE TABLE products CASCADE`);
   },
+
+  /**
+   * Truncates order-related tables for faster test setup.
+   * Use this when testing checkout or order functionality.
+   *
+   * OPTIMIZATION: Batch truncation of related tables
+   *
+   * @param db - Database connection to use for truncation
+   */
+  async truncateOrderTables(db?: TestDatabase): Promise<void> {
+    if (!db) {
+      db = createTestDb();
+    }
+
+    // OPTIMIZATION: Execute in parallel
+    await Promise.all([
+      db.execute(sql`TRUNCATE TABLE order_items CASCADE`),
+      db.execute(sql`TRUNCATE TABLE orders CASCADE`),
+    ]);
+  },
 };

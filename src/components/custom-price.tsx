@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import clsx from "clsx";
+import { formatFullPrice } from "@/lib/utils";
 
 export function Price({
   amount,
@@ -12,11 +13,10 @@ export function Price({
   currencyCode: string;
   currencyCodeClassName?: string;
 } & React.ComponentProps<"p">): ReactNode {
-  const formattedAmount = new Intl.NumberFormat(undefined, {
-    style: "currency",
-    currency: currencyCode,
-    currencyDisplay: "narrowSymbol",
-  }).format(parseFloat(amount));
+  const formattedAmount = formatFullPrice({
+    price: Number(amount),
+    currencyCode,
+  });
 
   return (
     <p suppressHydrationWarning={true} className={className}>

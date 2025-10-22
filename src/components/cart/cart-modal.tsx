@@ -24,25 +24,12 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import Link from "next/link";
 
 export function CartModalWithTrigger(): ReactNode {
-  const { cart } = useCart();
-
-  const [isOpen, setIsOpen] = useState(false);
-  const quantityRef = useRef(cart?.totalQuantity);
-  const openCart = () => setIsOpen(true);
-  const closeCart = () => setIsOpen(false);
+  const [quantity, setQuantity] = useState<number>(0);
+  const { cart, isOpen, setIsOpen, openCart, closeCart } = useCart();
 
   useEffect(() => {
-    if (
-      cart?.totalQuantity &&
-      cart?.totalQuantity !== quantityRef.current &&
-      cart?.totalQuantity > 0
-    ) {
-      if (!isOpen) {
-        setIsOpen(true);
-      }
-      quantityRef.current = cart?.totalQuantity;
-    }
-  }, [isOpen, cart?.totalQuantity, quantityRef]);
+    setQuantity(cart?.totalQuantity || 0);
+  }, [cart]);
 
   return (
     <Drawer open={isOpen} onOpenChange={setIsOpen} direction="right">
@@ -52,7 +39,7 @@ export function CartModalWithTrigger(): ReactNode {
           className="cursor-pointer"
           onClick={openCart}
         >
-          <OpenCart quantity={quantityRef.current} />
+          <OpenCart quantity={quantity} />
         </button>
       </DrawerTrigger>
       <DrawerContent aria-describedby={undefined} className="z-[99]">
