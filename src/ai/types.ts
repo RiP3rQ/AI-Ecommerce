@@ -6,6 +6,7 @@ import {
   TypedToolCall,
   TypedToolResult,
   ReasoningOutput,
+  ProviderMetadata,
 } from "ai";
 
 /**
@@ -31,6 +32,8 @@ export interface GenerateTextResultType {
   toolCalls?: TypedToolCall<Record<string, Tool>>[];
   /** Results from tool executions. */
   toolResults?: TypedToolResult<Record<string, Tool>>[];
+  /** Metadata about the AI provider response including headers, status, etc. */
+  providerMetadata?: ProviderMetadata;
 }
 
 /**

@@ -31,6 +31,7 @@ export class AiSdkHandler {
         reasoning: result.reasoning,
         toolCalls: result.toolCalls,
         toolResults: result.toolResults,
+        providerMetadata: result.providerMetadata,
       };
     } catch (error) {
       // Wrap errors with more context
