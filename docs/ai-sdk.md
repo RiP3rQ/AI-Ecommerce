@@ -2,15 +2,16 @@
 
 ## Overview
 
-This project uses the Vercel AI SDK with Google's Gemini provider for structured data generation. The `AiSdkHandler` class provides a unified, type-safe interface for all AI operations, ensuring consistent error handling, metadata tracking, and performance monitoring.
+This project uses the Vercel AI SDK with Google's Gemini provider for text generation. The `AiSdkHandler` class provides a simple interface for AI operations with error handling and metadata tracking.
 
 ## Architecture
 
 ### Core Components
 
-- **`AiSdkHandler`**: Singleton class managing all AI SDK operations
+- **`AiSdkHandler`**: Class for AI SDK operations
 - **`geminiProvider`**: Custom Gemini provider with timeout handling
-- **Constants**: Configuration values for model settings and timeouts
+- **`types.ts`**: Type definitions for AI operations
+- **Constants**: Configuration values for model settings
 
 ### Provider Configuration
 
@@ -32,126 +33,115 @@ export const GEMINI_MODEL_MAX_OUTPUT_TOKENS = 1000;
 export const GEMINI_API_TIMEOUT = 59000; // 59 seconds
 ```
 
-## AI SDK Call Handling
+## Usage
 
-### Singleton Pattern
-
-The `AiSdkHandler` uses a singleton pattern to ensure:
-- Single point of configuration
-- Connection pooling efficiency
-- Consistent behavior across the application
+### Basic Text Generation
 
 ```typescript
-const aiHandler = AiSdkHandler.getInstance();
+import { AiSdkHandler } from '@/ai/ai-sdk';
+
+const aiHandler = new AiSdkHandler();
+
+const result = await aiHandler.generateText({
+    prompt: "Explain quantum computing in simple terms"
+});
+
+console.log(result.text); // Generated text response
 ```
 
-### generateObject Method
+### generateText Method
 
-This is the only public method, focusing on structured data generation:
+Generates text using the Gemini AI model:
 
 ```typescript
-public async generateObject<T extends z.ZodType>(
-    options: GenerateObjectOptions<T>
-): Promise<GenerateObjectResult<T>>
+public async generateText(
+    options: GenerateTextOptions
+): Promise<GenerateTextResult>
 ```
 
 #### Parameters
 
-- **`schema`**: Zod schema defining expected output structure
-- **`prompt`**: Text prompt for the AI model
-- **`schemaName`** (optional): Name for better AI guidance
-- **`schemaDescription`** (optional): Description for better AI guidance
-- **`output`** (optional): Strategy - 'object', 'array', 'enum', 'no-schema'
-- **`enum`** (optional): For enum output, list of possible values
+- **`system`** (optional): System prompt to set AI behavior and context
+- **`prompt`**: Text prompt or array of conversation messages for the AI model
 - **`temperature`** (optional): Creativity level (0.0-1.0), defaults to 0.1
-- **`maxTokens`** (optional): Maximum tokens to generate, defaults to 1000
+- **`maxOutputTokens`** (optional): Maximum tokens to generate, defaults to 1000
+- **`tools`** (optional): Tools available for the AI model to use during generation
+- **`stopWhen`** (optional): Conditions to stop generation early
+- **`experimental_context`** (optional): Experimental context for advanced use cases
 
-## Output Data Handling
+#### Return Value
 
-### Structured Validation
+Returns a `GenerateTextResultType` object containing:
 
-All outputs are validated against Zod schemas before being returned:
-
-```typescript
-const schema = z.object({
-    name: z.string(),
-    age: z.number(),
-    hobbies: z.array(z.string())
-});
-
-const result = await aiHandler.generateObject({ schema, prompt });
-result.object // TypeScript knows this is { name: string, age: number, hobbies: string[] }
-```
-
-### Output Strategies
-
-#### Object (Default)
-Generates a single object matching the schema.
-
-#### Array
-Generates an array of objects. The schema defines the structure of each array element.
+- **`text`**: The generated text response
+- **`response`**: Provider response metadata (headers, body)
+- **`usage`**: Token usage information (prompt, completion, total tokens)
+- **`reasoning`**: Model's reasoning process (if available)
+- **`toolCalls`**: Information about tool calls made during generation
+- **`toolResults`**: Results from tool executions
 
 ```typescript
-const result = await aiHandler.generateObject({
-    schema: z.object({ title: z.string(), content: z.string() }),
-    output: 'array',
-    prompt: "Generate 3 blog post ideas"
-});
-// result.object is Array<{ title: string, content: string }>
-```
-
-#### Enum
-Classifies input into one of predefined categories.
-
-```typescript
-const result = await aiHandler.generateObject({
-    schema: z.string(),
-    output: 'enum',
-    enum: ['positive', 'negative', 'neutral'],
-    prompt: "Classify: 'I love this product!'"
-});
-// result.object is 'positive' | 'negative' | 'neutral'
-```
-
-#### No Schema
-Free-form generation without validation (use sparingly).
-
-## Metadata from Provider
-
-### Response Metadata
-
-Every `generateObject` call returns comprehensive metadata:
-
-```typescript
-interface GenerateObjectResult<T> {
-    object: z.infer<T>;           // The validated structured data
+interface GenerateTextResult {
+    text: string;                 // The generated text response
     response: {                   // Provider response metadata
-        headers: Record<string, string>;
-        body: unknown;
+        headers?: Record<string, string>;
+        body?: unknown;
     };
-    usage: {                      // Token consumption details
-        promptTokens: number;
-        completionTokens: number;
-        totalTokens: number;
+    usage?: {                     // Token consumption details
+        promptTokens?: number;
+        completionTokens?: number;
+        totalTokens?: number;
     };
     reasoning?: string;           // Model's thought process (if available)
+    toolCalls?: Array<{           // Information about tool calls made
+        toolCallId: string;
+        toolName: string;
+        args: unknown;
+    }>;
+    toolResults?: Array<{         // Results from tool executions
+        toolCallId: string;
+        toolName: string;
+        args: unknown;
+        result: unknown;
+    }>;
 }
 ```
 
 ### Accessing Metadata
 
 ```typescript
-const result = await aiHandler.generateObject({ schema, prompt });
+const result = await aiHandler.generateText({ prompt: "Hello AI!" });
 
-// Log token usage for monitoring
-console.log(`Tokens used: ${result.usage.totalTokens}`);
+// Log token usage for monitoring and cost tracking
+if (result.usage?.totalTokens) {
+    console.log(`Tokens used: ${result.usage.totalTokens}`);
+    console.log(`Prompt tokens: ${result.usage.promptTokens}`);
+    console.log(`Completion tokens: ${result.usage.completionTokens}`);
+}
 
 // Access response headers (useful for debugging)
-console.log('Response headers:', result.response.headers);
+if (result.response.headers) {
+    console.log('Response headers:', result.response.headers);
+}
 
 // Model reasoning (available with some providers/models)
 if (result.reasoning) {
     console.log('Model reasoning:', result.reasoning);
+}
+
+// Tool usage tracking
+if (result.toolCalls?.length) {
+    console.log(`Tools called: ${result.toolCalls.length}`);
+    result.toolCalls.forEach(call => {
+        console.log(`- ${call.toolName}:`, call.args);
+    });
+}
+
+if (result.toolResults?.length) {
+    console.log(`Tool results: ${result.toolResults.length}`);
+    result.toolResults.forEach(toolResult => {
+        console.log(`- ${toolResult.toolName} result:`, toolResult.result);
+    });
 }
 ```
 
@@ -172,7 +162,7 @@ Track token consumption for:
 - Usage analytics
 
 ```typescript
-const result = await aiHandler.generateObject({ schema, prompt });
+const result = await aiHandler.generateText({ prompt: "Hello AI!" });
 
 const { usage } = result;
 const cost = calculateCost(usage); // Implement based on provider pricing
@@ -195,7 +185,7 @@ logger.info('AI request completed', {
 
 ```typescript
 try {
-    const result = await aiHandler.generateObject({ schema, prompt });
+    const result = await aiHandler.generateText({ prompt: "Hello AI!" });
     return result.object;
 } catch (error) {
     if (NoObjectGeneratedError.isInstance(error)) {
@@ -230,7 +220,7 @@ try {
 
 ### Streaming Considerations
 
-For real-time applications, consider using `streamObject` instead of `generateObject`:
+For real-time applications, consider using `streamObject` instead of `generateText`:
 
 ```typescript
 // For future streaming implementation
@@ -253,14 +243,14 @@ Implement caching for frequently requested data:
 
 ```typescript
 // Example caching wrapper
-async function cachedGenerateObject<T extends z.ZodType>(
+async function cachedGenerateText(
     cacheKey: string,
-    options: GenerateObjectOptions<T>
-): Promise<GenerateObjectResult<T>> {
+    options: GenerateTextOptions
+): Promise<GenerateTextResult> {
     const cached = await cache.get(cacheKey);
     if (cached) return cached;
 
-    const result = await aiHandler.generateObject(options);
+    const result = await aiHandler.generateText(options);
     await cache.set(cacheKey, result, { ttl: 3600 }); // 1 hour
     return result;
 }
