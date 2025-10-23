@@ -68,6 +68,33 @@ vi.mock("../../lib/api-helpers", () => ({
   validateServerSession: mockValidateServerSession,
 }));
 
+// Mock AI SDK to prevent actual API calls during tests
+vi.mock("ai", () => ({
+  generateText: vi.fn(),
+  tool: vi.fn(),
+}));
+
+// Mock fetch to prevent actual HTTP calls
+const mockFetch = vi.fn();
+global.fetch = mockFetch;
+
+// Mock AbortController for testing abort signal functionality
+global.AbortController = vi.fn().mockImplementation(() => ({
+  abort: vi.fn(),
+  signal: {
+    aborted: false,
+    onabort: null,
+    reason: undefined,
+    throwIfAborted: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  },
+}));
+
+// Mock setTimeout/clearTimeout for timeout testing
+vi.useFakeTimers();
+
 // OPTIMIZATION: Initialize default mocks in beforeAll (runs once per test file)
 // This is significantly faster than running in beforeEach
 beforeAll(() => {
