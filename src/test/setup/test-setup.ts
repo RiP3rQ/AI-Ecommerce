@@ -71,6 +71,7 @@ vi.mock("../../lib/api-helpers", () => ({
 // Mock AI SDK to prevent actual API calls during tests
 vi.mock("ai", () => ({
   generateText: vi.fn(),
+  tool: vi.fn(),
 }));
 
 // Mock fetch to prevent actual HTTP calls

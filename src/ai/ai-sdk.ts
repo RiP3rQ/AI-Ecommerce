@@ -175,14 +175,15 @@ export class AiSdkHandler {
             error instanceof Error ? error.message : "Unknown error",
           processingTimeMs,
         });
+        // If fallback save succeeds, don't throw - we've saved what we can
+        return;
       } catch (saveError) {
-        // If even the error save fails, just log and rethrow
+        // If even the error save fails, log and rethrow the original error
         console.error("Failed to save AI error to database:", saveError);
+        throw new Error(
+          `AI SDK saveAiResultToDatabase failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+        );
       }
-
-      throw new Error(
-        `AI SDK saveAiResultToDatabase failed: ${error instanceof Error ? error.message : "Unknown error"}`,
-      );
     }
   }
 }
