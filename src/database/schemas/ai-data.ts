@@ -10,6 +10,13 @@ import {
 } from "drizzle-orm/pg-core";
 import { relations, sql } from "drizzle-orm";
 import { DEFAULT_DATE_TABLES } from "../helpers/dates";
+import {
+  ProviderMetadata,
+  ReasoningOutput,
+  Tool,
+  TypedToolCall,
+  TypedToolResult,
+} from "ai";
 
 /**
  * AI data table for storing AI SDK generateText results
@@ -38,10 +45,12 @@ export const aiData = pgTable(
     totalTokens: integer("total_tokens"),
 
     // Additional metadata as JSON
-    reasoning: jsonb("reasoning").$type<unknown[]>(), // Array of ReasoningOutput
-    toolCalls: jsonb("tool_calls").$type<unknown[]>(), // Array of TypedToolCall
-    toolResults: jsonb("tool_results").$type<unknown[]>(), // Array of TypedToolResult
-    providerMetadata: jsonb("provider_metadata").$type<unknown>(), // ProviderMetadata
+    reasoning: jsonb("reasoning").$type<ReasoningOutput[]>(), // Array of ReasoningOutput
+    toolCalls:
+      jsonb("tool_calls").$type<TypedToolCall<Record<string, Tool>>[]>(), // Array of TypedToolCall
+    toolResults:
+      jsonb("tool_results").$type<TypedToolResult<Record<string, Tool>>[]>(), // Array of TypedToolResult
+    providerMetadata: jsonb("provider_metadata").$type<ProviderMetadata>(), // ProviderMetadata
 
     // Processing metadata
     processingTimeMs: integer("processing_time_ms"), // How long the AI call took

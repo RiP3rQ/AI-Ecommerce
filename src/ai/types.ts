@@ -7,6 +7,7 @@ import {
   TypedToolResult,
   ReasoningOutput,
   ProviderMetadata,
+  LanguageModelUsage,
 } from "ai";
 
 /**
@@ -15,23 +16,14 @@ import {
 export interface GenerateTextResultType {
   /** The generated text response from the AI model. */
   text: string;
-  /** Metadata about the AI provider response including headers, status, etc. */
-  response: {
-    headers?: Record<string, string>;
-    body?: unknown;
-  };
   /** Token usage information for the request. */
-  usage?: {
-    promptTokens?: number;
-    completionTokens?: number;
-    totalTokens?: number;
-  };
+  usage: LanguageModelUsage;
   /** Model's reasoning process (if available). */
-  reasoning?: ReasoningOutput[];
+  reasoning: ReasoningOutput[];
   /** Information about tool calls made during generation. */
-  toolCalls?: TypedToolCall<Record<string, Tool>>[];
+  toolCalls: TypedToolCall<Record<string, Tool>>[];
   /** Results from tool executions. */
-  toolResults?: TypedToolResult<Record<string, Tool>>[];
+  toolResults: TypedToolResult<Record<string, Tool>>[];
   /** Metadata about the AI provider response including headers, status, etc. */
   providerMetadata?: ProviderMetadata;
 }
