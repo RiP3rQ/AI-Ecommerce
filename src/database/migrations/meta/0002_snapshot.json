@@ -46,12 +46,6 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "url_handle": {
-          "name": "url_handle",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
         "available_for_sale": {
           "name": "available_for_sale",
           "type": "boolean",
@@ -163,13 +157,7 @@
       },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "products_url_handle_unique": {
-          "name": "products_url_handle_unique",
-          "columns": ["url_handle"],
-          "nullsNotDistinct": false
-        }
-      },
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false

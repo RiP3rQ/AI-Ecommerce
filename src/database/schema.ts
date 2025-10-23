@@ -18,3 +18,6 @@ export * from "./schemas/orders";
 
 // =============== PROFILES ===============
 export * from "./schemas/profiles";
+
+// =============== AI DATA ===============
+export * from "./schemas/ai-data";
