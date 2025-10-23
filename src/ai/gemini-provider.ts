@@ -13,7 +13,10 @@ const geminiLlmApiFetcher = async (
   init?: RequestInit,
 ): Promise<Response> => {
   const timeoutController = new AbortController();
-  const timeoutId = setTimeout(() => timeoutController.abort(), GEMINI_API_TIMEOUT);
+  const timeoutId = setTimeout(
+    () => timeoutController.abort(),
+    GEMINI_API_TIMEOUT,
+  );
 
   // Handle external abort signal if provided
   const externalSignal = init?.signal;
