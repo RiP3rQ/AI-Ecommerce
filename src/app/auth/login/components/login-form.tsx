@@ -67,8 +67,14 @@ export function LoginForm({ className, ...props }: LoginFormProps): ReactNode {
                   type="email"
                   placeholder="m@example.com"
                   required
+                  disabled={isLoading}
+                  autoFocus
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  data-testid="email-input"
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setError(null);
+                  }}
                 />
               </Field>
               <Field>
@@ -85,13 +91,18 @@ export function LoginForm({ className, ...props }: LoginFormProps): ReactNode {
                   id="password"
                   type="password"
                   required
+                  disabled={isLoading}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  data-testid="password-input"
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setError(null);
+                  }}
                 />
               </Field>
               <Field>
-                {error && <p className="text-sm text-red-500">{error}</p>}
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                {error && <p className="text-sm text-red-500" data-testid="error-message">{error}</p>}
+                <Button type="submit" className="w-full" disabled={isLoading} data-testid="login-button">
                   {isLoading ? "Logging in..." : "Login"}
                 </Button>
               </Field>
