@@ -11,7 +11,9 @@ test.describe("Login Page", () => {
       await page.goto("/auth/login");
 
       await expect(page).toHaveTitle("RiP3rQ's Store");
-      await expect(page.getByRole("heading", { name: "Welcome back" })).toBeVisible();
+      await expect(
+        page.getByRole("heading", { name: "Welcome back" }),
+      ).toBeVisible();
     });
 
     test("should display all form elements", async ({ page }) => {
@@ -23,10 +25,14 @@ test.describe("Login Page", () => {
 
       // Check buttons
       await expect(page.getByTestId("login-button")).toBeVisible();
-      await expect(page.getByRole("button", { name: "Continue with Google" })).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Continue with Google" }),
+      ).toBeVisible();
 
       // Check links
-      await expect(page.getByRole("link", { name: "Forgot your password?" })).toBeVisible();
+      await expect(
+        page.getByRole("link", { name: "Forgot your password?" }),
+      ).toBeVisible();
       await expect(page.getByRole("link", { name: "Sign up" })).toBeVisible();
     });
 
@@ -46,7 +52,9 @@ test.describe("Login Page", () => {
   });
 
   test.describe("Form Validation", () => {
-    test("should show validation errors for empty required fields", async ({ page }) => {
+    test("should show validation errors for empty required fields", async ({
+      page,
+    }) => {
       await page.goto("/auth/login");
 
       // Try to submit empty form
@@ -56,7 +64,9 @@ test.describe("Login Page", () => {
       await expect(page.getByTestId("email-input")).toBeFocused();
     });
 
-    test("should show validation error for invalid email format", async ({ page }) => {
+    test("should show validation error for invalid email format", async ({
+      page,
+    }) => {
       await page.goto("/auth/login");
 
       await page.getByTestId("email-input").fill("invalid-email");
@@ -102,7 +112,11 @@ test.describe("Login Page", () => {
       await submitButton.click();
 
       // Should show loading state - be more flexible about timing
-      await expect(submitButton.filter({ hasText: "Logging in..." }).or(submitButton.filter({ hasText: "Login" }))).toBeVisible();
+      await expect(
+        submitButton
+          .filter({ hasText: "Logging in..." })
+          .or(submitButton.filter({ hasText: "Login" })),
+      ).toBeVisible();
 
       // Wait for either success (redirect) or error (due to database constraints)
       // Since E2E environment may not have proper user setup, we accept either outcome
@@ -112,11 +126,15 @@ test.describe("Login Page", () => {
       } catch {
         // If redirect doesn't happen, check that we eventually get some response
         // This handles the case where auth succeeds but cart creation fails
-        await expect(submitButton.filter({ hasText: "Login" })).toBeVisible({ timeout: 10000 });
+        await expect(submitButton.filter({ hasText: "Login" })).toBeVisible({
+          timeout: 10000,
+        });
       }
     });
 
-    test("should handle failed login with invalid credentials", async ({ page }) => {
+    test("should handle failed login with invalid credentials", async ({
+      page,
+    }) => {
       await page.goto("/auth/login");
 
       const emailInput = page.getByTestId("email-input");
@@ -129,10 +147,18 @@ test.describe("Login Page", () => {
       await submitButton.click();
 
       // Should show loading state or transition to error state
-      await expect(submitButton.filter({ hasText: "Logging in..." }).or(submitButton.filter({ hasText: "Login" }))).toBeVisible();
+      await expect(
+        submitButton
+          .filter({ hasText: "Logging in..." })
+          .or(submitButton.filter({ hasText: "Login" })),
+      ).toBeVisible();
 
       // Should eventually show error message (actual Supabase error message)
-      await expect(page.locator("text=/Invalid login credentials|Email not confirmed|Invalid email or password/i")).toBeVisible({ timeout: 10000 });
+      await expect(
+        page.locator(
+          "text=/Invalid login credentials|Email not confirmed|Invalid email or password/i",
+        ),
+      ).toBeVisible({ timeout: 10000 });
 
       // Button should return to normal state
       await expect(submitButton.filter({ hasText: "Login" })).toBeVisible();
@@ -154,10 +180,16 @@ test.describe("Login Page", () => {
       await passwordInput.press("Enter");
 
       // Should show loading state or transition
-      await expect(submitButton.filter({ hasText: "Logging in..." }).or(submitButton.filter({ hasText: "Login" }))).toBeVisible();
+      await expect(
+        submitButton
+          .filter({ hasText: "Logging in..." })
+          .or(submitButton.filter({ hasText: "Login" })),
+      ).toBeVisible();
     });
 
-    test("should clear error message when user starts typing", async ({ page }) => {
+    test("should clear error message when user starts typing", async ({
+      page,
+    }) => {
       await page.goto("/auth/login");
 
       const emailInput = page.getByTestId("email-input");
@@ -170,7 +202,9 @@ test.describe("Login Page", () => {
       await submitButton.click();
 
       // Wait for error message to appear
-      await expect(page.getByTestId("error-message")).toBeVisible({ timeout: 10000 });
+      await expect(page.getByTestId("error-message")).toBeVisible({
+        timeout: 10000,
+      });
 
       // Start typing in email field
       await emailInput.fill(EMAIL);
@@ -196,11 +230,15 @@ test.describe("Login Page", () => {
       try {
         await expect(emailInput).toBeDisabled({ timeout: 5000 });
         await expect(passwordInput).toBeDisabled();
-        await expect(submitButton.filter({ hasText: "Logging in..." })).toBeDisabled();
+        await expect(
+          submitButton.filter({ hasText: "Logging in..." }),
+        ).toBeDisabled();
       } catch {
         // If form doesn't get disabled, that's also acceptable for this test
         // as long as some response happens
-        await expect(submitButton.filter({ hasText: "Login" })).toBeVisible({ timeout: 10000 });
+        await expect(submitButton.filter({ hasText: "Login" })).toBeVisible({
+          timeout: 10000,
+        });
       }
     });
   });
@@ -236,7 +274,9 @@ test.describe("Login Page", () => {
       await expect(page.getByTestId("password-input")).toBeVisible();
 
       // Check screen reader only text
-      await expect(page.getByText("Login with Google").first()).toHaveClass(/sr-only/);
+      await expect(page.getByText("Login with Google").first()).toHaveClass(
+        /sr-only/,
+      );
     });
 
     test("should support keyboard navigation", async ({ page }) => {
@@ -264,13 +304,15 @@ test.describe("Login Page", () => {
       await expect(heading).toBeVisible();
 
       // Check heading level (should be h1)
-      const headingTag = await heading.evaluate(el => el.tagName);
+      const headingTag = await heading.evaluate((el) => el.tagName);
       expect(headingTag).toBe("H1");
     });
   });
 
   test.describe("Loading States", () => {
-    test("should show loading indicator during authentication", async ({ page }) => {
+    test("should show loading indicator during authentication", async ({
+      page,
+    }) => {
       await page.goto("/auth/login");
 
       const emailInput = page.getByTestId("email-input");
@@ -283,7 +325,11 @@ test.describe("Login Page", () => {
       await submitButton.click();
 
       // Should show loading text or transition to some state
-      await expect(submitButton.filter({ hasText: "Logging in..." }).or(submitButton.filter({ hasText: "Login" }))).toBeVisible();
+      await expect(
+        submitButton
+          .filter({ hasText: "Logging in..." })
+          .or(submitButton.filter({ hasText: "Login" })),
+      ).toBeVisible();
     });
 
     test("should reset loading state after failed login", async ({ page }) => {
@@ -299,10 +345,16 @@ test.describe("Login Page", () => {
       await submitButton.click();
 
       // Should show loading or transition to some state
-      await expect(submitButton.filter({ hasText: "Logging in..." }).or(submitButton.filter({ hasText: "Login" }))).toBeVisible();
+      await expect(
+        submitButton
+          .filter({ hasText: "Logging in..." })
+          .or(submitButton.filter({ hasText: "Login" })),
+      ).toBeVisible();
 
       // Wait for error to appear (loading should be gone)
-      await expect(page.getByTestId("error-message")).toBeVisible({ timeout: 10000 });
+      await expect(page.getByTestId("error-message")).toBeVisible({
+        timeout: 10000,
+      });
 
       // Button should return to normal state
       await expect(submitButton.filter({ hasText: "Login" })).toBeVisible();
@@ -328,14 +380,15 @@ test.describe("Login Page", () => {
       // Error should be styled appropriately (red text)
       await expect(errorMessage).toHaveClass(/text-red-500/);
     });
-
   });
 
   test.describe("Google Authentication", () => {
     test("should display Google login button", async ({ page }) => {
       await page.goto("/auth/login");
 
-      const googleButton = page.getByRole("button", { name: "Continue with Google" });
+      const googleButton = page.getByRole("button", {
+        name: "Continue with Google",
+      });
       await expect(googleButton).toBeVisible();
 
       // Should contain Google icon (though we can't test actual Google auth)

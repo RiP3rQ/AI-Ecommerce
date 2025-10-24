@@ -101,8 +101,20 @@ export function LoginForm({ className, ...props }: LoginFormProps): ReactNode {
                 />
               </Field>
               <Field>
-                {error && <p className="text-sm text-red-500" data-testid="error-message">{error}</p>}
-                <Button type="submit" className="w-full" disabled={isLoading} data-testid="login-button">
+                {error && (
+                  <p
+                    className="text-sm text-red-500"
+                    data-testid="error-message"
+                  >
+                    {error}
+                  </p>
+                )}
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isLoading}
+                  data-testid="login-button"
+                >
                   {isLoading ? "Logging in..." : "Login"}
                 </Button>
               </Field>
