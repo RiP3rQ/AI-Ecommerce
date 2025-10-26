@@ -1,4 +1,5 @@
 import { expect, Page } from "@playwright/test";
+import { LoginPage } from "./page-objects/login-page";
 
 const TEST_EMAIL = "test@test.com";
 const TEST_PASSWORD = "password123";
@@ -8,19 +9,11 @@ const TEST_PASSWORD = "password123";
  * @param page - Playwright page instance
  */
 export async function authenticateUser(page: Page): Promise<void> {
-  // Navigate to login page
-  await page.goto("/auth/login");
+  const loginPage = new LoginPage(page);
 
-  // Fill login form
-  const emailInput = page.getByTestId("email-input");
-  const passwordInput = page.getByTestId("password-input");
-  const submitButton = page.getByTestId("login-button");
-
-  await emailInput.fill(TEST_EMAIL);
-  await passwordInput.fill(TEST_PASSWORD);
-
-  // Submit form
-  await submitButton.click();
+  // Navigate to login page and login
+  await loginPage.goto();
+  await loginPage.login(TEST_EMAIL, TEST_PASSWORD);
 
   // Wait for successful login (redirect to home page)
   await page.waitForURL("/", { timeout: 10000 });

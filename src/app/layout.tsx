@@ -26,10 +26,7 @@ const { NEXT_PUBLIC_SITE_NAME } = env;
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
-  title: {
-    default: NEXT_PUBLIC_SITE_NAME,
-    template: `%s | ${NEXT_PUBLIC_SITE_NAME}`,
-  },
+  title: NEXT_PUBLIC_SITE_NAME,
   robots: {
     follow: true,
     index: true,

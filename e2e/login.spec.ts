@@ -1,53 +1,50 @@
 import { test, expect } from "@playwright/test";
+import { LoginPage } from "./page-objects/login-page";
 
 const EMAIL = "test@test.com";
 const PASSWORD = "password123";
 
 test.describe("Login Page", () => {
-  // E2E tests use real authentication - no mocking
-
   test.describe("Page Loading and UI Elements", () => {
     test("should load login page successfully", async ({ page }) => {
-      await page.goto("/auth/login");
+      const loginPage = new LoginPage(page);
+      await loginPage.goto();
 
       await expect(page).toHaveTitle("RiP3rQ's Store");
-      await expect(
-        page.getByRole("heading", { name: "Welcome back" }),
-      ).toBeVisible();
+      await expect(loginPage.welcomeHeading).toBeVisible();
     });
 
     test("should display all form elements", async ({ page }) => {
-      await page.goto("/auth/login");
+      const loginPage = new LoginPage(page);
+      await loginPage.goto();
 
       // Check form fields
-      await expect(page.getByTestId("email-input")).toBeVisible();
-      await expect(page.getByTestId("password-input")).toBeVisible();
+      await expect(loginPage.emailInput).toBeVisible();
+      await expect(loginPage.passwordInput).toBeVisible();
 
       // Check buttons
-      await expect(page.getByTestId("login-button")).toBeVisible();
-      await expect(
-        page.getByRole("button", { name: "Continue with Google" }),
-      ).toBeVisible();
+      await expect(loginPage.loginButton).toBeVisible();
+      await expect(loginPage.googleButton).toBeVisible();
 
       // Check links
-      await expect(
-        page.getByRole("link", { name: "Forgot your password?" }),
-      ).toBeVisible();
-      await expect(page.getByRole("link", { name: "Sign up" })).toBeVisible();
+      await expect(loginPage.forgotPasswordLink).toBeVisible();
+      await expect(loginPage.signUpLink).toBeVisible();
     });
 
     test("should display login image on desktop", async ({ page }) => {
-      await page.setViewportSize({ width: 1024, height: 768 });
-      await page.goto("/auth/login");
+      const loginPage = new LoginPage(page);
+      await loginPage.setDesktopViewport();
+      await loginPage.goto();
 
-      await expect(page.getByAltText("Ecommerce Login Page")).toBeVisible();
+      await expect(loginPage.loginImage).toBeVisible();
     });
 
     test("should hide login image on mobile", async ({ page }) => {
-      await page.setViewportSize({ width: 375, height: 667 });
-      await page.goto("/auth/login");
+      const loginPage = new LoginPage(page);
+      await loginPage.setMobileViewport();
+      await loginPage.goto();
 
-      await expect(page.getByAltText("Ecommerce Login Page")).not.toBeVisible();
+      await expect(loginPage.loginImage).not.toBeVisible();
     });
   });
 
@@ -55,68 +52,59 @@ test.describe("Login Page", () => {
     test("should show validation errors for empty required fields", async ({
       page,
     }) => {
-      await page.goto("/auth/login");
+      const loginPage = new LoginPage(page);
+      await loginPage.goto();
 
       // Try to submit empty form
-      await page.getByTestId("login-button").click();
+      await loginPage.clickLogin();
 
       // HTML5 validation should prevent submission
-      await expect(page.getByTestId("email-input")).toBeFocused();
+      await expect(loginPage.emailInput).toBeFocused();
     });
 
     test("should show validation error for invalid email format", async ({
       page,
     }) => {
-      await page.goto("/auth/login");
+      const loginPage = new LoginPage(page);
+      await loginPage.goto();
 
-      await page.getByTestId("email-input").fill("invalid-email");
-      await page.getByTestId("password-input").fill(PASSWORD);
+      await loginPage.emailInput.fill("invalid-email");
+      await loginPage.passwordInput.fill(PASSWORD);
 
       // Try to submit with invalid email
-      await page.getByTestId("login-button").click();
+      await loginPage.clickLogin();
 
       // HTML5 validation should prevent submission and focus email field
-      await expect(page.getByTestId("email-input")).toBeFocused();
+      await expect(loginPage.emailInput).toBeFocused();
     });
 
     test("should accept valid email format", async ({ page }) => {
-      await page.goto("/auth/login");
+      const loginPage = new LoginPage(page);
+      await loginPage.goto();
 
-      const emailInput = page.getByTestId("email-input");
-      const passwordInput = page.getByTestId("password-input");
-
-      await emailInput.fill(EMAIL);
-      await passwordInput.fill(PASSWORD);
+      await loginPage.fillLoginForm(EMAIL, PASSWORD);
 
       // Wait for input values to be set
-      await expect(emailInput).toHaveValue(EMAIL);
-      await expect(passwordInput).toHaveValue(PASSWORD);
+      await expect(loginPage.emailInput).toHaveValue(EMAIL);
+      await expect(loginPage.passwordInput).toHaveValue(PASSWORD);
     });
   });
 
   test.describe("Authentication Flows", () => {
     test("should handle successful login", async ({ page }) => {
-      await page.goto("/auth/login");
+      const loginPage = new LoginPage(page);
+      await loginPage.goto();
 
-      const emailInput = page.getByTestId("email-input");
-      const passwordInput = page.getByTestId("password-input");
-      const submitButton = page.getByTestId("login-button");
-
-      await emailInput.fill(EMAIL);
-      await passwordInput.fill(PASSWORD);
+      await loginPage.fillLoginForm(EMAIL, PASSWORD);
 
       // Ensure form is filled
-      await expect(emailInput).toHaveValue(EMAIL);
-      await expect(passwordInput).toHaveValue(PASSWORD);
+      await expect(loginPage.emailInput).toHaveValue(EMAIL);
+      await expect(loginPage.passwordInput).toHaveValue(PASSWORD);
 
-      await submitButton.click();
+      await loginPage.clickLogin();
 
       // Should show loading state - be more flexible about timing
-      await expect(
-        submitButton
-          .filter({ hasText: "Logging in..." })
-          .or(submitButton.filter({ hasText: "Login" })),
-      ).toBeVisible();
+      await loginPage.waitForLoadingState();
 
       // Wait for either success (redirect) or error (due to database constraints)
       // Since E2E environment may not have proper user setup, we accept either outcome
@@ -126,7 +114,9 @@ test.describe("Login Page", () => {
       } catch {
         // If redirect doesn't happen, check that we eventually get some response
         // This handles the case where auth succeeds but cart creation fails
-        await expect(submitButton.filter({ hasText: "Login" })).toBeVisible({
+        await expect(
+          loginPage.loginButton.filter({ hasText: "Login" }),
+        ).toBeVisible({
           timeout: 10000,
         });
       }
@@ -135,23 +125,16 @@ test.describe("Login Page", () => {
     test("should handle failed login with invalid credentials", async ({
       page,
     }) => {
-      await page.goto("/auth/login");
+      const loginPage = new LoginPage(page);
+      await loginPage.goto();
 
-      const emailInput = page.getByTestId("email-input");
-      const passwordInput = page.getByTestId("password-input");
-      const submitButton = page.getByTestId("login-button");
+      await loginPage.emailInput.fill(EMAIL);
+      await loginPage.passwordInput.fill("wrongpassword");
 
-      await emailInput.fill(EMAIL);
-      await passwordInput.fill("wrongpassword");
-
-      await submitButton.click();
+      await loginPage.clickLogin();
 
       // Should show loading state or transition to error state
-      await expect(
-        submitButton
-          .filter({ hasText: "Logging in..." })
-          .or(submitButton.filter({ hasText: "Login" })),
-      ).toBeVisible();
+      await loginPage.waitForLoadingState();
 
       // Should eventually show error message (actual Supabase error message)
       await expect(
@@ -161,82 +144,69 @@ test.describe("Login Page", () => {
       ).toBeVisible({ timeout: 10000 });
 
       // Button should return to normal state
-      await expect(submitButton.filter({ hasText: "Login" })).toBeVisible();
+      await expect(
+        loginPage.loginButton.filter({ hasText: "Login" }),
+      ).toBeVisible();
     });
   });
 
   test.describe("User Interactions", () => {
     test("should submit form with Enter key", async ({ page }) => {
-      await page.goto("/auth/login");
+      const loginPage = new LoginPage(page);
+      await loginPage.goto();
 
-      const emailInput = page.getByTestId("email-input");
-      const passwordInput = page.getByTestId("password-input");
-      const submitButton = page.getByTestId("login-button");
-
-      await emailInput.fill(EMAIL);
-      await passwordInput.fill(PASSWORD);
+      await loginPage.fillLoginForm(EMAIL, PASSWORD);
 
       // Press Enter in password field
-      await passwordInput.press("Enter");
+      await loginPage.submitWithEnter();
 
       // Should show loading state or transition
-      await expect(
-        submitButton
-          .filter({ hasText: "Logging in..." })
-          .or(submitButton.filter({ hasText: "Login" })),
-      ).toBeVisible();
+      await loginPage.waitForLoadingState();
     });
 
     test("should clear error message when user starts typing", async ({
       page,
     }) => {
-      await page.goto("/auth/login");
-
-      const emailInput = page.getByTestId("email-input");
-      const passwordInput = page.getByTestId("password-input");
-      const submitButton = page.getByTestId("login-button");
+      const loginPage = new LoginPage(page);
+      await loginPage.goto();
 
       // Trigger error first
-      await emailInput.fill("invalid@test.com");
-      await passwordInput.fill("wrongpassword");
-      await submitButton.click();
+      await loginPage.emailInput.fill("invalid@test.com");
+      await loginPage.passwordInput.fill("wrongpassword");
+      await loginPage.clickLogin();
 
       // Wait for error message to appear
-      await expect(page.getByTestId("error-message")).toBeVisible({
-        timeout: 10000,
-      });
+      await loginPage.waitForErrorMessage();
 
       // Start typing in email field
-      await emailInput.fill(EMAIL);
+      await loginPage.emailInput.fill(EMAIL);
 
       // Error should be cleared
-      await expect(page.getByTestId("error-message")).not.toBeVisible();
+      await expect(loginPage.errorMessage).not.toBeVisible();
     });
 
     test("should disable form during submission", async ({ page }) => {
-      await page.goto("/auth/login");
+      const loginPage = new LoginPage(page);
+      await loginPage.goto();
 
-      const emailInput = page.getByTestId("email-input");
-      const passwordInput = page.getByTestId("password-input");
-      const submitButton = page.getByTestId("login-button");
+      await loginPage.fillLoginForm(EMAIL, PASSWORD);
 
-      await emailInput.fill(EMAIL);
-      await passwordInput.fill(PASSWORD);
-
-      await submitButton.click();
+      await loginPage.clickLogin();
 
       // Form should be disabled during submission (may happen asynchronously)
       // Wait for either disabled state or error state
       try {
-        await expect(emailInput).toBeDisabled({ timeout: 5000 });
-        await expect(passwordInput).toBeDisabled();
+        await expect(loginPage.emailInput).toBeDisabled({ timeout: 5000 });
+        await expect(loginPage.passwordInput).toBeDisabled();
         await expect(
-          submitButton.filter({ hasText: "Logging in..." }),
+          loginPage.loginButton.filter({ hasText: "Logging in..." }),
         ).toBeDisabled();
       } catch {
         // If form doesn't get disabled, that's also acceptable for this test
         // as long as some response happens
-        await expect(submitButton.filter({ hasText: "Login" })).toBeVisible({
+        await expect(
+          loginPage.loginButton.filter({ hasText: "Login" }),
+        ).toBeVisible({
           timeout: 10000,
         });
       }
@@ -245,9 +215,10 @@ test.describe("Login Page", () => {
 
   test.describe("Navigation", () => {
     test("should navigate to forgot password page", async ({ page }) => {
-      await page.goto("/auth/login");
+      const loginPage = new LoginPage(page);
+      await loginPage.goto();
 
-      await page.getByRole("link", { name: "Forgot your password?" }).click();
+      await loginPage.clickForgotPassword();
 
       // Wait for navigation to complete
       await page.waitForURL("**/auth/forgot-password");
@@ -255,9 +226,10 @@ test.describe("Login Page", () => {
     });
 
     test("should navigate to sign up page", async ({ page }) => {
-      await page.goto("/auth/login");
+      const loginPage = new LoginPage(page);
+      await loginPage.goto();
 
-      await page.getByRole("link", { name: "Sign up" }).click();
+      await loginPage.clickSignUp();
 
       // Wait for navigation to complete
       await page.waitForURL("**/auth/sign-up");
@@ -267,11 +239,12 @@ test.describe("Login Page", () => {
 
   test.describe("Accessibility", () => {
     test("should have proper ARIA labels", async ({ page }) => {
-      await page.goto("/auth/login");
+      const loginPage = new LoginPage(page);
+      await loginPage.goto();
 
       // Check form labels
-      await expect(page.getByTestId("email-input")).toBeVisible();
-      await expect(page.getByTestId("password-input")).toBeVisible();
+      await expect(loginPage.emailInput).toBeVisible();
+      await expect(loginPage.passwordInput).toBeVisible();
 
       // Check screen reader only text
       await expect(page.getByText("Login with Google").first()).toHaveClass(
@@ -280,31 +253,34 @@ test.describe("Login Page", () => {
     });
 
     test("should support keyboard navigation", async ({ page }) => {
-      await page.goto("/auth/login");
+      const loginPage = new LoginPage(page);
+      await loginPage.goto();
 
       // Focus should start on email field (first focusable element)
-      await expect(page.getByTestId("email-input")).toBeFocused();
+      await expect(loginPage.emailInput).toBeFocused();
 
       // Tab through the form to verify keyboard accessibility
       await page.keyboard.press("Tab");
       // Check that we can navigate to password field (may not be immediately focused due to form behavior)
-      await page.getByTestId("password-input").focus();
-      await expect(page.getByTestId("password-input")).toBeFocused();
+      await loginPage.passwordInput.focus();
+      await expect(loginPage.passwordInput).toBeFocused();
 
       await page.keyboard.press("Tab");
       // Verify we can reach the submit button
-      await page.getByTestId("login-button").focus();
-      await expect(page.getByTestId("login-button")).toBeFocused();
+      await loginPage.loginButton.focus();
+      await expect(loginPage.loginButton).toBeFocused();
     });
 
     test("should have proper heading structure", async ({ page }) => {
-      await page.goto("/auth/login");
+      const loginPage = new LoginPage(page);
+      await loginPage.goto();
 
-      const heading = page.getByRole("heading", { name: "Welcome back" });
-      await expect(heading).toBeVisible();
+      await expect(loginPage.welcomeHeading).toBeVisible();
 
       // Check heading level (should be h1)
-      const headingTag = await heading.evaluate((el) => el.tagName);
+      const headingTag = await loginPage.welcomeHeading.evaluate(
+        (el) => el.tagName,
+      );
       expect(headingTag).toBe("H1");
     });
   });
@@ -313,86 +289,65 @@ test.describe("Login Page", () => {
     test("should show loading indicator during authentication", async ({
       page,
     }) => {
-      await page.goto("/auth/login");
+      const loginPage = new LoginPage(page);
+      await loginPage.goto();
 
-      const emailInput = page.getByTestId("email-input");
-      const passwordInput = page.getByTestId("password-input");
-      const submitButton = page.getByTestId("login-button");
+      await loginPage.fillLoginForm(EMAIL, PASSWORD);
 
-      await emailInput.fill(EMAIL);
-      await passwordInput.fill(PASSWORD);
-
-      await submitButton.click();
+      await loginPage.clickLogin();
 
       // Should show loading text or transition to some state
-      await expect(
-        submitButton
-          .filter({ hasText: "Logging in..." })
-          .or(submitButton.filter({ hasText: "Login" })),
-      ).toBeVisible();
+      await loginPage.waitForLoadingState();
     });
 
     test("should reset loading state after failed login", async ({ page }) => {
-      await page.goto("/auth/login");
+      const loginPage = new LoginPage(page);
+      await loginPage.goto();
 
-      const emailInput = page.getByTestId("email-input");
-      const passwordInput = page.getByTestId("password-input");
-      const submitButton = page.getByTestId("login-button");
+      await loginPage.emailInput.fill("invalid@test.com");
+      await loginPage.passwordInput.fill("wrongpassword");
 
-      await emailInput.fill("invalid@test.com");
-      await passwordInput.fill("wrongpassword");
-
-      await submitButton.click();
+      await loginPage.clickLogin();
 
       // Should show loading or transition to some state
-      await expect(
-        submitButton
-          .filter({ hasText: "Logging in..." })
-          .or(submitButton.filter({ hasText: "Login" })),
-      ).toBeVisible();
+      await loginPage.waitForLoadingState();
 
       // Wait for error to appear (loading should be gone)
-      await expect(page.getByTestId("error-message")).toBeVisible({
-        timeout: 10000,
-      });
+      await loginPage.waitForErrorMessage();
 
       // Button should return to normal state
-      await expect(submitButton.filter({ hasText: "Login" })).toBeVisible();
+      await expect(
+        loginPage.loginButton.filter({ hasText: "Login" }),
+      ).toBeVisible();
     });
   });
 
   test.describe("Error Handling", () => {
     test("should display error messages clearly", async ({ page }) => {
-      await page.goto("/auth/login");
+      const loginPage = new LoginPage(page);
+      await loginPage.goto();
 
-      const emailInput = page.getByTestId("email-input");
-      const passwordInput = page.getByTestId("password-input");
-      const submitButton = page.getByTestId("login-button");
+      await loginPage.emailInput.fill("invalid@test.com");
+      await loginPage.passwordInput.fill("wrongpassword");
 
-      await emailInput.fill("invalid@test.com");
-      await passwordInput.fill("wrongpassword");
+      await loginPage.clickLogin();
 
-      await submitButton.click();
-
-      const errorMessage = page.getByTestId("error-message");
-      await expect(errorMessage).toBeVisible({ timeout: 10000 });
+      await loginPage.waitForErrorMessage();
 
       // Error should be styled appropriately (red text)
-      await expect(errorMessage).toHaveClass(/text-red-500/);
+      await expect(loginPage.errorMessage).toHaveClass(/text-red-500/);
     });
   });
 
   test.describe("Google Authentication", () => {
     test("should display Google login button", async ({ page }) => {
-      await page.goto("/auth/login");
+      const loginPage = new LoginPage(page);
+      await loginPage.goto();
 
-      const googleButton = page.getByRole("button", {
-        name: "Continue with Google",
-      });
-      await expect(googleButton).toBeVisible();
+      await expect(loginPage.googleButton).toBeVisible();
 
       // Should contain Google icon (though we can't test actual Google auth)
-      await expect(googleButton.locator("svg")).toBeVisible();
+      await expect(loginPage.googleButton.locator("svg")).toBeVisible();
     });
   });
 });
