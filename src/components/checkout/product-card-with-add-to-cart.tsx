@@ -25,6 +25,8 @@ import { ShoppingCart, Plus } from "lucide-react";
 import type { ProductWithDetails } from "@/app/api/shop/types";
 import type { SelectProductVariant } from "@/database/schemas/product-variants";
 import type { SelectProductOption } from "@/database/schemas/product-options";
+import { useAuth } from "@/hooks/use-auth";
+import { toast } from "sonner";
 
 /**
  * Extended product type that includes variants and options for checkout functionality.
@@ -52,6 +54,7 @@ export function ProductCardWithAddToCart({
   const [selectedVariantId, setSelectedVariantId] = useState<string>("");
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const { addItem } = useCart();
+  const { isAuthenticated } = useAuth();
 
   const hasImage = !!product.featuredImage?.url;
   const hasVariants = product.variants && product.variants.length > 0;
@@ -67,6 +70,11 @@ export function ProductCardWithAddToCart({
 
   const handleAddToCart = async () => {
     if (isAddingToCart) return;
+
+    if (!isAuthenticated) {
+      toast.error("Please log in to add items to your cart");
+      return;
+    }
 
     setIsAddingToCart(true);
 

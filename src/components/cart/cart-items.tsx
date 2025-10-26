@@ -1,6 +1,6 @@
 import { DEFAULT_OPTION } from "@/lib/constants";
 import { createUrl } from "@/lib/utils";
-import { ShoppingCartIcon, Link, LogInIcon } from "lucide-react";
+import { ShoppingCartIcon, LogInIcon } from "lucide-react";
 import { ReactNode } from "react";
 import { Price } from "../custom-price";
 import { CheckoutButton } from "./checkout-button";
@@ -9,6 +9,7 @@ import { EditItemQuantityButton } from "./edit-quantity-button";
 import { useAuth } from "@/hooks/use-auth";
 import { useCart } from "@/providers/cart-provider";
 import Image from "next/image";
+import Link from "next/link";
 
 export function CartItems(): ReactNode {
   const { isAuthenticated } = useAuth();
