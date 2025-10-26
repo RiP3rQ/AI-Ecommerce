@@ -1,6 +1,10 @@
+"use client";
+
 import { ReactNode } from "react";
 import { ProductCardWithAddToCart } from "./product-card-with-add-to-cart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AuthGuard } from "@/components/auth-guard";
+import { useAuth } from "@/hooks/use-auth";
 import type { ProductWithDetails } from "@/app/api/shop/types";
 import type { SelectProductImage } from "@/database/schemas/product-images";
 import type { SelectProductVariant } from "@/database/schemas/product-variants";
@@ -257,8 +261,44 @@ const mockSuggestedProducts: ProductWithVariantsAndOptions[] = [
  * Component that displays suggested products in a grid layout.
  * Products can be added to cart directly or via variant selection modal.
  * Currently uses mock data, will be replaced with actual AI-generated suggestions later.
+ * Protected feature - requires authentication.
  */
 export function SuggestedProducts(): ReactNode {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div>
+        <h2 className="text-xl font-semibold mb-4">You might also like</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Loading skeleton */}
+          {[...Array(4)].map((_, i) => (
+            <Card key={i} className="animate-pulse">
+              <CardContent className="p-4">
+                <div className="w-full h-48 bg-muted rounded mb-4"></div>
+                <div className="h-4 bg-muted rounded mb-2"></div>
+                <div className="h-4 bg-muted rounded w-3/4"></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div>
+        <h2 className="text-xl font-semibold mb-4">You might also like</h2>
+        <AuthGuard
+          title="AI-Powered Product Suggestions"
+          description="Login to unlock personalized product recommendations powered by artificial intelligence."
+          feature="AI product suggestions"
+        />
+      </div>
+    );
+  }
+
   return (
     <div>
       <h2 className="text-xl font-semibold mb-4">You might also like</h2>

@@ -1,4 +1,5 @@
-import { LogoutButton } from "./logout-button";
+import { LogoutButton } from "@/components/global/logout-button";
+import { LoginButton } from "@/components/global/login-button";
 
 import { createServerSupabaseClient } from "@/supabase-auth/server";
 
@@ -10,9 +11,9 @@ export async function AuthButton() {
 
   const user = data?.claims;
 
-  return user ? (
+  return (
     <div className="fixed bottom-16 right-4 z-[55] bg-background hover:bg-background/80">
-      <LogoutButton />
+      {user ? <LogoutButton /> : <LoginButton />}
     </div>
-  ) : null;
+  );
 }

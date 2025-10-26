@@ -10,6 +10,7 @@ import {
   updateCartItemQuantity,
   removeCartItem,
 } from "@/lib/cart-api";
+import { createClientSupabaseClient } from "@/supabase-auth/client";
 import React, {
   createContext,
   useCallback,
@@ -20,6 +21,7 @@ import React, {
 } from "react";
 import useSWR from "swr";
 import { transformCartResponse } from "@/lib/cart-helpers";
+import { useRouter } from "next/navigation";
 
 type CartContextType = {
   isOpen: boolean;
@@ -48,6 +50,18 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const cartUrl = `${BASE_URL}/api/cart`;
+  const router = useRouter();
+
+  // Helper function to check authentication
+  const checkAuthentication = async (): Promise<boolean> => {
+    const supabaseClient = createClientSupabaseClient();
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (!user) {
+      router.push("/auth/login");
+      return false;
+    }
+    return true;
+  };
 
   // Use SWR to fetch cart data initially
   const {
@@ -78,6 +92,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       height?: number;
     },
   ) => {
+    // Check authentication before allowing cart operations
+    const isAuthenticated = await checkAuthentication();
+    if (!isAuthenticated) {
+      return;
+    }
+
     try {
       // Fire-and-forget add item to cart
       addItemToCart({
@@ -177,6 +197,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateItemQuantity = async (cartItemId: string, quantity: number) => {
+    // Check authentication before allowing cart operations
+    const isAuthenticated = await checkAuthentication();
+    if (!isAuthenticated) {
+      return;
+    }
+
     try {
       // Fire-and-forget update item quantity or remove item if quantity is 0
       if (quantity === 0) {
@@ -247,6 +273,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   const removeItem = async (cartItemId: string) => {
+    // Check authentication before allowing cart operations
+    const isAuthenticated = await checkAuthentication();
+    if (!isAuthenticated) {
+      return;
+    }
+
     try {
       // Fire-and-forget remove item from cart
       removeCartItem({ cartItemId });
