@@ -3,7 +3,7 @@
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { useCart } from "@/providers/cart-provider";
-import { SelectCartItem } from "@/types/cart";
+import type { SelectCartItem } from "@/types/cart";
 
 export function DeleteItemButton({ item }: { item: SelectCartItem }) {
   const [isLoading, setIsLoading] = useState(false);

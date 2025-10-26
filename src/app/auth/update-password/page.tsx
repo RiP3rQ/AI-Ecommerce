@@ -1,5 +1,5 @@
 import { UpdatePasswordForm } from "@/app/auth/update-password/components/update-password-form";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 export default function Page(): ReactNode {
   return (

@@ -1,5 +1,5 @@
 import { ForgotPasswordForm } from "@/app/auth/forgot-password/components/forgot-password-form";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 export default function Page(): ReactNode {
   return (

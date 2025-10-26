@@ -1,0 +1,227 @@
+name: Merge to main
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+env:
+  NODE_ENV: test
+  CI: 1
+  DATABASE_URL: postgres://postgres:password@localhost:5432/ai_ecommerce_test
+  NEXT_PUBLIC_SUPABASE_URL: https://test.supabase.co
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: test-publishable-key
+  NEXT_PUBLIC_SITE_NAME: AI Ecommerce Test
+  GEMINI_API_KEY: test-gemini-api-key
+
+jobs:
+  type-check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v3
+
+    - name: Setup Node.js environment
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
+        cache: 'pnpm'
+
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+
+    - name: TypeScript type check
+      run: pnpm run type:check
+
+  unit-test:
+    runs-on: ubuntu-latest
+    needs: type-check
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: ai_ecommerce_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v3
+
+    - name: Setup Node.js environment
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
+        cache: 'pnpm'
+
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+
+    - name: Wait for database to be ready
+      run: |
+        for i in {1..30}; do
+          if pg_isready -h localhost -p 5432 -U postgres; then
+            echo "Database is ready!"
+            break
+          fi
+          echo "Waiting for database... ($i/30)"
+          sleep 2
+        done
+        if [ $i -eq 30 ]; then
+          echo "Database failed to start"
+          exit 1
+        fi
+
+    - name: Run unit tests with coverage
+      run: pnpm run test:coverage
+
+    - name: Upload unit test coverage
+      uses: actions/upload-artifact@v4
+      with:
+        name: unit-coverage
+        path: coverage/
+        retention-days: 5
+
+  e2e-test:
+    runs-on: ubuntu-latest
+    needs: type-check
+    environment: CI
+    env:
+      NODE_ENV: CI
+      CI: 1
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+      NEXT_PUBLIC_SITE_NAME: RiP3rQ's Store
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v3
+
+    - name: Setup Node.js environment
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
+        cache: 'pnpm'
+
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+    
+    - name: Create .env file
+      run: |
+        echo "NODE_ENV=CI" > .env
+        echo "CI=1" >> .env
+        echo "NEXT_PUBLIC_SITE_NAME=AI Ecommerce Test" >> .env
+        echo "NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" >> .env
+        echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}" >> .env
+        echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+        echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> .env
+
+    - name: Install Playwright Browsers
+      run: pnpm exec playwright install --with-deps chromium
+
+    - name: Run Playwright E2E tests
+      run: pnpm run test:e2e
+
+    - uses: actions/upload-artifact@v4
+      if: ${{ !cancelled() }}
+      with:
+        name: playwright-report
+        path: playwright-report/
+        retention-days: 5
+
+    - name: Upload E2E test coverage
+      uses: codecov/codecov-action@v4
+      if: success()
+      with:
+        file: ./playwright-report/coverage/lcov.info
+        flags: e2e-tests
+        name: e2e-tests-coverage
+
+  status-comment:
+    name: Update PR Status
+    needs: [type-check, unit-test, e2e-test]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get PR details
+        id: pr_details
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const pr_number = context.issue.number;
+            return { owner, repo, pr_number };
+
+      - name: Download unit test coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: unit-coverage
+          path: unit-coverage
+
+      - name: Download E2E report
+        uses: actions/download-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report
+
+      - name: Create status comment
+        uses: actions/github-script@v7
+        if: ${{ needs.unit-test.result == 'success' && needs.e2e-test.result == 'success' }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { owner, repo, pr_number } = ${{ steps.pr_details.outputs.result }};
+
+            github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: pr_number,
+              body: `✅ All checks have passed successfully!\n\n` +
+                    `- Type Check: ✅\n` +
+                    `- Unit Tests: ✅\n` +
+                    `- E2E Tests: ✅\n\n` +
+                    `Coverage reports have been uploaded as artifacts.`
+            });
+
+      - name: Create failure comment
+        uses: actions/github-script@v7
+        if: ${{ needs.unit-test.result != 'success' || needs.e2e-test.result != 'success' }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { owner, repo, pr_number } = ${{ steps.pr_details.outputs.result }};
+            const typeCheckStatus = "${{ needs.type-check.result }}" === "success" ? "✅" : "❌";
+            const unitStatus = "${{ needs.unit-test.result }}" === "success" ? "✅" : "❌";
+            const e2eStatus = "${{ needs.e2e-test.result }}" === "success" ? "✅" : "❌";
+
+            github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: pr_number,
+              body: `❌ Some checks have failed!\n\n` +
+                    `- Type Check: ${typeCheckStatus}\n` +
+                    `- Unit Tests: ${unitStatus}\n` +
+                    `- E2E Tests: ${e2eStatus}\n\n` +
+                    `Please check the workflow logs for details.`
+            });

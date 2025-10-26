@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
-import { ReactNode, useState } from "react";
+import { type ReactNode, useState } from "react";
 
 export function UpdatePasswordForm({
   className,

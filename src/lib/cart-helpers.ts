@@ -1,5 +1,5 @@
-import { CartResponse } from "@/app/api/cart/types";
-import { FrontendCart, SelectCartItem } from "@/types/cart";
+import type { CartResponse } from "@/app/api/cart/types";
+import type { FrontendCart, SelectCartItem } from "@/types/cart";
 
 /**
  * Transforms CartResponse from API to FrontendCart structure

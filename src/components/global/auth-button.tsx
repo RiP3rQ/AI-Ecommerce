@@ -4,7 +4,7 @@ import { LogoutButton } from "@/components/global/logout-button";
 import { LoginButton } from "@/components/global/login-button";
 
 import { useAuth } from "@/hooks/use-auth";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 export function AuthButton(): ReactNode {
   const { isAuthenticated } = useAuth();

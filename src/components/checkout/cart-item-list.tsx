@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import Image from "next/image";
 import { useCart } from "@/providers/cart-provider";
 import { Button } from "@/components/ui/button";

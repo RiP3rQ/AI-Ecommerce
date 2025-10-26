@@ -1,13 +1,13 @@
 "use client";
 
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Skeleton } from "../ui/skeleton";
 import Link from "next/link";
 import { GridTileImage } from "../grid/single-tile";
-import { LatestProductsItem } from "@/app/api/main-page/types";
+import type { LatestProductsItem } from "@/app/api/main-page/types";
 import { swrFetcher } from "@/lib/swr-fetcher";
 import { BASE_URL } from "@/lib/utils";
-import useSWR, { SWRResponse } from "swr";
+import useSWR, { type SWRResponse } from "swr";
 
 export function ItemsMarquee(): ReactNode {
   // ============================= SWR DATA =============================

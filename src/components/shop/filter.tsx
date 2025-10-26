@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useEffect, useMemo, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -8,9 +8,9 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { CheckIcon, XIcon, FilterIcon } from "lucide-react";
 import { BASE_URL, cn } from "@/lib/utils";
-import { SelectCategory } from "@/database/schema";
+import type { SelectCategory } from "@/database/schema";
 import { swrFetcher } from "@/lib/swr-fetcher";
-import useSWR, { SWRResponse } from "swr";
+import useSWR, { type SWRResponse } from "swr";
 
 interface FiltersProps {
   selectedCategory?: string;

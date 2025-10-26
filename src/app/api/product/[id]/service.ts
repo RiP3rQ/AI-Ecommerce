@@ -1,13 +1,13 @@
-import { DrizzleDbClient, drizzleDbClient } from "@/database/index";
+import { type DrizzleDbClient, drizzleDbClient } from "@/database/index";
 import {
   productImages,
   productOptions,
   products,
   productVariants,
   SelectProduct,
-  SelectProductImage,
-  SelectProductOption,
-  SelectProductVariant,
+  type SelectProductImage,
+  type SelectProductOption,
+  type SelectProductVariant,
 } from "@/database/schema";
 import { ProductNotFoundError } from "@/lib/errors";
 import type { PriceRange } from "@/types/products";

@@ -1,4 +1,4 @@
-import { DrizzleDbClient, drizzleDbClient } from "@/database/index";
+import { type DrizzleDbClient, drizzleDbClient } from "@/database/index";
 import { orders, orderItems } from "@/database/schemas/orders";
 import { cartService } from "../service";
 import { EmptyCartError } from "@/lib/errors";

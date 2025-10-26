@@ -10,7 +10,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { relations, sql } from "drizzle-orm";
 import { DEFAULT_DATE_TABLES } from "../helpers/dates";
-import {
+import type {
   ProviderMetadata,
   ReasoningOutput,
   Tool,

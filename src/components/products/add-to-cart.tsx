@@ -1,7 +1,7 @@
 "use client";
 
-import { SelectProductVariant } from "@/database/schema";
-import { ProductData } from "@/app/api/product/[id]/types";
+import type { SelectProductVariant } from "@/database/schema";
+import type { ProductData } from "@/app/api/product/[id]/types";
 import { useCart } from "@/providers/cart-provider";
 import { useProductProvider } from "@/providers/product-provider";
 import clsx from "clsx";
@@ -33,7 +33,6 @@ function SubmitButton({
     return (
       <Tooltip>
         <TooltipTrigger asChild>
-
           <span className="w-full">
             <Button
               type="button"

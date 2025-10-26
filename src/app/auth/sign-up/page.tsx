@@ -1,5 +1,5 @@
 import { RegisterForm } from "@/app/auth/sign-up/components/register-form";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 export default function SignUpPage(): ReactNode {
   return (

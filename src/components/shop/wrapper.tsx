@@ -7,18 +7,18 @@ import {
   shopFiltersUrlSchema,
   DEFAULT_SHOP_FILTERS,
   DEFAULT_PAGINATION,
-  PaginationUrlSchema,
-  ShopFiltersUrlSchema,
+  type PaginationUrlSchema,
+  type ShopFiltersUrlSchema,
 } from "@/schemas/shop-url-schema";
 import { parseAsJson, useQueryState } from "nuqs";
-import { ReactNode, useCallback, useMemo } from "react";
+import { type ReactNode, useCallback, useMemo } from "react";
 import useSWR from "swr";
 import { Filters } from "./filter";
 import { SearchbarAndSorts } from "./searchbar-and-sorts";
 import { ProductsList } from "./products-list";
 import { Skeleton } from "@/components/ui/skeleton";
-import { SWRResponse } from "@/types/swr";
-import { ShopProductsData } from "@/app/api/shop/types";
+import type { SWRResponse } from "@/types/swr";
+import type { ShopProductsData } from "@/app/api/shop/types";
 import { CLIENT_SIDE_URL_UPDATE_OPTIONS } from "@/lib/nuqs";
 import { error } from "console";
 
@@ -139,7 +139,10 @@ export function ShopWrapper({
       {/* Filters Sidebar - 30% width on desktop */}
       <div className="hidden lg:block lg:w-[30%] xl:w-[25%]">
         {isLoading ? (
-          <div className="sticky top-0 h-screen border-r border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-black">
+          <div
+            className="sticky top-0 h-screen border-r border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-black"
+            data-testid="loading-skeleton"
+          >
             <Skeleton className="h-8 w-32 mb-6" />
             <Skeleton className="h-px w-full mb-6" />
             <div className="space-y-4">
@@ -165,7 +168,7 @@ export function ShopWrapper({
         <div className="mx-auto max-w-[1800px] px-4 py-8 sm:px-6 lg:px-8">
           {isLoading ? (
             <>
-              <div className="mb-6">
+              <div className="mb-6" data-testid="loading-skeleton">
                 <Skeleton className="h-10 w-full max-w-md mb-4" />
               </div>
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

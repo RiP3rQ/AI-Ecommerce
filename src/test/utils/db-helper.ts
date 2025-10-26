@@ -1,7 +1,7 @@
-import { drizzle, NodePgDatabase } from "drizzle-orm/node-postgres";
+import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
 import { sql, eq, DrizzleError } from "drizzle-orm";
 import * as schema from "../../database/schema";
-import { Pool, PoolClient } from "pg";
+import { Pool, type PoolClient } from "pg";
 import process from "node:process";
 
 /**

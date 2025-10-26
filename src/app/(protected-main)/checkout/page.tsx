@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { CartItemList } from "@/components/checkout/cart-item-list";
 import { OrderSummary } from "@/components/checkout/order-summary";
 import { SuggestedProducts } from "@/components/checkout/suggested-products";

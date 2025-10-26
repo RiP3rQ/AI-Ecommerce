@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { Price } from "./custom-price";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { formatBasicPrice } from "@/lib/utils";
 
 export function CustomLabel({

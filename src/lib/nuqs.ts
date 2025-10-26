@@ -1,4 +1,4 @@
-import { Options } from "nuqs";
+import type { Options } from "nuqs";
 
 export const CLIENT_SIDE_URL_UPDATE_OPTIONS: Options = {
   history: "push", // 'push' for allowing to go back to the previous page | 'replace' for keeping the current history point and only replacing the query string

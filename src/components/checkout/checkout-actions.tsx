@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useState } from "react";
+import { type ReactNode, useState } from "react";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
 import { completeCheckout } from "@/lib/checkout-api";

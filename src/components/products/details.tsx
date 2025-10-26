@@ -1,11 +1,11 @@
 "use client";
 
-import { ReactNode, Suspense } from "react";
+import { type ReactNode, Suspense } from "react";
 import { Gallery } from "./gallery";
 import { ProductDescription } from "./description";
-import { SelectProductImage } from "@/database/schema";
-import useSWR, { SWRResponse } from "swr";
-import { ProductData } from "@/app/api/product/[id]/types";
+import type { SelectProductImage } from "@/database/schema";
+import useSWR, { type SWRResponse } from "swr";
+import type { ProductData } from "@/app/api/product/[id]/types";
 import { swrFetcher } from "@/lib/swr-fetcher";
 import { BASE_URL } from "@/lib/utils";
 

@@ -1,7 +1,7 @@
 import { DEFAULT_OPTION } from "@/lib/constants";
 import { createUrl } from "@/lib/utils";
 import { ShoppingCartIcon, LogInIcon } from "lucide-react";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Price } from "../custom-price";
 import { CheckoutButton } from "./checkout-button";
 import { DeleteItemButton } from "./delete-item-button";
