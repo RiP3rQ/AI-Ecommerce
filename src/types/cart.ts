@@ -1,4 +1,4 @@
-import {
+import type {
   SelectCart as DbSelectCart,
   SelectCartItem as DbSelectCartItem,
   SelectProduct,

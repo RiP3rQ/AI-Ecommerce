@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { ProductCard } from "./product-card";
 import {
   Pagination,
@@ -16,8 +16,8 @@ import {
   EmptyDescription,
 } from "@/components/ui/empty";
 import { PackageSearchIcon } from "lucide-react";
-import { ShopFiltersUrlSchema } from "@/schemas/shop-url-schema";
-import { ProductWithDetails } from "@/app/api/shop/types";
+import type { ShopFiltersUrlSchema } from "@/schemas/shop-url-schema";
+import type { ProductWithDetails } from "@/app/api/shop/types";
 
 interface Product {
   id: string;

@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { ProductCardWithAddToCart } from "./product-card-with-add-to-cart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AuthGuard } from "@/components/auth-guard";

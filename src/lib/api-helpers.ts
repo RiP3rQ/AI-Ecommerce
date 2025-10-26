@@ -2,7 +2,7 @@
 
 import { createServerSupabaseClient } from "@/supabase-auth/server";
 import { UnauthorizedError } from "./errors";
-import { User } from "@supabase/supabase-js";
+import type { User } from "@supabase/supabase-js";
 
 /**
  * Validates user session and returns the authenticated user.

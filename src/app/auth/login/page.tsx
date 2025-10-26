@@ -1,5 +1,5 @@
 import { LoginForm } from "@/app/auth/login/components/login-form";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 export default function LoginPage(): ReactNode {
   return (

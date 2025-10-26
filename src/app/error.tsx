@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 export default function Error({ reset }: { reset: () => void }): ReactNode {
   return (

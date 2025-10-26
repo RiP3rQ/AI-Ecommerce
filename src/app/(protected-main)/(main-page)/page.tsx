@@ -1,6 +1,6 @@
 import { HeroThreeItemGrid } from "@/components/grid/hero";
 import { ItemsMarquee } from "@/components/marquee";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 export default function Page(): ReactNode {
   return (

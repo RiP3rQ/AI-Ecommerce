@@ -1,6 +1,9 @@
 "use client";
 
-import { SelectProductOption, SelectProductVariant } from "@/database/schema";
+import type {
+  SelectProductOption,
+  SelectProductVariant,
+} from "@/database/schema";
 import { useProductProvider } from "@/providers/product-provider";
 import { productUrlSchema } from "@/schemas/product-url-schema";
 import clsx from "clsx";

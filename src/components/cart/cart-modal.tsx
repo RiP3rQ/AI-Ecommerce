@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import OpenCart from "./open-cart-button";
 import { ShoppingCartIcon, ChevronRightCircleIcon } from "lucide-react";
 import { Price } from "../custom-price";

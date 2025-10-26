@@ -1,4 +1,4 @@
-import {
+import type {
   PaginationUrlSchema,
   ShopFiltersUrlSchema,
 } from "@/schemas/shop-url-schema";

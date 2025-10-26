@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { ProductProvider } from "@/providers/product-provider";
 import { ProductDetails } from "@/components/products/details";
 

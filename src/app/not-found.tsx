@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowLeftIcon } from "lucide-react";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 export default function NotFoundPage(): ReactNode {
   return (

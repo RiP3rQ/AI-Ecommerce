@@ -1,10 +1,10 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Price } from "../custom-price";
-import { ProductWithDetails } from "@/app/api/shop/types";
+import type { ProductWithDetails } from "@/app/api/shop/types";
 
 interface ProductCardProps {
   product: ProductWithDetails;

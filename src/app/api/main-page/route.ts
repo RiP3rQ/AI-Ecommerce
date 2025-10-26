@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { handleApiError } from "@/lib/errors";
 import { mainPageService } from "./service";
 import type { MainPageResponse } from "./types";

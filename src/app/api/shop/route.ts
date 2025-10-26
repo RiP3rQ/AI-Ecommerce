@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { handleApiError } from "@/lib/errors";
 import { shopService } from "./service";
-import { GetProductsDto, getProductsSchemaRefined } from "./dto";
+import { type GetProductsDto, getProductsSchemaRefined } from "./dto";
 import type { ShopProductsResponse } from "./types";
 import { drizzleDbClient } from "@/database";
 
@@ -30,7 +30,7 @@ export async function GET(
     // Step 1: Parse and validate query parameters
     const searchParams = request.nextUrl.searchParams;
 
-    let queryParams: Partial<GetProductsDto> = {
+    const queryParams: Partial<GetProductsDto> = {
       page: searchParams.get("page")
         ? Number.parseInt(searchParams.get("page")!)
         : 1,

@@ -1,11 +1,7 @@
 "use client";
 
-import React, {
-  createContext,
-  useContext,
-  useMemo,
-  useOptimistic,
-} from "react";
+import type React from "react";
+import { createContext, useContext, useMemo, useOptimistic } from "react";
 import { parseAsInteger, parseAsJson, useQueryState } from "nuqs";
 import { productUrlSchema } from "@/schemas/product-url-schema";
 

@@ -7,7 +7,7 @@ import * as schema from "../../database/schema";
 import { closePool } from "../utils/db-helper";
 
 // Cache to track if migrations have already been run in this test session
-let migrationCache = {
+const migrationCache = {
   isInitialized: false,
   lastInitTime: 0,
 };

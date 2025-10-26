@@ -1,6 +1,6 @@
 import { CartResponse } from "@/app/api/cart/types";
 import { BASE_URL } from "./utils";
-import { CheckoutResponse } from "@/app/api/cart/checkout/dto";
+import type { CheckoutResponse } from "@/app/api/cart/checkout/dto";
 
 /**
  * Completes the checkout process.

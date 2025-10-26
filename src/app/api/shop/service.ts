@@ -1,4 +1,4 @@
-import { DrizzleDbClient } from "@/database/index";
+import type { DrizzleDbClient } from "@/database/index";
 import { products } from "@/database/schemas/products";
 import { categories } from "@/database/schemas/categories";
 import { productVariants } from "@/database/schemas/product-variants";
@@ -15,7 +15,7 @@ import type {
   PaginationMeta,
 } from "./types";
 import type { SelectProductImage } from "@/database/schemas/product-images";
-import { TestDatabase } from "@/test/utils/db-helper";
+import type { TestDatabase } from "@/test/utils/db-helper";
 
 /**
  * Service class for shop operations.

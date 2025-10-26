@@ -1,5 +1,5 @@
 import { ShopWrapper } from "@/components/shop/wrapper";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 interface ShopPageProps {
   params: Promise<{

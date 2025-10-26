@@ -1,5 +1,5 @@
-import { DrizzleDbClient, drizzleDbClient } from "@/database/index";
-import { categories, SelectCategory } from "@/database/schemas/categories";
+import { type DrizzleDbClient, drizzleDbClient } from "@/database/index";
+import { categories, type SelectCategory } from "@/database/schemas/categories";
 import { desc, asc } from "drizzle-orm";
 import { InvalidSortFieldError } from "@/lib/errors";
 import type { GetCategoriesDto } from "./dto";

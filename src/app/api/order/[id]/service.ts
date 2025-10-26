@@ -1,10 +1,10 @@
-import { DrizzleDbClient, drizzleDbClient } from "@/database/index";
+import { type DrizzleDbClient, drizzleDbClient } from "@/database/index";
 import { orders, orderItems } from "@/database/schemas/orders";
 import { eq } from "drizzle-orm";
 import { OrderNotFoundError } from "@/lib/errors";
 import type { TestDatabase } from "@/test/utils/db-helper";
 import type { OrderDetails } from "./dto";
-import { SelectProductImage } from "@/database/schema";
+import type { SelectProductImage } from "@/database/schema";
 
 /**
  * Service class for order operations.

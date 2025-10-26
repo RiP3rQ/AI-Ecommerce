@@ -1,4 +1,4 @@
-import { DrizzleDbClient, drizzleDbClient } from "@/database/index";
+import { type DrizzleDbClient, drizzleDbClient } from "@/database/index";
 import { carts, cartItems } from "@/database/schemas/cart";
 import { productVariants } from "@/database/schemas/product-variants";
 import { eq, and } from "drizzle-orm";

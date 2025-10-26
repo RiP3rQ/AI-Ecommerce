@@ -11,7 +11,7 @@ import {
   FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { ComponentProps, ReactNode, useState } from "react";
+import { type ComponentProps, type ReactNode, useState } from "react";
 import { GoogleIcon } from "../../../../../public/icons";
 import Image from "next/image";
 import { useRouter } from "next/navigation";

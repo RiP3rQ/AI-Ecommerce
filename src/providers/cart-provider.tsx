@@ -1,17 +1,18 @@
 "use client";
 
-import { CartResponse } from "@/app/api/cart/types";
-import { SelectProduct, SelectProductVariant } from "@/database/schema";
+import type { CartResponse } from "@/app/api/cart/types";
+import type { SelectProduct, SelectProductVariant } from "@/database/schema";
 import { swrFetcher } from "@/lib/swr-fetcher";
 import { BASE_URL } from "@/lib/utils";
-import { FrontendCart, SelectCartItem } from "@/types/cart";
+import type { FrontendCart, SelectCartItem } from "@/types/cart";
 import {
   addItemToCart,
   updateCartItemQuantity,
   removeCartItem,
 } from "@/lib/cart-api";
 import { createClientSupabaseClient } from "@/supabase-auth/client";
-import React, {
+import type React from "react";
+import {
   createContext,
   useCallback,
   useContext,

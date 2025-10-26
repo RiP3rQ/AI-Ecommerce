@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/providers/cart-provider";

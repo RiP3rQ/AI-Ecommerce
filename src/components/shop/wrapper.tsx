@@ -7,18 +7,18 @@ import {
   shopFiltersUrlSchema,
   DEFAULT_SHOP_FILTERS,
   DEFAULT_PAGINATION,
-  PaginationUrlSchema,
-  ShopFiltersUrlSchema,
+  type PaginationUrlSchema,
+  type ShopFiltersUrlSchema,
 } from "@/schemas/shop-url-schema";
 import { parseAsJson, useQueryState } from "nuqs";
-import { ReactNode, useCallback, useMemo } from "react";
+import { type ReactNode, useCallback, useMemo } from "react";
 import useSWR from "swr";
 import { Filters } from "./filter";
 import { SearchbarAndSorts } from "./searchbar-and-sorts";
 import { ProductsList } from "./products-list";
 import { Skeleton } from "@/components/ui/skeleton";
-import { SWRResponse } from "@/types/swr";
-import { ShopProductsData } from "@/app/api/shop/types";
+import type { SWRResponse } from "@/types/swr";
+import type { ShopProductsData } from "@/app/api/shop/types";
 import { CLIENT_SIDE_URL_UPDATE_OPTIONS } from "@/lib/nuqs";
 import { error } from "console";
 

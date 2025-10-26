@@ -5,10 +5,10 @@ import {
   GEMINI_MODEL_TEMPERATURE,
   GEMINI_MODEL_MAX_OUTPUT_TOKENS,
 } from "./constants";
-import { GenerateTextOptions, GenerateTextResultType } from "./types";
+import type { GenerateTextOptions, GenerateTextResultType } from "./types";
 import { getAiTools } from "./tools";
-import { DrizzleDbClient } from "@/database";
-import { TestDatabase } from "@/test/utils/db-helper";
+import type { DrizzleDbClient } from "@/database";
+import type { TestDatabase } from "@/test/utils/db-helper";
 import { aiData } from "@/database/schemas/ai-data";
 
 export class AiSdkHandler {

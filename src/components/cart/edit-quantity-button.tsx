@@ -1,6 +1,6 @@
 "use client";
 
-import { SelectCartItem } from "@/types/cart";
+import type { SelectCartItem } from "@/types/cart";
 import { MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import { useState } from "react";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import useSWR from "swr";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,8 +10,11 @@ import { CheckCircle, Package, Truck, CreditCard } from "lucide-react";
 import LoadingDots from "@/components/loading-dots";
 import { Price } from "@/components/custom-price";
 import { BASE_URL } from "@/lib/utils";
-import { OrderDetails, OrderDetailsResponse } from "@/app/api/order/[id]/dto";
-import { SWRResponse } from "@/types/swr";
+import {
+  type OrderDetails,
+  OrderDetailsResponse,
+} from "@/app/api/order/[id]/dto";
+import type { SWRResponse } from "@/types/swr";
 import { swrFetcher } from "@/lib/swr-fetcher";
 
 export function CheckoutComplete(): ReactNode {

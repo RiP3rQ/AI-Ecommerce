@@ -3,9 +3,9 @@
 import { GridTileImage } from "@/components/grid/single-tile";
 import Link from "next/link";
 import type { LatestProductsItem } from "@/app/api/main-page/types";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Skeleton } from "../ui/skeleton";
-import useSWR, { SWRResponse } from "swr";
+import useSWR, { type SWRResponse } from "swr";
 import { swrFetcher } from "@/lib/swr-fetcher";
 import { BASE_URL } from "@/lib/utils";
 

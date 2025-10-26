@@ -1,6 +1,6 @@
 import {
   createGoogleGenerativeAI,
-  GoogleGenerativeAIProviderSettings,
+  type GoogleGenerativeAIProviderSettings,
 } from "@ai-sdk/google";
 import { env } from "@/env";
 import { GEMINI_API_TIMEOUT } from "./constants";
