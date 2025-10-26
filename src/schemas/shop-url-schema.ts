@@ -17,7 +17,7 @@ export const DEFAULT_SHOP_FILTERS = {
   sortField: "createdAt",
   search: "",
   categoryId: "",
-  priceRange: { min: 0, max: 1000000 },
+  priceRange: { min: 0, max: 100000 }, // 1,000 dollars in cents
 };
 
 export const shopFiltersUrlSchema = z.object({

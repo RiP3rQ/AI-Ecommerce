@@ -10,6 +10,7 @@ import {
   updateCartItemQuantity,
   removeCartItem,
 } from "@/lib/cart-api";
+import { createClientSupabaseClient } from "@/supabase-auth/client";
 import React, {
   createContext,
   useCallback,
@@ -20,6 +21,8 @@ import React, {
 } from "react";
 import useSWR from "swr";
 import { transformCartResponse } from "@/lib/cart-helpers";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/use-auth";
 
 type CartContextType = {
   isOpen: boolean;
@@ -48,13 +51,14 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const cartUrl = `${BASE_URL}/api/cart`;
+  const { isAuthenticated } = useAuth();
 
   // Use SWR to fetch cart data initially
   const {
     data: cartResponse,
     error,
     isLoading,
-  } = useSWR<CartResponse>(cartUrl, swrFetcher);
+  } = useSWR<CartResponse>(isAuthenticated ? cartUrl : null, swrFetcher);
 
   // Local cart state that gets updated when we make changes
   const [cart, setCart] = useState<FrontendCart | undefined>(
@@ -78,6 +82,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       height?: number;
     },
   ) => {
+    // Check authentication before allowing cart operations
+    if (!isAuthenticated) {
+      return;
+    }
+
     try {
       // Fire-and-forget add item to cart
       addItemToCart({
@@ -177,6 +186,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateItemQuantity = async (cartItemId: string, quantity: number) => {
+    // Check authentication before allowing cart operations
+    if (!isAuthenticated) {
+      return;
+    }
+
     try {
       // Fire-and-forget update item quantity or remove item if quantity is 0
       if (quantity === 0) {
@@ -247,6 +261,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   const removeItem = async (cartItemId: string) => {
+    // Check authentication before allowing cart operations
+    if (!isAuthenticated) {
+      return;
+    }
+
     try {
       // Fire-and-forget remove item from cart
       removeCartItem({ cartItemId });

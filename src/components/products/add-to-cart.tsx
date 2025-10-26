@@ -8,21 +8,54 @@ import clsx from "clsx";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
 import { Button } from "../ui/button";
+import { useAuth } from "@/hooks/use-auth";
+import { toast } from "sonner";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 function SubmitButton({
   availableForSale,
   selectedVariantId,
   isLoading,
   onClick,
+  isAuthenticated,
 }: {
   availableForSale: boolean;
   selectedVariantId: string | undefined;
   isLoading: boolean;
   onClick: () => void;
+  isAuthenticated: boolean;
 }) {
   const buttonClasses =
     "relative flex w-full items-center justify-center rounded-full bg-blue-600 p-4 tracking-wide text-white cursor-pointer";
   const disabledClasses = "cursor-not-allowed opacity-60 hover:opacity-60";
+
+  if (!isAuthenticated) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+
+          <span className="w-full">
+            <Button
+              type="button"
+              aria-label="Add to cart"
+              disabled
+              tabIndex={-1}
+              className={clsx(buttonClasses, {
+                "hover:opacity-90": !isLoading,
+                "opacity-60": isLoading,
+              })}
+            >
+              <div className="absolute left-0 ml-4">
+                <PlusIcon className="h-5" />
+              </div>
+              {isLoading ? "Adding..." : "Add To Cart"}
+            </Button>
+          </span>
+        </TooltipTrigger>
+        <TooltipContent>Please log in to add items to your cart</TooltipContent>
+      </Tooltip>
+    );
+  }
 
   if (!availableForSale) {
     return (
@@ -78,6 +111,7 @@ export function AddToCart({
   const { cart, addItem, updateItemQuantity } = useCart();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { isAuthenticated } = useAuth();
 
   const variant = variants.find((variant: SelectProductVariant) =>
     variant.selectedOptions.every(
@@ -103,6 +137,11 @@ export function AddToCart({
 
   const handleAddToCart = async () => {
     if (!selectedVariantId || !finalVariant || isLoading) return;
+
+    if (!isAuthenticated) {
+      toast.error("Please log in to add items to your cart");
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
@@ -134,6 +173,7 @@ export function AddToCart({
         selectedVariantId={selectedVariantId}
         isLoading={isLoading}
         onClick={handleAddToCart}
+        isAuthenticated={isAuthenticated}
       />
       {error && (
         <p aria-live="polite" className="text-sm text-red-500 mt-2">

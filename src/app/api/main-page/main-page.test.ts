@@ -21,7 +21,6 @@ import {
 import { createProductImageFixture } from "@/test/fixtures/product-images";
 import type { MainPageResponse } from "./types";
 import { mockValidateServerSession } from "@/test/setup/test-setup";
-import { UnauthorizedError } from "@/lib/errors/cart-errors";
 import { createCategoryFixture } from "@/test/fixtures/categories";
 import { faker } from "@faker-js/faker";
 import { NextRequest } from "next/server";
@@ -248,10 +247,7 @@ describe("/api/main-page", () => {
 
   describe("Integration Tests - Route Handler", () => {
     describe("GET /api/main-page", () => {
-      it("should return latest products with proper response format when authenticated", async () => {
-        // Arrange: Mock successful authentication
-        mockValidateServerSession.mockResolvedValue({ id: "user-123" });
-
+      it("should return latest products with proper response format", async () => {
         // Create test data in database
         const db = createTestDb();
         try {
@@ -288,21 +284,6 @@ describe("/api/main-page", () => {
           // Clean up
           await dbHelpers.truncateProductTables(db);
         }
-      });
-
-      it("should return 401 when user is not authenticated", async () => {
-        // Arrange: Mock authentication failure
-        mockValidateServerSession.mockRejectedValue(new UnauthorizedError());
-
-        // Act: Make GET request to main-page endpoint
-        const response = await GET(
-          new NextRequest("http://localhost:3000/api/main-page"),
-        );
-        const result = await response.json();
-
-        // Assert: Response status is 401
-        expect(response.status).toBe(401);
-        expect(result.message).toBe("User is not authenticated.");
       });
     });
   });

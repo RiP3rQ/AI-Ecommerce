@@ -4,7 +4,6 @@ import { productService } from "./service";
 import { getProductSchema } from "./dto";
 import type { ProductResponse } from "./types";
 import { drizzleDbClient } from "@/database";
-import { validateServerSession } from "@/lib/api-helpers";
 
 /**
  * GET /api/product/[productUuid]
@@ -22,18 +21,13 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse<ProductResponse | unknown>> {
   try {
-    // Step 1: Validate user session
-    await validateServerSession();
-
-    // Step 2: Extract and validate path parameters
+    // Step 1: Extract path parameters
     const { id } = await params;
 
-    console.log("id", id);
-
-    // Step 3: Validate parameters
+    // Step 2: Validate parameters
     const validatedDto = getProductSchema.parse({ id });
 
-    // Step 4: Get product from service
+    // Step 3: Get product from service
     const productData = await productService.getProduct({
       dto: validatedDto,
       db: drizzleDbClient(),

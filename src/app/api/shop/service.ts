@@ -73,6 +73,8 @@ export class ShopService {
       search,
       categoryId,
       availableForSale,
+      priceMin,
+      priceMax,
     });
 
     // Get total count for pagination
@@ -107,18 +109,8 @@ export class ShopService {
       offset,
     });
 
-    // Filter by price range if provided (done after query due to aggregation)
-    let filteredProducts = productsResult;
-    if (priceMin !== undefined || priceMax !== undefined) {
-      filteredProducts = this.filterByPriceRange({
-        products: productsResult,
-        priceMin,
-        priceMax,
-      });
-    }
-
     // Transform products to include computed fields
-    const productsWithDetails = filteredProducts.map((product) =>
+    const productsWithDetails = productsResult.map((product) =>
       this.transformProductWithDetails(product),
     );
 
@@ -145,10 +137,14 @@ export class ShopService {
     search,
     categoryId,
     availableForSale,
+    priceMin,
+    priceMax,
   }: Readonly<{
     search?: string;
     categoryId?: string;
     availableForSale?: boolean;
+    priceMin?: number;
+    priceMax?: number;
   }>) {
     const conditions = [];
 
@@ -175,6 +171,21 @@ export class ShopService {
     // Filter by availability
     if (availableForSale !== undefined) {
       conditions.push(eq(products.availableForSale, availableForSale));
+    }
+
+    // Filter by price range - check if product has at least one variant in price range
+    if (priceMin !== undefined || priceMax !== undefined) {
+      let existsQuery: ReturnType<typeof sql>;
+
+      if (priceMin !== undefined && priceMax !== undefined) {
+        existsQuery = sql`EXISTS (SELECT 1 FROM product_variants WHERE product_variants.product_id = products.id AND product_variants.available_for_sale = true AND product_variants.price >= ${priceMin} AND product_variants.price <= ${priceMax})`;
+      } else if (priceMin !== undefined) {
+        existsQuery = sql`EXISTS (SELECT 1 FROM product_variants WHERE product_variants.product_id = products.id AND product_variants.available_for_sale = true AND product_variants.price >= ${priceMin})`;
+      } else if (priceMax !== undefined) {
+        existsQuery = sql`EXISTS (SELECT 1 FROM product_variants WHERE product_variants.product_id = products.id AND product_variants.available_for_sale = true AND product_variants.price <= ${priceMax})`;
+      }
+
+      conditions.push(existsQuery!);
     }
 
     return conditions;
@@ -209,33 +220,6 @@ export class ShopService {
           `Sort field "${sortField}" is not supported.`,
         );
     }
-  }
-
-  /**
-   * Filters products by price range (client-side filtering after query).
-   */
-  private filterByPriceRange({
-    products,
-    priceMin,
-    priceMax,
-  }: Readonly<{
-    products: any[];
-    priceMin?: number;
-    priceMax?: number;
-  }>) {
-    return products.filter((product) => {
-      const variants = product.variants || [];
-      if (variants.length === 0) return false;
-
-      const prices = variants.map((v: any) => v.price);
-      const minPrice = Math.min(...prices);
-      const maxPrice = Math.max(...prices);
-
-      if (priceMin !== undefined && maxPrice < priceMin) return false;
-      if (priceMax !== undefined && minPrice > priceMax) return false;
-
-      return true;
-    });
   }
 
   /**

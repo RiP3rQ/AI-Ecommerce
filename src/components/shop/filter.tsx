@@ -29,8 +29,12 @@ export function Filters({
   onResetFilters,
   searchParamCategoryName,
 }: FiltersProps): ReactNode {
-  const [localMinPrice, setLocalMinPrice] = useState(priceRange.min.toString());
-  const [localMaxPrice, setLocalMaxPrice] = useState(priceRange.max.toString());
+  const [localMinPrice, setLocalMinPrice] = useState(
+    (priceRange.min / 100).toString(),
+  );
+  const [localMaxPrice, setLocalMaxPrice] = useState(
+    (priceRange.max / 100).toString(),
+  );
 
   // ============================= SWR DATA =============================
   const { data, isLoading, error } = useSWR<SWRResponse<SelectCategory[]>>(
@@ -53,13 +57,14 @@ export function Filters({
   }, [searchParamCategoryName, data]);
 
   const handleApplyPriceRange = (): void => {
-    const min = Number.parseFloat(localMinPrice) || 0;
-    const max = Number.parseFloat(localMaxPrice) || 1000000;
+    // Convert dollars to cents for API (database stores prices in cents)
+    const min = Math.floor((Number.parseFloat(localMinPrice) || 0) * 100);
+    const max = Math.floor((Number.parseFloat(localMaxPrice) || 1000000) * 100);
     onPriceRangeChange({ min, max });
   };
 
   const hasActiveFilters =
-    selectedCategory || priceRange.min > 0 || priceRange.max < 1000000;
+    selectedCategory || priceRange.min > 0 || priceRange.max < 100000; // 1000 dollars * 100 cents
 
   const categories = useMemo(() => data?.data || [], [data]);
 
@@ -190,7 +195,8 @@ export function Filters({
               )}
               {(priceRange.min > 0 || priceRange.max < 1000000) && (
                 <Badge variant="secondary" className="gap-1">
-                  ${priceRange.min} - ${priceRange.max}
+                  ${(priceRange.min / 100).toFixed(0)} - $
+                  {(priceRange.max / 100).toFixed(0)}
                   <button
                     type="button"
                     onClick={() => onPriceRangeChange({ min: 0, max: 1000000 })}

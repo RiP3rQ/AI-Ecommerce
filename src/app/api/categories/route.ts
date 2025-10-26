@@ -4,7 +4,6 @@ import { categoriesService } from "./service";
 import { getCategoriesSchema } from "./dto";
 import type { CategoriesResponse } from "./types";
 import { drizzleDbClient } from "@/database";
-import { validateServerSession } from "@/lib/api-helpers";
 
 /**
  * GET /api/categories
@@ -21,10 +20,7 @@ export async function GET(
   request: NextRequest,
 ): Promise<NextResponse<CategoriesResponse | unknown>> {
   try {
-    // Step 1: Validate user session
-    await validateServerSession();
-
-    // Step 2: Parse and validate query parameters
+    // Step 1: Parse and validate query parameters
     const searchParams = request.nextUrl.searchParams;
 
     const rawSortDirection = searchParams.get("sortDirection")?.toLowerCase();
@@ -43,10 +39,10 @@ export async function GET(
           : undefined,
     };
 
-    // Step 3: Validate query parameters
+    // Step 2: Validate query parameters
     const validatedDto = getCategoriesSchema.parse(queryParams);
 
-    // Step 4: Get categories from service
+    // Step 3: Get categories from service
     const categoriesData = await categoriesService.getCategories({
       dto: validatedDto,
       db: drizzleDbClient(),
