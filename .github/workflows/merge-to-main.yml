@@ -98,6 +98,7 @@ jobs:
   e2e-test:
     runs-on: ubuntu-latest
     needs: type-check
+    environment: CI
     env:
       NODE_ENV: CI
       CI: 1
