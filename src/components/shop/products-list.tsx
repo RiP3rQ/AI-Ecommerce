@@ -110,7 +110,10 @@ export function ProductsList({
       </div>
 
       {/* Products Grid */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mb-8">
+      <div
+        className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mb-8"
+        data-testid="products-grid"
+      >
         {products.map((product, index) => (
           <ProductCard
             key={product.id}
@@ -122,7 +125,7 @@ export function ProductsList({
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <Pagination className="mt-auto">
+        <Pagination className="mt-auto" data-testid="pagination">
           <PaginationContent>
             <PaginationItem>
               <PaginationPrevious

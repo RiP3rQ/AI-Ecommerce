@@ -22,6 +22,7 @@ export function ProductCard({
       href={`/product/${product.id}`}
       prefetch={true}
       className="group relative flex flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white transition-all hover:border-blue-600 hover:shadow-lg dark:border-neutral-800 dark:bg-black dark:hover:border-blue-500"
+      data-testid="product-card"
     >
       {/* Product Image */}
       <div className="relative aspect-square w-full overflow-hidden bg-neutral-100 dark:bg-neutral-900">
@@ -69,7 +70,7 @@ export function ProductCard({
         {product.minPrice !== undefined &&
           product.maxPrice !== undefined &&
           product.currencyCode && (
-            <div className="mt-auto">
+            <div className="mt-auto" data-testid="product-price">
               <Price
                 amount={product.minPrice.toString()}
                 currencyCode={product.currencyCode}

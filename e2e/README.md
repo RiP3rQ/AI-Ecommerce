@@ -43,6 +43,14 @@ pnpm exec playwright test --debug
 
 ## Test Structure
 
+### Authentication Helpers (`auth-helpers.ts`)
+
+Utility functions for handling authentication in tests:
+
+- **`authenticateUser(page)`**: Logs in with test credentials
+- **`isAuthenticated(page)`**: Checks if user is currently authenticated
+- **`ensureAuthenticated(page)`**: Authenticates only if not already logged in
+
 ### Login Tests (`login.spec.ts`)
 
 Comprehensive test suite covering all login page functionality:
@@ -85,6 +93,68 @@ Comprehensive test suite covering all login page functionality:
 
 - **Google Authentication**
   - Google login button presence
+
+### Shop Tests (`shop.spec.ts`)
+
+Comprehensive test suite covering all shop page functionality. **Note**: All shop tests automatically authenticate using test credentials before running, since the application routes are protected.
+
+- **Page Loading & UI Elements**
+  - Shop page loads successfully after authentication
+  - Search and sort controls are displayed
+  - Filters sidebar shows on desktop, hidden on mobile
+
+- **Search Functionality**
+  - Search input accepts text input
+  - Debounced search (500ms delay) works correctly
+  - Search results update appropriately
+  - Search clearing works
+
+- **Sort Functionality**
+  - Sort dropdown shows all options (Newest First, Oldest First, Name A-Z, Name Z-A, Price Low-High, Price High-Low)
+  - Sort changes update URL and results
+  - Default sort behavior
+
+- **Category Filtering**
+  - Category buttons are displayed
+  - Clicking category filters results
+  - URL updates with category parameters
+
+- **Price Range Filtering**
+  - Price range inputs are present
+  - Price range application works
+  - Active filters display correctly
+
+- **Product Display & Interaction**
+  - Product cards show with images, titles, descriptions, prices
+  - Product cards are clickable and navigate to product pages
+  - Product count displays correctly
+  - Out of stock products show badges
+
+- **Pagination**
+  - Pagination controls appear when multiple pages exist
+  - Page navigation works
+  - Previous/Next buttons function correctly
+
+- **Empty States**
+  - "No products found" message displays for empty results
+  - Appropriate messaging for filters
+
+- **Reset Filters**
+  - Reset button appears when filters are active
+  - Reset clears all filters and search
+
+- **Accessibility**
+  - Proper ARIA labels on form elements
+  - Keyboard navigation support
+  - Screen reader compatibility
+
+- **Loading States**
+  - Loading skeletons display during data fetching
+  - Loading states transition to content properly
+
+- **URL State Management**
+  - URL parameters update with search, filters, and sort
+  - URL state persistence works correctly
 
 ## Test Credentials
 
