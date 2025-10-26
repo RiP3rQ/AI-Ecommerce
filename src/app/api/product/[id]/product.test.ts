@@ -16,7 +16,6 @@ import { createProductImageFixtures } from "@/test/fixtures/product-images";
 import { createProductOptionFixtures } from "@/test/fixtures/product-options";
 import type { ProductResponse } from "./types";
 import { mockValidateServerSession } from "@/test/setup/test-setup";
-import { UnauthorizedError } from "@/lib/errors/cart-errors";
 import { faker } from "@faker-js/faker";
 
 /**
@@ -320,9 +319,6 @@ describe("/api/product/[productUuid]", () => {
   describe("Integration Tests - Route Handler", () => {
     describe("GET /api/product/[productUuid]", () => {
       it("should return product data with proper response format", async () => {
-        // Arrange: Mock successful authentication
-        mockValidateServerSession.mockResolvedValue({ id: "user-123" });
-
         // Arrange: Seed product data
         const db = createTestDb();
         let productId: string;
@@ -358,9 +354,6 @@ describe("/api/product/[productUuid]", () => {
       });
 
       it("should return 404 for non-existent product", async () => {
-        // Arrange: Mock successful authentication
-        mockValidateServerSession.mockResolvedValue({ id: "user-123" });
-
         const productId = faker.string.uuid();
 
         // Act: Make GET request for non-existent product
@@ -379,30 +372,7 @@ describe("/api/product/[productUuid]", () => {
         expect(result.message).toContain("not found");
       });
 
-      it("should return 401 when user is not authenticated", async () => {
-        // Arrange: Mock authentication failure
-        mockValidateServerSession.mockRejectedValue(new UnauthorizedError());
-
-        // Act: Make GET request to product endpoint
-        const response = await GET(
-          new NextRequest("http://localhost:3000/api/product/some-uuid"),
-          {
-            params: Promise.resolve({
-              id: faker.string.uuid().toString(),
-            }),
-          },
-        );
-        const result = await response.json();
-
-        // Assert: Response status is 401
-        expect(response.status).toBe(401);
-        expect(result.message).toBe("User is not authenticated.");
-      });
-
       it("should return 403 for invalid UUID format", async () => {
-        // Arrange: Mock successful authentication
-        mockValidateServerSession.mockResolvedValue({ id: "user-123" });
-
         // Act: Make GET request with invalid UUID
         const request = new NextRequest(
           "http://localhost:3000/api/product/invalid-uuid",

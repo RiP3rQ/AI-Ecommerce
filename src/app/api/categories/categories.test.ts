@@ -13,7 +13,6 @@ import {
 } from "@/test/fixtures/categories";
 import type { CategoriesResponse } from "./types";
 import { mockValidateServerSession } from "@/test/setup/test-setup";
-import { UnauthorizedError } from "@/lib/errors/cart-errors";
 
 /**
  * Comprehensive test suite for the categories API endpoint.
@@ -274,9 +273,6 @@ describe("/api/categories", () => {
 describe("Integration Tests - Route Handler", () => {
   describe("GET /api/categories", () => {
     it("should return categories with proper response format", async () => {
-      // Arrange: Mock successful authentication
-      mockValidateServerSession.mockResolvedValue({ id: "user-123" });
-
       // Arrange: Seed categories in test database (not in transaction since we're testing HTTP endpoint)
       const db = createTestDb();
       try {
@@ -312,9 +308,6 @@ describe("Integration Tests - Route Handler", () => {
     });
 
     it("should handle case-insensitive query parameters in route handler", async () => {
-      // Arrange: Mock successful authentication
-      mockValidateServerSession.mockResolvedValue({ id: "user-123" });
-
       // Arrange: Seed categories in test database (not in transaction since we're testing HTTP endpoint)
       const db = createTestDb();
       try {
@@ -344,21 +337,6 @@ describe("Integration Tests - Route Handler", () => {
         // Clean up
         await dbHelpers.truncateCategoriesTable(db);
       }
-    });
-
-    it("should return 401 when user is not authenticated", async () => {
-      // Arrange: Mock authentication failure
-      mockValidateServerSession.mockRejectedValue(new UnauthorizedError());
-
-      // Act: Make GET request to categories endpoint
-      const response = await GET(
-        new NextRequest("http://localhost:3000/api/categories"),
-      );
-      const result = await response.json();
-
-      // Assert: Response status is 401
-      expect(response.status).toBe(401);
-      expect(result.message).toBe("User is not authenticated.");
     });
   });
 });

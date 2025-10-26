@@ -17,7 +17,7 @@ export function ModeSwitcher(): React.ReactNode {
 
   return (
     <DropdownMenu>
-      <div className="fixed bottom-4 right-4 z-[60] bg-background hover:bg-background/80">
+      <div className="fixed bottom-4 right-4 z-[60] bg-background hover:bg-background/80 rounded-lg">
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="icon">
             <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />

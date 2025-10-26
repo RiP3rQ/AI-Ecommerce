@@ -431,6 +431,298 @@ describe("/api/shop", () => {
         });
       });
 
+      it("filters products by minimum price only", async () => {
+        await createTestableUnit(async (db) => {
+          // Arrange: Create test data
+          const categoryId = faker.string.uuid();
+          const category = await createCategoryFixture({
+            db,
+            overrides: {
+              name: `Test Category ${faker.string.uuid()}`,
+              id: categoryId,
+            },
+          });
+
+          // Create products with different prices
+          const cheapProduct = await createProductFixture({
+            db,
+            overrides: { title: "Cheap Product", categoryId },
+          });
+          const expensiveProduct = await createProductFixture({
+            db,
+            overrides: { title: "Expensive Product", categoryId },
+          });
+
+          await createProductVariantFixture({
+            db,
+            overrides: {
+              productId: cheapProduct.id,
+              price: 500, // $5.00
+              currencyCode: "USD",
+            },
+          });
+          await createProductVariantFixture({
+            db,
+            overrides: {
+              productId: expensiveProduct.id,
+              price: 2000, // $20.00
+              currencyCode: "USD",
+            },
+          });
+
+          // Act: Filter by minimum price $15.00
+          const result = await shopService.getProducts({
+            dto: {
+              page: 1,
+              limit: 10,
+              sortDirection: "asc",
+              sortField: "createdAt",
+              priceMin: 1500, // $15.00
+            },
+            db,
+          });
+
+          // Assert: Only expensive product should be included
+          expect(result.products).toHaveLength(1);
+          expect(result.products[0].title).toBe("Expensive Product");
+          expect(result.products[0].minPrice).toBe(2000);
+        });
+      });
+
+      it("filters products by maximum price only", async () => {
+        await createTestableUnit(async (db) => {
+          // Arrange: Create test data
+          const categoryId = faker.string.uuid();
+          const category = await createCategoryFixture({
+            db,
+            overrides: {
+              name: `Test Category ${faker.string.uuid()}`,
+              id: categoryId,
+            },
+          });
+
+          // Create products with different prices
+          const cheapProduct = await createProductFixture({
+            db,
+            overrides: { title: "Cheap Product", categoryId },
+          });
+          const expensiveProduct = await createProductFixture({
+            db,
+            overrides: { title: "Expensive Product", categoryId },
+          });
+
+          await createProductVariantFixture({
+            db,
+            overrides: {
+              productId: cheapProduct.id,
+              price: 500, // $5.00
+              currencyCode: "USD",
+            },
+          });
+          await createProductVariantFixture({
+            db,
+            overrides: {
+              productId: expensiveProduct.id,
+              price: 2000, // $20.00
+              currencyCode: "USD",
+            },
+          });
+
+          // Act: Filter by maximum price $10.00
+          const result = await shopService.getProducts({
+            dto: {
+              page: 1,
+              limit: 10,
+              sortDirection: "asc",
+              sortField: "createdAt",
+              priceMax: 1000, // $10.00
+            },
+            db,
+          });
+
+          // Assert: Only cheap product should be included
+          expect(result.products).toHaveLength(1);
+          expect(result.products[0].title).toBe("Cheap Product");
+          expect(result.products[0].minPrice).toBe(500);
+        });
+      });
+
+      it("filters products with multiple variants correctly", async () => {
+        await createTestableUnit(async (db) => {
+          // Arrange: Create test data
+          const categoryId = faker.string.uuid();
+          const category = await createCategoryFixture({
+            db,
+            overrides: {
+              name: `Test Category ${faker.string.uuid()}`,
+              id: categoryId,
+            },
+          });
+
+          // Create product with multiple variants
+          const product = await createProductFixture({
+            db,
+            overrides: { title: "Multi-Variant Product", categoryId },
+          });
+
+          // Create variants with different prices
+          await createProductVariantFixture({
+            db,
+            overrides: {
+              productId: product.id,
+              price: 500, // $5.00
+              currencyCode: "USD",
+            },
+          });
+          await createProductVariantFixture({
+            db,
+            overrides: {
+              productId: product.id,
+              price: 1500, // $15.00
+              currencyCode: "USD",
+            },
+          });
+          await createProductVariantFixture({
+            db,
+            overrides: {
+              productId: product.id,
+              price: 2500, // $25.00
+              currencyCode: "USD",
+            },
+          });
+
+          // Act: Filter by price range $10 - $20
+          const result = await shopService.getProducts({
+            dto: {
+              page: 1,
+              limit: 10,
+              sortDirection: "asc",
+              sortField: "createdAt",
+              priceMin: 1000, // $10.00
+              priceMax: 2000, // $20.00
+            },
+            db,
+          });
+
+          // Assert: Product should be included because it has variants in range ($15)
+          expect(result.products).toHaveLength(1);
+          expect(result.products[0].title).toBe("Multi-Variant Product");
+          expect(result.products[0].minPrice).toBe(500);
+          expect(result.products[0].maxPrice).toBe(2500);
+        });
+      });
+
+      it("excludes products with no variants in price range", async () => {
+        await createTestableUnit(async (db) => {
+          // Arrange: Create test data
+          const categoryId = faker.string.uuid();
+          const category = await createCategoryFixture({
+            db,
+            overrides: {
+              name: `Test Category ${faker.string.uuid()}`,
+              id: categoryId,
+            },
+          });
+
+          // Create product with multiple variants all outside range
+          const product = await createProductFixture({
+            db,
+            overrides: { title: "Out of Range Product", categoryId },
+          });
+
+          await createProductVariantFixture({
+            db,
+            overrides: {
+              productId: product.id,
+              price: 500, // $5.00 - below range
+              currencyCode: "USD",
+            },
+          });
+          await createProductVariantFixture({
+            db,
+            overrides: {
+              productId: product.id,
+              price: 3000, // $30.00 - above range
+              currencyCode: "USD",
+            },
+          });
+
+          // Act: Filter by price range $10 - $20
+          const result = await shopService.getProducts({
+            dto: {
+              page: 1,
+              limit: 10,
+              sortDirection: "asc",
+              sortField: "createdAt",
+              priceMin: 1000, // $10.00
+              priceMax: 2000, // $20.00
+            },
+            db,
+          });
+
+          // Assert: Product should be excluded because no variants are in range
+          expect(result.products).toHaveLength(0);
+        });
+      });
+
+      it("handles zero price values correctly", async () => {
+        await createTestableUnit(async (db) => {
+          // Arrange: Create test data
+          const categoryId = faker.string.uuid();
+          const category = await createCategoryFixture({
+            db,
+            overrides: {
+              name: `Test Category ${faker.string.uuid()}`,
+              id: categoryId,
+            },
+          });
+
+          const freeProduct = await createProductFixture({
+            db,
+            overrides: { title: "Free Product", categoryId },
+          });
+          const paidProduct = await createProductFixture({
+            db,
+            overrides: { title: "Paid Product", categoryId },
+          });
+
+          await createProductVariantFixture({
+            db,
+            overrides: {
+              productId: freeProduct.id,
+              price: 0, // Free
+              currencyCode: "USD",
+            },
+          });
+          await createProductVariantFixture({
+            db,
+            overrides: {
+              productId: paidProduct.id,
+              price: 1000, // $10.00
+              currencyCode: "USD",
+            },
+          });
+
+          // Act: Filter by price range $0 - $5
+          const result = await shopService.getProducts({
+            dto: {
+              page: 1,
+              limit: 10,
+              sortDirection: "asc",
+              sortField: "createdAt",
+              priceMin: 0,
+              priceMax: 500, // $5.00
+            },
+            db,
+          });
+
+          // Assert: Only free product should be included
+          expect(result.products).toHaveLength(1);
+          expect(result.products[0].title).toBe("Free Product");
+          expect(result.products[0].minPrice).toBe(0);
+        });
+      });
+
       it("sorts products by title ascending", async () => {
         await createTestableUnit(async (db) => {
           // Arrange: Create test data
