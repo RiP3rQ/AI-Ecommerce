@@ -55,7 +55,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   // Helper function to check authentication
   const checkAuthentication = async (): Promise<boolean> => {
     const supabaseClient = createClientSupabaseClient();
-    const { data: { user } } = await supabaseClient.auth.getUser();
+    const {
+      data: { user },
+    } = await supabaseClient.auth.getUser();
     if (!user) {
       router.push("/auth/login");
       return false;

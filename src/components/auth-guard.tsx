@@ -42,7 +42,9 @@ export function AuthGuard({
             </div>
             <CardTitle className="text-lg">{title}</CardTitle>
             <p className="text-sm text-muted-foreground mt-2">
-              {feature ? `${description} Access to ${feature} requires authentication.` : description}
+              {feature
+                ? `${description} Access to ${feature} requires authentication.`
+                : description}
             </p>
           </CardHeader>
           <CardContent className="text-center">
