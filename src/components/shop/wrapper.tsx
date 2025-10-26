@@ -166,41 +166,21 @@ export function ShopWrapper({
       {/* Main Content - 70% width on desktop */}
       <div className="flex-1 lg:w-[70%] xl:w-[75%]">
         <div className="mx-auto max-w-[1800px] px-4 py-8 sm:px-6 lg:px-8">
-          {isLoading ? (
-            <>
-              <div className="mb-6" data-testid="loading-skeleton">
-                <Skeleton className="h-10 w-full max-w-md mb-4" />
-              </div>
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {Array.from({ length: 8 }).map((_, index) => (
-                  <div key={index} className="space-y-3">
-                    <Skeleton className="aspect-square w-full rounded-lg" />
-                    <Skeleton className="h-4 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
-                  </div>
-                ))}
-              </div>
-            </>
-          ) : (
-            <>
-              <SearchbarAndSorts
-                searchValue={filtersUrlData.search}
-                sortField={filtersUrlData.sortField}
-                sortDirection={filtersUrlData.sortDirection}
-                onSearchChange={handleSearchChange}
-                onSortChange={handleSortChange}
-              />
-              <ProductsList
-                products={products}
-                currentPage={paginationUrlData.page}
-                totalPages={paginationMetadata?.totalPages || 1}
-                totalProducts={paginationMetadata?.totalItems || 0}
-                onPageChange={handlePageChange}
-                categoryName={categoryName}
-                filters={filtersUrlData}
-              />
-            </>
-          )}
+          <SearchbarAndSorts
+            searchValue={filtersUrlData.search}
+            sortField={filtersUrlData.sortField}
+            sortDirection={filtersUrlData.sortDirection}
+            onSearchChange={handleSearchChange}
+            onSortChange={handleSortChange}
+          />
+          <ProductsList
+            products={products}
+            currentPage={paginationUrlData.page}
+            totalPages={paginationMetadata?.totalPages || 1}
+            totalProducts={paginationMetadata?.totalItems || 0}
+            onPageChange={handlePageChange}
+            isLoading={isLoading}
+          />
         </div>
       </div>
     </div>

@@ -16,8 +16,8 @@ import {
   EmptyDescription,
 } from "@/components/ui/empty";
 import { PackageSearchIcon } from "lucide-react";
-import type { ShopFiltersUrlSchema } from "@/schemas/shop-url-schema";
 import type { ProductWithDetails } from "@/app/api/shop/types";
+import { Skeleton } from "../ui/skeleton";
 
 interface Product {
   id: string;
@@ -35,8 +35,7 @@ interface ProductsListProps {
   totalPages: number;
   totalProducts: number;
   onPageChange: (page: number) => void;
-  categoryName?: string;
-  filters?: ShopFiltersUrlSchema;
+  isLoading: boolean;
 }
 
 export function ProductsList({
@@ -45,9 +44,27 @@ export function ProductsList({
   totalPages,
   totalProducts,
   onPageChange,
-  categoryName = "",
-  filters,
+  isLoading,
 }: ProductsListProps): ReactNode {
+  if (isLoading) {
+    return (
+      <>
+        <div className="mb-6" data-testid="loading-skeleton">
+          <Skeleton className="h-10 w-full max-w-md mb-4" />
+        </div>
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {Array.from({ length: 8 }).map((_, index) => (
+            <div key={index} className="space-y-3">
+              <Skeleton className="aspect-square w-full rounded-lg" />
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-4 w-1/2" />
+            </div>
+          ))}
+        </div>
+      </>
+    );
+  }
+
   if (products.length === 0) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
