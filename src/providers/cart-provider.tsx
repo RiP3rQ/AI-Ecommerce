@@ -22,6 +22,7 @@ import React, {
 import useSWR from "swr";
 import { transformCartResponse } from "@/lib/cart-helpers";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/use-auth";
 
 type CartContextType = {
   isOpen: boolean;
@@ -50,27 +51,14 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const cartUrl = `${BASE_URL}/api/cart`;
-  const router = useRouter();
-
-  // Helper function to check authentication
-  const checkAuthentication = async (): Promise<boolean> => {
-    const supabaseClient = createClientSupabaseClient();
-    const {
-      data: { user },
-    } = await supabaseClient.auth.getUser();
-    if (!user) {
-      router.push("/auth/login");
-      return false;
-    }
-    return true;
-  };
+  const { isAuthenticated } = useAuth();
 
   // Use SWR to fetch cart data initially
   const {
     data: cartResponse,
     error,
     isLoading,
-  } = useSWR<CartResponse>(cartUrl, swrFetcher);
+  } = useSWR<CartResponse>(isAuthenticated ? cartUrl : null, swrFetcher);
 
   // Local cart state that gets updated when we make changes
   const [cart, setCart] = useState<FrontendCart | undefined>(
@@ -95,7 +83,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     },
   ) => {
     // Check authentication before allowing cart operations
-    const isAuthenticated = await checkAuthentication();
     if (!isAuthenticated) {
       return;
     }
@@ -200,7 +187,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const updateItemQuantity = async (cartItemId: string, quantity: number) => {
     // Check authentication before allowing cart operations
-    const isAuthenticated = await checkAuthentication();
     if (!isAuthenticated) {
       return;
     }
@@ -276,7 +262,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const removeItem = async (cartItemId: string) => {
     // Check authentication before allowing cart operations
-    const isAuthenticated = await checkAuthentication();
     if (!isAuthenticated) {
       return;
     }

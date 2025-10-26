@@ -49,8 +49,8 @@ export function ShopWrapper({
   );
 
   // ============================= MEMOIZED DATA =============================
-  const products = useMemo(() => data?.data.products || [], [data]);
-  const paginationMetadata = useMemo(() => data?.data.pagination, [data]);
+  const products = useMemo(() => data?.data?.products || [], [data]);
+  const paginationMetadata = useMemo(() => data?.data?.pagination, [data]);
 
   const paginationUrlData = useMemo(
     () => pagination as PaginationUrlSchema,
