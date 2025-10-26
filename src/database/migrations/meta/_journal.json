@@ -50,6 +50,13 @@
       "when": 1761498523985,
       "tag": "0006_seed-database-for-rag",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1761512523734,
+      "tag": "0007_seed-images-for-products",
+      "breakpoints": true
     }
   ]
 }
