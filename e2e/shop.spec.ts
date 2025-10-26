@@ -20,7 +20,9 @@ test.describe("Shop Page", () => {
 
       // Check that products load (or loading state is shown)
       await expect(
-        page.getByTestId("products-grid").or(page.getByTestId("loading-skeleton"))
+        page
+          .getByTestId("products-grid")
+          .or(page.getByTestId("loading-skeleton")),
       ).toBeVisible();
     });
 
@@ -76,7 +78,9 @@ test.describe("Shop Page", () => {
 
       // Should either show results or empty state
       await expect(
-        page.getByTestId("products-grid").or(page.getByText("No products found"))
+        page
+          .getByTestId("products-grid")
+          .or(page.getByText("No products found")),
       ).toBeVisible();
     });
 
@@ -137,7 +141,9 @@ test.describe("Shop Page", () => {
       await expect(page.getByText("Categories")).toBeVisible();
 
       // Should have at least one category button
-      const categoryButtons = page.locator("button").filter({ hasText: /^[A-Za-z]/ });
+      const categoryButtons = page
+        .locator("button")
+        .filter({ hasText: /^[A-Za-z]/ });
       await expect(categoryButtons.first()).toBeVisible();
     });
 
@@ -146,7 +152,9 @@ test.describe("Shop Page", () => {
       await page.goto(SHOP_URL);
 
       // Find and click first available category
-      const categoryButtons = page.locator("button").filter({ hasText: /^[A-Za-z]/ });
+      const categoryButtons = page
+        .locator("button")
+        .filter({ hasText: /^[A-Za-z]/ });
       const firstCategory = categoryButtons.first();
 
       if (await firstCategory.isVisible()) {
@@ -158,7 +166,9 @@ test.describe("Shop Page", () => {
 
         // Should show filtered results or empty state
         await expect(
-          page.getByTestId("products-grid").or(page.getByText("No products found"))
+          page
+            .getByTestId("products-grid")
+            .or(page.getByText("No products found")),
         ).toBeVisible();
       }
     });
@@ -188,7 +198,9 @@ test.describe("Shop Page", () => {
       await applyButton.click();
 
       // URL should be updated with price range
-      await page.waitForURL(/\?.*priceRange=%7B%22min%22%3A10%2C%22max%22%3A100%7D/);
+      await page.waitForURL(
+        /\?.*priceRange=%7B%22min%22%3A10%2C%22max%22%3A100%7D/,
+      );
     });
   });
 
@@ -197,7 +209,9 @@ test.describe("Shop Page", () => {
       await page.goto(SHOP_URL);
 
       // Wait for products to load
-      await page.waitForSelector('[data-testid="products-grid"]', { timeout: 10000 });
+      await page.waitForSelector('[data-testid="products-grid"]', {
+        timeout: 10000,
+      });
 
       // Should have product cards
       const productCards = page.locator('[data-testid="product-card"]');
@@ -209,7 +223,9 @@ test.describe("Shop Page", () => {
         await expect(firstCard).toBeVisible();
 
         // Should have image, title, and price
-        await expect(firstCard.locator("img").or(firstCard.locator("📦"))).toBeVisible();
+        await expect(
+          firstCard.locator("img").or(firstCard.locator("📦")),
+        ).toBeVisible();
         await expect(firstCard.locator("h3")).toBeVisible();
       }
     });
@@ -218,7 +234,9 @@ test.describe("Shop Page", () => {
       await page.goto(SHOP_URL);
 
       // Wait for products to load
-      await page.waitForSelector('[data-testid="products-grid"]', { timeout: 10000 });
+      await page.waitForSelector('[data-testid="products-grid"]', {
+        timeout: 10000,
+      });
 
       const productCards = page.locator('[data-testid="product-card"]');
       const count = await productCards.count();
@@ -236,7 +254,9 @@ test.describe("Shop Page", () => {
     test("should show product prices correctly", async ({ page }) => {
       await page.goto(SHOP_URL);
 
-      await page.waitForSelector('[data-testid="products-grid"]', { timeout: 10000 });
+      await page.waitForSelector('[data-testid="products-grid"]', {
+        timeout: 10000,
+      });
 
       const productCards = page.locator('[data-testid="product-card"]');
       const count = await productCards.count();
@@ -244,7 +264,7 @@ test.describe("Shop Page", () => {
       if (count > 0) {
         // Check that prices are displayed (format may vary)
         const priceElements = page.locator('[data-testid="product-price"]');
-        if (await priceElements.count() > 0) {
+        if ((await priceElements.count()) > 0) {
           await expect(priceElements.first()).toBeVisible();
         }
       }
@@ -252,11 +272,15 @@ test.describe("Shop Page", () => {
   });
 
   test.describe("Pagination", () => {
-    test("should display pagination when multiple pages exist", async ({ page }) => {
+    test("should display pagination when multiple pages exist", async ({
+      page,
+    }) => {
       await page.goto(SHOP_URL);
 
       // Wait for content to load
-      await page.waitForSelector('[data-testid="products-grid"]', { timeout: 10000 });
+      await page.waitForSelector('[data-testid="products-grid"]', {
+        timeout: 10000,
+      });
 
       // Check if pagination exists
       const pagination = page.locator('[data-testid="pagination"]');
@@ -272,7 +296,9 @@ test.describe("Shop Page", () => {
     test("should show products count", async ({ page }) => {
       await page.goto(SHOP_URL);
 
-      await page.waitForSelector('[data-testid="products-grid"]', { timeout: 10000 });
+      await page.waitForSelector('[data-testid="products-grid"]', {
+        timeout: 10000,
+      });
 
       // Should show "Showing X of Y products"
       await expect(page.getByText(/Showing \d+ of \d+ products/)).toBeVisible();
@@ -294,7 +320,9 @@ test.describe("Shop Page", () => {
 
       if (hasEmptyState) {
         await expect(emptyState).toBeVisible();
-        await expect(page.getByText("Try adjusting your filters or search criteria")).toBeVisible();
+        await expect(
+          page.getByText("Try adjusting your filters or search criteria"),
+        ).toBeVisible();
       }
     });
   });
@@ -332,7 +360,10 @@ test.describe("Shop Page", () => {
 
       // Search input should have aria-label
       const searchInput = page.getByPlaceholder("Search products...");
-      await expect(searchInput).toHaveAttribute("aria-label", "Search products");
+      await expect(searchInput).toHaveAttribute(
+        "aria-label",
+        "Search products",
+      );
 
       // Sort select should be keyboard accessible
       const sortSelect = page.getByRole("combobox");
@@ -364,7 +395,9 @@ test.describe("Shop Page", () => {
         await expect(loadingSkeleton).toBeVisible();
 
         // Should eventually load products
-        await page.waitForSelector('[data-testid="products-grid"]', { timeout: 10000 });
+        await page.waitForSelector('[data-testid="products-grid"]', {
+          timeout: 10000,
+        });
         await expect(loadingSkeleton).not.toBeVisible();
       }
     });
