@@ -43,6 +43,13 @@
       "when": 1761238559125,
       "tag": "0005_zippy_mongoose",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1761498523985,
+      "tag": "0006_seed-database-for-rag",
+      "breakpoints": true
     }
   ]
 }
