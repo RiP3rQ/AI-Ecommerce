@@ -93,7 +93,8 @@ export async function findSimilarProducts(
       .map((item) => item.productId)
       .filter((id) => {
         // Check if ID is a valid UUID format to avoid PostgreSQL errors
-        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+        const uuidRegex =
+          /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
         return uuidRegex.test(id);
       });
 
@@ -110,7 +111,9 @@ export async function findSimilarProducts(
 
     // Only add exclusion for valid UUIDs to prevent DB errors
     if (validCartProductIds.length > 0) {
-      whereConditions.push(...validCartProductIds.map((id) => ne(products.id, id)));
+      whereConditions.push(
+        ...validCartProductIds.map((id) => ne(products.id, id)),
+      );
     }
 
     const similarProducts = await db

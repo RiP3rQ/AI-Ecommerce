@@ -61,7 +61,9 @@ export const suggestProductsSchema = z
     try {
       const cartItemsJson = jsonMatch[1];
       const cartItemsData = JSON.parse(cartItemsJson);
-      const cartItems = cartItemForSuggestionSchema.array().parse(cartItemsData);
+      const cartItems = cartItemForSuggestionSchema
+        .array()
+        .parse(cartItemsData);
 
       return {
         cartItems,

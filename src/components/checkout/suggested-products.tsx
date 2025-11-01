@@ -64,12 +64,16 @@ export function SuggestedProducts(): ReactNode {
     .filter((msg) => msg.role === "assistant")
     .slice(-1)[0];
 
+  console.log("latestAssistantMessage", latestAssistantMessage);
+
   const isStreaming = status === "streaming" || status === "submitted";
   const streamingText =
     latestAssistantMessage?.parts
       .filter((part) => part.type === "text")
       .map((part) => part.text)
       .join("") || "";
+
+  console.log("streamingText", streamingText);
 
   // Parse suggestions from the final assistant message
   const suggestedProducts = useMemo((): SuggestedProduct[] => {
@@ -118,6 +122,8 @@ export function SuggestedProducts(): ReactNode {
     }
   }, [latestAssistantMessage, status]);
 
+  console.log("suggestedProducts", suggestedProducts);
+
   // State for full product data needed for ProductCardWithAddToCart
   const [fullProductData, setFullProductData] = useState<
     Array<
@@ -127,36 +133,6 @@ export function SuggestedProducts(): ReactNode {
       }
     >
   >([]);
-
-  // Fetch full product data when suggestions are available
-  useEffect(() => {
-    const fetchFullProductData = async () => {
-      if (suggestedProducts.length === 0) {
-        setFullProductData([]);
-        return;
-      }
-
-      try {
-        const productPromises = suggestedProducts.map(async (suggestion) => {
-          const response = await fetch(`/api/product/${suggestion.productId}`);
-          if (!response.ok) {
-            console.error(`Failed to fetch product ${suggestion.productId}`);
-            return null;
-          }
-          const data = await response.json();
-          return data.data || null;
-        });
-
-        const products = (await Promise.all(productPromises)).filter(Boolean);
-        setFullProductData(products);
-      } catch (error) {
-        console.error("Error fetching full product data:", error);
-        setFullProductData([]);
-      }
-    };
-
-    fetchFullProductData();
-  }, [suggestedProducts]);
 
   const handleGenerateSuggestions = () => {
     if (cartItemsForSuggestions.length === 0) return;
