@@ -88,13 +88,30 @@ export async function findSimilarProducts(
     const cartEmbedding = result.embedding;
 
     // Find similar products using cosine similarity
-    // Exclude products already in cart
-    const cartProductIds = cartItems.map((item) => item.productId);
+    // Filter out cart items that have valid UUID format (to avoid DB errors)
+    const validCartProductIds = cartItems
+      .map((item) => item.productId)
+      .filter((id) => {
+        // Check if ID is a valid UUID format to avoid PostgreSQL errors
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+        return uuidRegex.test(id);
+      });
 
     const similarity = sql<number>`1 - (${cosineDistance(
       products.embedding,
       cartEmbedding,
     )})`;
+
+    // Build where conditions
+    const whereConditions = [
+      gt(similarity, SIMILARITY_CONFIG.similarityThreshold),
+      ne(products.availableForSale, false),
+    ];
+
+    // Only add exclusion for valid UUIDs to prevent DB errors
+    if (validCartProductIds.length > 0) {
+      whereConditions.push(...validCartProductIds.map((id) => ne(products.id, id)));
+    }
 
     const similarProducts = await db
       .select({
@@ -105,13 +122,7 @@ export async function findSimilarProducts(
         similarity,
       })
       .from(products)
-      .where(
-        and(
-          gt(similarity, SIMILARITY_CONFIG.similarityThreshold),
-          ne(products.availableForSale, false),
-          ...cartProductIds.map((id) => ne(products.id, id)),
-        ),
-      )
+      .where(and(...whereConditions))
       .orderBy(desc(similarity))
       .limit(SIMILARITY_CONFIG.maxSuggestions);
 
