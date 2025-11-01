@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import type { ReactNode } from "react";
+import { useEffect, useMemo, type ReactNode } from "react";
 import useSWR from "swr";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,9 +16,11 @@ import {
 } from "@/app/api/order/[id]/dto";
 import type { SWRResponse } from "@/types/swr";
 import { swrFetcher } from "@/lib/swr-fetcher";
+import { useCart } from "@/providers/cart-provider";
 
 export function CheckoutComplete(): ReactNode {
   const searchParams = useSearchParams();
+  const { clearCart } = useCart();
   const orderId = searchParams.get("orderId");
 
   const {
@@ -30,7 +32,15 @@ export function CheckoutComplete(): ReactNode {
     swrFetcher,
   );
 
-  if (isLoading) {
+  const order = useMemo(() => orderResponse?.data, [orderResponse]);
+
+  useEffect(() => {
+    if (order?.id) {
+      void clearCart();
+    }
+  }, [order]);
+
+  if (isLoading || !order) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-center items-center min-h-[400px]">
@@ -55,10 +65,6 @@ export function CheckoutComplete(): ReactNode {
       </div>
     );
   }
-
-  const order = orderResponse.data;
-
-  console.log("order", order);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
