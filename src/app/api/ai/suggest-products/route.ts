@@ -1,8 +1,11 @@
-import { type NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { handleApiError } from "@/lib/errors";
 import { suggestProductsService } from "./service";
-import { suggestProductsSchema } from "./dto";
 import { validateServerSession } from "@/lib/api-helpers";
+import { CartItemWithDetails } from "../../cart/types";
+import { cartService } from "../../cart/service";
+import { drizzleDbClient } from "@/database";
+import { ProductData } from "../../product/[id]/types";
 
 /**
  * POST /api/ai/suggest-products
@@ -15,20 +18,42 @@ import { validateServerSession } from "@/lib/api-helpers";
  * @param request - The incoming request
  * @returns Streaming AI response with product suggestions
  */
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<
+  NextResponse<
+    | {
+        success: boolean;
+        data: Array<{
+          productId: string;
+          reason: string;
+          productData?: ProductData;
+        }>;
+      }
+    | unknown
+  >
+> {
   try {
     // Step 1: Validate session
-    await validateServerSession();
+    const user = await validateServerSession();
 
-    // Step 2: Validate request body
-    const body = await request.json();
-    const validatedDto = suggestProductsSchema.parse(body);
+    // Step 2: Get cart items
+    const cartItems = await cartService.getCart({
+      userId: user.id,
+      db: drizzleDbClient(),
+    });
 
-    // Step 3: Generate streaming product suggestions using RAG
-    const result = await suggestProductsService.suggestProducts(validatedDto);
+    // Step 2: Generate streaming product suggestions using RAG
+    const suggestedProducts = await suggestProductsService.suggestProducts({
+      cartItems: cartItems.cart.items,
+    });
 
-    // Return the streaming response directly
-    return result.toUIMessageStreamResponse();
+    // Step 3: Return the streaming response directly
+    return NextResponse.json(
+      {
+        success: true,
+        data: suggestedProducts,
+      },
+      { status: 200 },
+    );
   } catch (error: unknown) {
     return handleApiError(error);
   }
