@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { uuidSchema } from "../product/[id]/dto";
 
 /**
  * Schema for shop product filtering and sorting query parameters.
@@ -28,7 +29,7 @@ export const getProductsSchema = z.object({
 
   // Filtering
   search: z.string().optional(),
-  categoryId: z.string().uuid("Category ID must be a valid UUID.").optional(),
+  categoryId: uuidSchema.optional(),
   priceMin: z
     .number()
     .int()
