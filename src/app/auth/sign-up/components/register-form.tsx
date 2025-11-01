@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Field,
@@ -29,6 +30,7 @@ export function RegisterForm({
   const [repeatPassword, setRepeatPassword] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [agreedToTerms, setAgreedToTerms] = useState<boolean>(false);
   const router = useRouter();
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -44,16 +46,30 @@ export function RegisterForm({
     }
 
     try {
-      const { error } = await supabaseClient.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`,
-        },
-      });
-      if (error) {
-        throw error;
-      }
+      await supabaseClient.auth
+        .signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/`,
+          },
+        })
+        .then(async (response) => {
+          // Call a /api/register endpoint to create the user in the database
+          if (response.error) {
+            throw response.error;
+          }
+          if (!response.data?.user?.email || !response.data?.user?.id) {
+            throw new Error("User email or ID not found");
+          }
+          await fetch("/api/register", {
+            method: "POST",
+            body: JSON.stringify({
+              email: response.data?.user?.email,
+              userId: response.data?.user?.id,
+            }),
+          });
+        });
       router.push("/auth/sign-up-success");
     } catch (error: unknown) {
       console.error(error);
@@ -109,9 +125,39 @@ export function RegisterForm({
                   onChange={(e) => setRepeatPassword(e.target.value)}
                 />
               </Field>
+              <div className="flex items-center justify-center gap-2">
+                <Checkbox
+                  id="agreed-to-terms"
+                  checked={agreedToTerms}
+                  onCheckedChange={(checked) =>
+                    setAgreedToTerms(Boolean(checked))
+                  }
+                  className="size-4"
+                />
+                <FieldLabel htmlFor="agreed-to-terms">
+                  I agree to the{" "}
+                  <Link
+                    href="/terms-of-service"
+                    className="underline underline-offset-4"
+                  >
+                    Terms of Service
+                  </Link>{" "}
+                  and{" "}
+                  <Link
+                    href="/privacy-policy"
+                    className="underline underline-offset-4"
+                  >
+                    Privacy Policy
+                  </Link>
+                </FieldLabel>
+              </div>
               <Field>
                 {error && <p className="text-sm text-red-500">{error}</p>}
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isLoading || !agreedToTerms}
+                >
                   {isLoading ? "Creating an account..." : "Sign up"}
                 </Button>
               </Field>
@@ -119,7 +165,11 @@ export function RegisterForm({
                 Or continue with
               </FieldSeparator>
               <Field className="grid grid-cols-1 gap-4">
-                <Button variant="outline" type="button">
+                <Button
+                  variant="outline"
+                  type="button"
+                  disabled={isLoading || !agreedToTerms}
+                >
                   <GoogleIcon />
                   <span>Continue with Google</span>
                   <span className="sr-only">Sign up with Google</span>
