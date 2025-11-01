@@ -1,272 +1,176 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useMemo, useState, useEffect, type ReactNode } from "react";
+import { useChat } from "@ai-sdk/react";
 import { ProductCardWithAddToCart } from "./product-card-with-add-to-cart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { AuthGuard } from "@/components/auth-guard";
 import { useAuth } from "@/hooks/use-auth";
+import { useCart } from "@/providers/cart-provider";
+import { Sparkles, Loader2, ShoppingBag } from "lucide-react";
 import type { ProductWithDetails } from "@/app/api/shop/types";
-import type { SelectProductImage } from "@/database/schemas/product-images";
 import type { SelectProductVariant } from "@/database/schemas/product-variants";
 import type { SelectProductOption } from "@/database/schemas/product-options";
+import type { CartItemForSuggestion } from "@/app/api/ai/suggest-products/dto";
+import { DefaultChatTransport } from "ai";
 
 /**
- * Extended product type that includes variants and options for checkout functionality.
+ * Type for AI-suggested products from the API
  */
-interface ProductWithVariantsAndOptions extends ProductWithDetails {
-  variants: SelectProductVariant[];
-  options: SelectProductOption[];
+interface SuggestedProduct {
+  productId: string;
+  title: string;
+  description: string | null;
+  tags: string[] | null;
+  relevanceScore: number;
+  reasoning: string;
 }
 
 /**
- * Mock data for suggested products.
- * This will be replaced with actual AI-generated suggestions later.
- */
-const mockSuggestedProducts: ProductWithVariantsAndOptions[] = [
-  {
-    id: "mock-1",
-    title: "Wireless Bluetooth Headphones",
-    description:
-      "Premium noise-cancelling wireless headphones with 30-hour battery life.",
-    availableForSale: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    categoryId: null,
-    descriptionHtml: null,
-    tags: [],
-    embedding: null,
-    category: null,
-    featuredImage: {
-      id: "mock-image-1",
-      productId: "mock-1",
-      url: "https://plus.unsplash.com/premium_photo-1756131939171-728118fbad4a?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=687",
-      altText: "Wireless Bluetooth Headphones",
-      order: 0,
-      width: 300,
-      height: 300,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    } as SelectProductImage,
-    minPrice: 19999, // $199.99 in cents
-    maxPrice: 19999,
-    currencyCode: "USD",
-    variants: [
-      {
-        id: "variant-1",
-        productId: "mock-1",
-        price: 19999,
-        currencyCode: "USD",
-        availableForSale: true,
-        selectedOptions: [{ name: "Size", value: "One Size" }],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      } as SelectProductVariant,
-    ],
-    options: [
-      {
-        id: "option-1",
-        productId: "mock-1",
-        name: "Size",
-        values: ["One Size"],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      } as SelectProductOption,
-    ],
-    variantCount: 1,
-  },
-  {
-    id: "mock-2",
-    title: "Smart Fitness Watch",
-    description:
-      "Track your workouts, heart rate, and sleep with this advanced smartwatch.",
-    availableForSale: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    categoryId: null,
-    descriptionHtml: null,
-    tags: [],
-    embedding: null,
-    category: null,
-    featuredImage: {
-      id: "mock-image-2",
-      productId: "mock-2",
-      url: "https://plus.unsplash.com/premium_photo-1756131939171-728118fbad4a?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=687",
-      altText: "Smart Fitness Watch",
-      order: 0,
-      width: 300,
-      height: 300,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    } as SelectProductImage,
-    minPrice: 29999, // $299.99 in cents
-    maxPrice: 29999,
-    currencyCode: "USD",
-    variants: [
-      {
-        id: "variant-2-small",
-        productId: "mock-2",
-        price: 29999,
-        currencyCode: "USD",
-        availableForSale: true,
-        selectedOptions: [{ name: "Size", value: "Small" }],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      } as SelectProductVariant,
-      {
-        id: "variant-2-medium",
-        productId: "mock-2",
-        price: 29999,
-        currencyCode: "USD",
-        availableForSale: true,
-        selectedOptions: [{ name: "Size", value: "Medium" }],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      } as SelectProductVariant,
-      {
-        id: "variant-2-large",
-        productId: "mock-2",
-        price: 29999,
-        currencyCode: "USD",
-        availableForSale: false,
-        selectedOptions: [{ name: "Size", value: "Large" }],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      } as SelectProductVariant,
-    ],
-    options: [
-      {
-        id: "option-2",
-        productId: "mock-2",
-        name: "Size",
-        values: ["Small", "Medium", "Large"],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      } as SelectProductOption,
-    ],
-    variantCount: 3,
-  },
-  {
-    id: "mock-3",
-    title: "Portable Power Bank",
-    description: "20000mAh fast-charging power bank with multiple USB ports.",
-    availableForSale: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    categoryId: null,
-    descriptionHtml: null,
-    tags: [],
-    embedding: null,
-    category: null,
-    featuredImage: {
-      id: "mock-image-3",
-      productId: "mock-3",
-      url: "https://plus.unsplash.com/premium_photo-1756131939171-728118fbad4a?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=687",
-      altText: "Portable Power Bank",
-      order: 0,
-      width: 300,
-      height: 300,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    } as SelectProductImage,
-    minPrice: 4999, // $49.99 in cents
-    maxPrice: 4999,
-    currencyCode: "USD",
-    variants: [
-      {
-        id: "variant-3",
-        productId: "mock-3",
-        price: 4999,
-        currencyCode: "USD",
-        availableForSale: true,
-        selectedOptions: [{ name: "Capacity", value: "20000mAh" }],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      } as SelectProductVariant,
-    ],
-    options: [
-      {
-        id: "option-3",
-        productId: "mock-3",
-        name: "Capacity",
-        values: ["20000mAh"],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      } as SelectProductOption,
-    ],
-    variantCount: 1,
-  },
-  {
-    id: "mock-4",
-    title: "Wireless Charging Pad",
-    description: "Qi-compatible wireless charging pad for all your devices.",
-    availableForSale: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    categoryId: null,
-    descriptionHtml: null,
-    tags: [],
-    embedding: null,
-    category: null,
-    featuredImage: {
-      id: "mock-image-4",
-      productId: "mock-4",
-      url: "https://plus.unsplash.com/premium_photo-1756131939171-728118fbad4a?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=687",
-      altText: "Wireless Charging Pad",
-      order: 0,
-      width: 300,
-      height: 300,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    } as SelectProductImage,
-    minPrice: 2999, // $29.99 in cents
-    maxPrice: 2999,
-    currencyCode: "USD",
-    variants: [
-      {
-        id: "variant-4-black",
-        productId: "mock-4",
-        price: 2999,
-        currencyCode: "USD",
-        availableForSale: true,
-        selectedOptions: [{ name: "Color", value: "Black" }],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      } as SelectProductVariant,
-      {
-        id: "variant-4-white",
-        productId: "mock-4",
-        price: 2999,
-        currencyCode: "USD",
-        availableForSale: true,
-        selectedOptions: [{ name: "Color", value: "White" }],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      } as SelectProductVariant,
-    ],
-    options: [
-      {
-        id: "option-4",
-        productId: "mock-4",
-        name: "Color",
-        values: ["Black", "White"],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      } as SelectProductOption,
-    ],
-    variantCount: 2,
-  },
-];
-
-/**
- * Component that displays suggested products in a grid layout.
- * Products can be added to cart directly or via variant selection modal.
- * Currently uses mock data, will be replaced with actual AI-generated suggestions later.
+ * Component that displays AI-powered suggested products.
+ * Uses RAG system to generate personalized recommendations based on cart items.
  * Protected feature - requires authentication.
  */
 export function SuggestedProducts(): ReactNode {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { cart, isLoading: cartLoading } = useCart();
 
-  if (isLoading) {
+  // Initialize useChat hook for AI-powered suggestions
+  const { messages, sendMessage, status, error, clearError } = useChat({
+    transport: new DefaultChatTransport({
+      api: "/api/ai/suggest-products",
+    }),
+    onError: (error) => {
+      console.error("Error generating suggestions:", error);
+    },
+  });
+
+  // Extract cart items for suggestions
+  const cartItemsForSuggestions = useMemo((): CartItemForSuggestion[] => {
+    if (!cart?.lines) return [];
+
+    return cart.lines.map((item) => ({
+      productId: item.merchandise.product.id,
+      productTitle: item.merchandise.product.title,
+      productDescription: null, // Cart doesn't include description
+      quantity: item.quantity,
+      tags: null, // Cart doesn't include tags
+    }));
+  }, [cart]);
+
+  // Extract streaming text and suggestions from messages
+  const latestAssistantMessage = messages
+    .filter((msg) => msg.role === "assistant")
+    .slice(-1)[0];
+
+  const isStreaming = status === "streaming" || status === "submitted";
+  const streamingText =
+    latestAssistantMessage?.parts
+      .filter((part) => part.type === "text")
+      .map((part) => part.text)
+      .join("") || "";
+
+  // Parse suggestions from the final assistant message
+  const suggestedProducts = useMemo((): SuggestedProduct[] => {
+    if (!latestAssistantMessage || status !== "ready") return [];
+
+    // Look for tool results in the message parts
+    const toolResults = latestAssistantMessage.parts
+      .filter(
+        (
+          part,
+        ): part is Extract<
+          typeof part,
+          { type: "dynamic-tool"; state: "output-available" }
+        > =>
+          part.type === "dynamic-tool" &&
+          part.toolName === "suggestProducts" &&
+          part.state === "output-available",
+      )
+      .map((part) => part.output)
+      .filter(Boolean);
+
+    if (toolResults.length === 0) return [];
+
+    try {
+      const result = toolResults[0] as {
+        suggestions: Array<{
+          id: string;
+          title: string;
+          description: string | null;
+          tags: string[] | null;
+          relevanceScore: number;
+        }>;
+      };
+
+      return result.suggestions.map((suggestion) => ({
+        productId: suggestion.id,
+        title: suggestion.title,
+        description: suggestion.description,
+        tags: suggestion.tags,
+        relevanceScore: suggestion.relevanceScore,
+        reasoning: `Based on your cart items, this product complements your selection with ${Math.round(suggestion.relevanceScore * 100)}% relevance.`,
+      }));
+    } catch (error) {
+      console.error("Error parsing suggestions:", error);
+      return [];
+    }
+  }, [latestAssistantMessage, status]);
+
+  // State for full product data needed for ProductCardWithAddToCart
+  const [fullProductData, setFullProductData] = useState<
+    Array<
+      ProductWithDetails & {
+        variants: SelectProductVariant[];
+        options: SelectProductOption[];
+      }
+    >
+  >([]);
+
+  // Fetch full product data when suggestions are available
+  useEffect(() => {
+    const fetchFullProductData = async () => {
+      if (suggestedProducts.length === 0) {
+        setFullProductData([]);
+        return;
+      }
+
+      try {
+        const productPromises = suggestedProducts.map(async (suggestion) => {
+          const response = await fetch(`/api/product/${suggestion.productId}`);
+          if (!response.ok) {
+            console.error(`Failed to fetch product ${suggestion.productId}`);
+            return null;
+          }
+          const data = await response.json();
+          return data.data || null;
+        });
+
+        const products = (await Promise.all(productPromises)).filter(Boolean);
+        setFullProductData(products);
+      } catch (error) {
+        console.error("Error fetching full product data:", error);
+        setFullProductData([]);
+      }
+    };
+
+    fetchFullProductData();
+  }, [suggestedProducts]);
+
+  const handleGenerateSuggestions = () => {
+    if (cartItemsForSuggestions.length === 0) return;
+
+    // Clear any previous error
+    clearError();
+
+    // Send message to AI with cart items data
+    sendMessage({
+      text: `Please analyze these cart items and suggest ${Math.min(5, cartItemsForSuggestions.length * 2)} complementary products that would go well with them: ${JSON.stringify(cartItemsForSuggestions)}`,
+    });
+  };
+
+  if (authLoading || cartLoading) {
     return (
       <div>
         <h2 className="text-xl font-semibold mb-4">You might also like</h2>
@@ -299,14 +203,128 @@ export function SuggestedProducts(): ReactNode {
     );
   }
 
+  if (cartItemsForSuggestions.length === 0) {
+    return (
+      <Card>
+        <CardContent className="p-6 text-center">
+          <ShoppingBag className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+          <h3 className="text-lg font-semibold mb-2">Add items to your cart</h3>
+          <p className="text-muted-foreground">
+            Add some products to your cart to get AI-powered recommendations!
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
-    <div>
-      <h2 className="text-xl font-semibold mb-4">You might also like</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {mockSuggestedProducts.map((product) => (
-          <ProductCardWithAddToCart key={product.id} product={product} />
-        ))}
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold">You might also like</h2>
+
+        {suggestedProducts.length === 0 && !isStreaming && !streamingText && (
+          <Button
+            onClick={handleGenerateSuggestions}
+            disabled={isStreaming || status === "error"}
+            className="gap-2"
+          >
+            <Sparkles className="h-4 w-4" />
+            Get AI Suggestions
+          </Button>
+        )}
       </div>
+
+      {/* AI Thinking Process */}
+      {isStreaming && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Sparkles className="h-4 w-4" />
+              AI Assistant is working...
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-sm text-muted-foreground whitespace-pre-wrap">
+              {streamingText ||
+                "Analyzing your cart and finding perfect recommendations..."}
+              <div className="flex items-center gap-2 mt-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Processing your request...
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Error State */}
+      {status === "error" && error && (
+        <Card className="border-destructive">
+          <CardContent className="p-4">
+            <div className="text-sm text-destructive">
+              Sorry, I couldn't generate suggestions right now. Please try
+              again.
+            </div>
+            <Button
+              onClick={clearError}
+              variant="outline"
+              size="sm"
+              className="mt-2"
+            >
+              Try Again
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Product Suggestions */}
+      {fullProductData.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-primary" />
+            <h3 className="text-lg font-semibold">
+              Personalized Recommendations
+            </h3>
+          </div>
+
+          {/* Grid layout for product cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {fullProductData.map((product) => (
+              <ProductCardWithAddToCart
+                key={product.id}
+                product={{
+                  ...product,
+                  variants: (product as any).product_variants || [],
+                  options: (product as any).product_options || [],
+                }}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Initial state - show button to generate suggestions */}
+      {suggestedProducts.length === 0 && !isStreaming && !streamingText && (
+        <Card>
+          <CardContent className="p-6 text-center">
+            <Sparkles className="mx-auto h-12 w-12 text-primary mb-4" />
+            <h3 className="text-lg font-semibold mb-2">
+              AI-Powered Recommendations
+            </h3>
+            <p className="text-muted-foreground mb-4">
+              Get personalized product suggestions based on your cart items
+              using our advanced AI system.
+            </p>
+            <Button
+              onClick={handleGenerateSuggestions}
+              disabled={isStreaming}
+              size="lg"
+            >
+              <Sparkles className="mr-2 h-4 w-4" />
+              Discover Perfect Matches
+            </Button>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

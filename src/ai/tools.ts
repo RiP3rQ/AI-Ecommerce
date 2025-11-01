@@ -4,7 +4,7 @@ import { findSimilarProducts } from "./tool-helpers/suggest-products";
 
 export function getAiTools(): ToolSet | undefined {
   return {
-    suggest_products: tool({
+    suggestProducts: tool({
       description:
         "Suggest products similar to items in the user's cart using AI embeddings",
       inputSchema: z.object({
