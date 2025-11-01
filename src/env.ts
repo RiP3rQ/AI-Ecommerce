@@ -1,4 +1,4 @@
-import { createEnv } from "@t3-oss/env-core";
+import { createEnv, StandardSchemaV1 } from "@t3-oss/env-core";
 import { z } from "zod";
 
 export const env = createEnv({
@@ -29,15 +29,7 @@ export const env = createEnv({
    * What object holds the environment variables at runtime. This is usually
    * `process.env` or `import.meta.env`.
    */
-  runtimeEnv: {
-    DATABASE_URL: process.env.DATABASE_URL,
-    NODE_ENV: process.env.NODE_ENV,
-    GEMINI_API_KEY: process.env.GEMINI_API_KEY,
-    NEXT_PUBLIC_SITE_NAME: process.env.NEXT_PUBLIC_SITE_NAME,
-    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
-  },
+  runtimeEnv: process.env,
   /**
    * By default, this library will feed the environment variables directly to
    * the Zod validator.
@@ -56,4 +48,23 @@ export const env = createEnv({
     (process.env.NODE_ENV as string) === "test" ||
       (process.env.NODE_ENV as string) === "CI",
   ),
+  /**
+   * Called when the schema validation fails.
+   */
+  onValidationError: (issues: readonly StandardSchemaV1.Issue[]) => {
+    console.error("❌ Invalid environment variables:", issues);
+    throw new Error("Invalid environment variables");
+  },
+  /**
+   * Called when server variables are accessed on the client.
+   */
+  onInvalidAccess: (variable: string) => {
+    throw new Error(
+      "❌ Attempted to access a server-side environment variable on the client",
+    );
+  },
+  /**
+   * Tell the library when we're in a server context.
+   */
+  isServer: typeof window === "undefined",
 });
