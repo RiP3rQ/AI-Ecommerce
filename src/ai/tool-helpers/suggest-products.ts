@@ -1,6 +1,6 @@
 import { embed } from "ai";
 import { drizzleDbClient } from "@/database";
-import { products } from "@/database/schema";
+import { products, categories } from "@/database/schema";
 import { geminiProvider } from "../gemini-provider";
 import {
   cosineDistance,
@@ -20,7 +20,7 @@ const SIMILARITY_CONFIG = {
   model: geminiProvider.textEmbeddingModel("gemini-embedding-001"),
   outputDimensionality: 1536,
   similarityThreshold: 0.3, // Minimum similarity score (0-1)
-  maxSuggestions: 4, // Maximum number of suggestions to return
+  maxSuggestions: 10, // Maximum number of suggestions to return
 } as const;
 
 /**
@@ -68,6 +68,7 @@ export async function findSimilarProducts(
   Array<{
     id: string;
     title: string;
+    description?: string | null;
     tags: string[] | null;
     similarity: number;
   }>
@@ -78,6 +79,36 @@ export async function findSimilarProducts(
   }
 
   const db = drizzleDbClient();
+
+  // Filter out cart items that have valid UUID format (to avoid DB errors)
+  const validCartProductIds = cartItems
+    .map((item) => item.productId)
+    .filter((id) => {
+      // Check if ID is a valid UUID format to avoid PostgreSQL errors
+      const uuidRegex =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      return uuidRegex.test(id);
+    });
+
+  // Fetch categories for cart items to exclude them from suggestions
+  console.log("Fetching cart item categories...");
+  const cartCategories = await db
+    .select({
+      categoryId: products.categoryId,
+    })
+    .from(products)
+    .where(inArray(products.id, validCartProductIds));
+
+  // Extract unique category IDs from cart items (filter out nulls)
+  const cartCategoryIds = Array.from(
+    new Set(
+      cartCategories
+        .map((item) => item.categoryId)
+        .filter((id): id is string => id !== null),
+    ),
+  );
+
+  console.log("Cart categories to exclude:", cartCategoryIds);
 
   // Create embedding text from cart items
   console.log("Creating cart embedding text...");
@@ -100,16 +131,6 @@ export async function findSimilarProducts(
     const cartEmbedding = result.embedding;
 
     // Find similar products using cosine similarity
-    // Filter out cart items that have valid UUID format (to avoid DB errors)
-    const validCartProductIds = cartItems
-      .map((item) => item.productId)
-      .filter((id) => {
-        // Check if ID is a valid UUID format to avoid PostgreSQL errors
-        const uuidRegex =
-          /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-        return uuidRegex.test(id);
-      });
-
     const similarity = sql<number>`1 - (${cosineDistance(
       products.embedding,
       cartEmbedding,
@@ -126,12 +147,18 @@ export async function findSimilarProducts(
       whereConditions.push(not(inArray(products.id, validCartProductIds)));
     }
 
+    // Exclude products from categories already in cart
+    if (cartCategoryIds.length > 0) {
+      whereConditions.push(not(inArray(products.categoryId, cartCategoryIds)));
+    }
+
     console.log("Fetching similar products...");
 
     const similarProducts = await db
       .select({
         id: products.id,
         title: products.title,
+        description: products.description,
         tags: products.tags,
         similarity,
       })

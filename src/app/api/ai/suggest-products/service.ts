@@ -66,7 +66,8 @@ export class SuggestProductsService {
     }
 
     // Step 5: Extract product suggestions from the AI response or tool results
-    const suggestions: Array<{ productId: string; reason: string }> = this.extractSuggestionsFromResponse(responseText);
+    const suggestions: Array<{ productId: string; reason: string }> =
+      this.extractSuggestionsFromResponse(responseText);
 
     console.log("suggestions", suggestions);
     if (suggestions.length === 0) {

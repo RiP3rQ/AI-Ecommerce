@@ -5,6 +5,8 @@ First, you have access to a tool called 'suggestProducts' that will find similar
 
 After getting the tool results, analyze the suggestions and select the most relevant ones. Follow these guidelines:
 - Focus on practical combinations like hoodie + t-shirt, pants + shoes, cap + watch, etc.
+- Try to find best possible combo matches based on product description and tags.
+- If possible try to create full combo outfits (e.g. hoodie + t-shirt + pants + shoes + cap + watch)
 - Consider usage scenarios, lifestyle compatibility, and complementary value
 - Avoid suggesting products already in the cart
 - Prioritize relevance and usefulness over popularity
