@@ -29,14 +29,17 @@ export class MainPageService {
     // First, get products with their cheapest variant using a subquery
     const productsWithVariants = db
       .select({
-        productId: sql`${products.id}`.as('product_id'),
-        variantId: sql`${productVariants.id}`.as('variant_id'),
+        productId: sql`${products.id}`.as("product_id"),
+        variantId: sql`${productVariants.id}`.as("variant_id"),
         // Use ROW_NUMBER to rank variants by price within each product
-        rowNum: sql<number>`ROW_NUMBER() OVER (PARTITION BY ${products.id} ORDER BY ${productVariants.price} ASC)`.as('row_num'),
+        rowNum:
+          sql<number>`ROW_NUMBER() OVER (PARTITION BY ${products.id} ORDER BY ${productVariants.price} ASC)`.as(
+            "row_num",
+          ),
       })
       .from(products)
       .leftJoin(productVariants, eq(products.id, productVariants.productId))
-      .as('products_with_variants');
+      .as("products_with_variants");
 
     // Now get the final result with only the cheapest variant per product
     const latestProducts = await db

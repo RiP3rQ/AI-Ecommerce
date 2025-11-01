@@ -7,7 +7,7 @@ import type {
 /**
  * Product data without the embedding column for main page display.
  */
-export type ProductWithoutEmbedding = Omit<SelectProduct, 'embedding'>;
+export type ProductWithoutEmbedding = Omit<SelectProduct, "embedding">;
 
 /**
  * Represents a product with its main image and variant data for the main page.
