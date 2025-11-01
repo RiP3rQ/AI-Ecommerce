@@ -1,13 +1,12 @@
+import type { ProductData } from "../../product/[id]/types";
+
 /**
- * Product suggestion with relevance score and reasoning.
+ * Individual product suggestion with reasoning and full product data.
  */
 export interface ProductSuggestion {
   productId: string;
-  title: string;
-  description: string | null;
-  tags: string[] | null;
-  relevanceScore: number;
-  reasoning: string;
+  reason: string;
+  productData?: ProductData;
 }
 
 /**
@@ -15,9 +14,5 @@ export interface ProductSuggestion {
  */
 export interface SuggestProductsResponse {
   success: boolean;
-  data: {
-    suggestions: ProductSuggestion[];
-    totalSuggestions: number;
-    cartItemsAnalyzed: number;
-  };
+  data: ProductSuggestion[];
 }
