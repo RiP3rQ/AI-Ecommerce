@@ -13,9 +13,8 @@ import { ProductNotFoundError } from "@/lib/errors";
 import type { PriceRange } from "@/types/products";
 import type { GetProductDto } from "./dto";
 import type { ProductData } from "./types";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import type { TestDatabase } from "@/test/utils/db-helper";
-import { id } from "zod/v4/locales";
 
 /**
  * Service class for product operations.
@@ -95,6 +94,137 @@ export class ProductService {
       product_options,
       priceRange,
     };
+  }
+
+  /**
+   * Gets multiple products by their UUIDs with all related data.
+   * @param dto - Product retrieval parameters
+   * @param db - Optional database connection (for testing)
+   * @returns Array of product data with variants, images, options, and price range
+   */
+  public async getProducts({
+    productIds,
+    db,
+  }: Readonly<{
+    productIds: string[];
+    db?: DrizzleDbClient | TestDatabase;
+  }>): Promise<ProductData[]> {
+    if (productIds.length === 0) {
+      return [];
+    }
+
+    const dbClient = db || drizzleDbClient();
+
+    // Step 1: Get product data with joins
+    const productsData = await dbClient
+      .select({
+        products: {
+          id: products.id,
+          title: products.title,
+          description: products.description,
+          descriptionHtml: products.descriptionHtml,
+          tags: products.tags,
+          categoryId: products.categoryId,
+          availableForSale: products.availableForSale,
+          createdAt: products.createdAt,
+          updatedAt: products.updatedAt,
+          // Make sure to not include embeddings
+        },
+        product_variants: productVariants,
+        product_images: productImages,
+        product_options: productOptions,
+      })
+      .from(products)
+      .where(inArray(products.id, productIds))
+      .leftJoin(productVariants, eq(products.id, productVariants.productId))
+      .leftJoin(productImages, eq(products.id, productImages.productId))
+      .leftJoin(productOptions, eq(products.id, productOptions.productId));
+
+    if (!productsData || productsData.length === 0) {
+      return [];
+    }
+
+    // Step 2: Group data by product ID
+    const productsMap = new Map<
+      string,
+      {
+        product: SelectProduct;
+        variants: SelectProductVariant[];
+        images: SelectProductImage[];
+        options: SelectProductOption[];
+      }
+    >();
+
+    for (const row of productsData) {
+      const productId = row.products.id;
+
+      if (!productsMap.has(productId)) {
+        productsMap.set(productId, {
+          product: {
+            ...row.products,
+            embedding: null,
+          },
+          variants: [],
+          images: [],
+          options: [],
+        });
+      }
+
+      const productData = productsMap.get(productId)!;
+
+      // Add variant if not already present
+      if (
+        row.product_variants &&
+        !productData.variants.some((v) => v.id === row.product_variants!.id)
+      ) {
+        productData.variants.push(row.product_variants);
+      }
+
+      // Add image if not already present
+      if (
+        row.product_images &&
+        !productData.images.some((i) => i.id === row.product_images!.id)
+      ) {
+        productData.images.push(row.product_images);
+      }
+
+      // Add option if not already present
+      if (
+        row.product_options &&
+        !productData.options.some((o) => o.id === row.product_options!.id)
+      ) {
+        productData.options.push(row.product_options);
+      }
+    }
+
+    // Step 3: Transform each product into the expected format
+    const result: ProductData[] = [];
+
+    for (const [productId, data] of productsMap) {
+      // Sort images by order
+      data.images.sort((a, b) => a.order - b.order);
+
+      // Sort options by position
+      data.options.sort((a, b) => a.position - b.position);
+
+      // Calculate price range
+      const priceRange = this.calculatePriceRange(data.variants);
+
+      result.push({
+        ...data.product,
+        product_variants: data.variants,
+        product_images: data.images,
+        product_options: data.options,
+        priceRange,
+      });
+    }
+
+    // Step 4: Return products in the same order as requested IDs
+    const orderedResult = productIds
+      .map((id) => result.find((product) => product.id === id))
+      .filter(Boolean) as ProductData[];
+
+    return orderedResult;
   }
 
   /**

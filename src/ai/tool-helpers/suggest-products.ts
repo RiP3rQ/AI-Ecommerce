@@ -1,0 +1,176 @@
+import { embed } from "ai";
+import { drizzleDbClient } from "@/database";
+import { products, categories } from "@/database/schema";
+import { geminiProvider } from "../gemini-provider";
+import {
+  cosineDistance,
+  desc,
+  gt,
+  ne,
+  and,
+  sql,
+  not,
+  inArray,
+} from "drizzle-orm";
+
+/**
+ * Configuration for embedding similarity search.
+ */
+const SIMILARITY_CONFIG = {
+  model: geminiProvider.textEmbeddingModel("gemini-embedding-001"),
+  outputDimensionality: 1536,
+  similarityThreshold: 0.3, // Minimum similarity score (0-1)
+  maxSuggestions: 10, // Maximum number of suggestions to return
+} as const;
+
+/**
+ * Creates a rich text representation of cart items for embedding generation.
+ */
+function createCartEmbeddingText(
+  cartItems: Array<{
+    productTitle: string;
+    productDescription?: string | null;
+    quantity: number;
+    tags?: string[] | null;
+  }>,
+): string {
+  const itemsText = cartItems
+    .map((item) => {
+      const parts = [`${item.productTitle} (quantity: ${item.quantity})`];
+
+      if (item.productDescription) {
+        parts.push(item.productDescription);
+      }
+
+      if (item.tags && item.tags.length > 0) {
+        parts.push(`Tags: ${item.tags.join(", ")}`);
+      }
+
+      return parts.join(" ");
+    })
+    .join(" | ");
+
+  return `Cart items: ${itemsText}`;
+}
+
+/**
+ * Finds products similar to the items in the cart using embeddings.
+ */
+export async function findSimilarProducts(
+  cartItems: Array<{
+    productId: string;
+    productTitle: string;
+    quantity: number;
+  }>,
+): Promise<
+  Array<{
+    id: string;
+    title: string;
+    description?: string | null;
+    tags: string[] | null;
+    similarity: number;
+  }>
+> {
+  console.log("Executing findSimilarProducts...");
+  if (cartItems.length === 0) {
+    return [];
+  }
+
+  const db = drizzleDbClient();
+
+  // Filter out cart items that have valid UUID format (to avoid DB errors)
+  const validCartProductIds = cartItems.map((item) => item.productId);
+
+  // Fetch categories for cart items to exclude them from suggestions
+  console.log("Fetching cart item categories...");
+  const cartCategories = await db
+    .select({
+      categoryId: products.categoryId,
+    })
+    .from(products)
+    .where(inArray(products.id, validCartProductIds));
+
+  console.log("cartCategories", cartCategories);
+
+  // Extract unique category IDs from cart items (filter out nulls)
+  const cartCategoryIds = Array.from(
+    new Set(
+      cartCategories
+        .map((item) => item.categoryId)
+        .filter((id): id is string => id !== null),
+    ),
+  );
+
+  console.log("Cart categories to exclude:", cartCategoryIds);
+
+  // Create embedding text from cart items
+  console.log("Creating cart embedding text...");
+  const cartText = createCartEmbeddingText(cartItems);
+
+  try {
+    // Generate embedding for the cart
+    const result = await embed({
+      model: SIMILARITY_CONFIG.model,
+      value: cartText,
+      providerOptions: {
+        google: {
+          outputDimensionality: SIMILARITY_CONFIG.outputDimensionality,
+        },
+      },
+    });
+
+    console.log("Generated embedding for the cart...");
+
+    const cartEmbedding = result.embedding;
+
+    // Find similar products using cosine similarity
+    const similarity = sql<number>`1 - (${cosineDistance(
+      products.embedding,
+      cartEmbedding,
+    )})`;
+
+    // Build where conditions
+    const whereConditions = [
+      gt(similarity, SIMILARITY_CONFIG.similarityThreshold),
+      ne(products.availableForSale, false),
+    ];
+
+    // Exclude cart items from suggestions
+    if (validCartProductIds.length > 0) {
+      whereConditions.push(not(inArray(products.id, validCartProductIds)));
+    }
+
+    console.log("validCartProductIds", validCartProductIds);
+
+    // Exclude products from categories already in cart
+    if (cartCategoryIds.length > 0) {
+      whereConditions.push(not(inArray(products.categoryId, cartCategoryIds)));
+    }
+
+    console.log("cartCategoryIds", cartCategoryIds);
+
+    console.log("Fetching similar products...");
+
+    const similarProducts = await db
+      .select({
+        id: products.id,
+        title: products.title,
+        description: products.description,
+        tags: products.tags,
+        similarity,
+      })
+      .from(products)
+      .where(and(...whereConditions))
+      .orderBy(desc(similarity))
+      .limit(SIMILARITY_CONFIG.maxSuggestions);
+
+    console.log("Similar products fetched...");
+    console.log("similarProducts", similarProducts);
+
+    return similarProducts;
+  } catch (error) {
+    console.error("Error finding similar products:", error);
+    // Return empty array on error to prevent breaking the AI flow
+    return [];
+  }
+}

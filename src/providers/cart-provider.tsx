@@ -26,6 +26,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 
 type CartContextType = {
+  clearCart: () => Promise<void>;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   cart: FrontendCart | undefined;
@@ -312,6 +313,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const clearCart = async () => {
+    // Check authentication before allowing cart operations
+    if (!isAuthenticated) {
+      return;
+    }
+
+    // Just cleanup frontend state
+    setCart(undefined);
+    setIsOpen(false);
+  };
+
   const openCart = useCallback(() => {
     setIsOpen(true);
   }, []);
@@ -322,6 +334,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const contextValue = useMemo(
     () => ({
+      clearCart,
       isOpen,
       setIsOpen,
       cart,
@@ -334,6 +347,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       closeCart,
     }),
     [
+      clearCart,
       isOpen,
       setIsOpen,
       cart,

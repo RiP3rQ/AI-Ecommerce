@@ -236,13 +236,22 @@ export function ProductCardWithAddToCart({
               )}
               <div>
                 <h3 className="font-medium text-sm">{product.title}</h3>
-                {product.minPrice !== undefined && product.currencyCode && (
-                  <Price
-                    amount={product.minPrice.toString()}
-                    currencyCode={product.currencyCode}
-                    className="text-sm text-muted-foreground"
-                  />
-                )}
+                {(() => {
+                  // Show selected variant price if variant is selected, otherwise show min price
+                  const selectedVariant = selectedVariantId
+                    ? product.variants.find((v) => v.id === selectedVariantId)
+                    : null;
+                  const displayPrice =
+                    selectedVariant?.price ?? product.minPrice;
+
+                  return displayPrice !== undefined && product.currencyCode ? (
+                    <Price
+                      amount={displayPrice.toString()}
+                      currencyCode={product.currencyCode}
+                      className="text-sm text-muted-foreground"
+                    />
+                  ) : null;
+                })()}
               </div>
             </div>
 

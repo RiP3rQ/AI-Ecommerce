@@ -175,7 +175,7 @@ export class CartService {
 
       await db
         .update(cartItems)
-        .set({ quantity: newQuantity })
+        .set({ quantity: newQuantity, updatedAt: new Date() })
         .where(eq(cartItems.id, existingItem.id));
     } else {
       await db.insert(cartItems).values({
