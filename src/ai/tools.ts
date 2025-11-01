@@ -1,25 +1,48 @@
 import { tool, type ToolSet } from "ai";
 import z from "zod";
+import { findSimilarProducts } from "./tool-helpers/suggest-products";
 
 export function getAiTools(): ToolSet | undefined {
   return {
-    get_user_info: tool({
-      description: "Get user information",
+    suggest_products: tool({
+      description:
+        "Suggest products similar to items in the user's cart using AI embeddings",
       inputSchema: z.object({
-        userId: z.string(),
+        cartItems: z.array(
+          z.object({
+            productId: z.string(),
+            productTitle: z.string(),
+            productDescription: z.string().nullable(),
+            quantity: z.number(),
+            tags: z.array(z.string()).nullable(),
+          }),
+        ),
       }),
-      onInputAvailable: (options) => {
-        console.log(options);
-      },
-      execute: async (input, options) => {
+      execute: async ({ cartItems }) => {
+        const similarProducts = await findSimilarProducts(cartItems);
+
         return {
-          name: `John Doe - ${options.toolCallId}`,
-          email: "john.doe@example.com",
+          suggestions: similarProducts.map((product) => ({
+            id: product.id,
+            title: product.title,
+            description: product.description,
+            tags: product.tags,
+            relevanceScore: product.similarity,
+          })),
+          totalSuggestions: similarProducts.length,
         };
       },
       outputSchema: z.object({
-        name: z.string(),
-        email: z.string(),
+        suggestions: z.array(
+          z.object({
+            id: z.string(),
+            title: z.string(),
+            description: z.string().nullable(),
+            tags: z.array(z.string()).nullable(),
+            relevanceScore: z.number(),
+          }),
+        ),
+        totalSuggestions: z.number(),
       }),
     }),
   };

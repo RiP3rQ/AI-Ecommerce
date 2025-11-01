@@ -17,7 +17,9 @@ export type CartItemForSuggestion = z.infer<typeof cartItemForSuggestionSchema>;
  * Schema for suggest products request.
  */
 export const suggestProductsSchema = z.object({
-  cartItems: z.array(cartItemForSuggestionSchema).min(1, "At least one cart item is required"),
+  cartItems: z
+    .array(cartItemForSuggestionSchema)
+    .min(1, "At least one cart item is required"),
   maxSuggestions: z.number().int().min(1).max(10).optional().default(5),
 });
 
