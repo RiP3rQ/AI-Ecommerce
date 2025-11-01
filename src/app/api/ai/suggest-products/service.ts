@@ -1,4 +1,4 @@
-import { generateText } from "ai";
+import { generateText, stepCountIs } from "ai";
 import { geminiProvider } from "@/ai/gemini-provider";
 import { getAiTools } from "@/ai/tools";
 import { SuggestProductsPrompts } from "./prompts";
@@ -44,9 +44,10 @@ export class SuggestProductsService {
 
     // Step 3: Generate the text with tool usage
     let responseText: string = "";
+
     try {
       console.log("Generating text...");
-      const response = await generateText({
+      const aiResponse = await generateText({
         model: geminiProvider("gemini-2.5-flash"),
         system: SuggestProductsPrompts.SYSTEM_PROMPT,
         prompt: SuggestProductsPrompts.USER_PROMPT({
@@ -54,26 +55,19 @@ export class SuggestProductsService {
           maxSuggestions: MAX_SUGGESTIONS,
         }),
         temperature: 0.3, // Balanced creativity and consistency
-        maxOutputTokens: 2000, // Increased for tool results and analysis
+        maxOutputTokens: 4000, // Increased for tool results and analysis
+        stopWhen: [stepCountIs(3)],
         tools: getAiTools(), // Include all available tools, including suggestProducts
       });
-      console.log("response", response);
-      // TODO: HANDLE THE RESPONSE PROPERLY
-      responseText = response.text;
+      responseText = aiResponse.text || "";
     } catch (error) {
       console.error("AI generation error:", error);
       throw new AiSuggestionGenerationError();
     }
 
-    console.log("responseText", responseText);
+    // Step 5: Extract product suggestions from the AI response or tool results
+    const suggestions: Array<{ productId: string; reason: string }> = this.extractSuggestionsFromResponse(responseText);
 
-    // Step 4: Get the response text (this will include tool results and AI analysis)
-    if (!responseText || responseText.trim().length === 0) {
-      throw new AiSuggestionGenerationError("AI returned empty response");
-    }
-
-    // Step 5: Extract product suggestions from the AI response
-    const suggestions = this.extractSuggestionsFromResponse(responseText);
     console.log("suggestions", suggestions);
     if (suggestions.length === 0) {
       throw new NoValidSuggestionsError();
@@ -83,8 +77,6 @@ export class SuggestProductsService {
     const suggestedProducts = await productService.getProducts({
       productIds: suggestions.map((suggestion) => suggestion.productId),
     });
-
-    console.log("suggestedProducts", suggestedProducts);
 
     // Step 7: Check for missing products and warn about them
     const foundProductIds = new Set(suggestedProducts.map((p) => p.id));
