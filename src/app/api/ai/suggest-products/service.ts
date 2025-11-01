@@ -1,8 +1,17 @@
-import { streamText, stepCountIs } from "ai";
+import { generateText } from "ai";
 import { geminiProvider } from "@/ai/gemini-provider";
 import { getAiTools } from "@/ai/tools";
-import type { SuggestProductsDto } from "./dto";
 import { SuggestProductsPrompts } from "./prompts";
+import { CartItemWithDetails } from "../../cart/types";
+import { MAX_SUGGESTIONS } from "./constants";
+import { productService } from "../../product/[id]/service";
+import { ProductData } from "../../product/[id]/types";
+import {
+  AiSuggestionGenerationError,
+  AiSuggestionParsingError,
+  NoValidSuggestionsError,
+  SuggestedProductsNotFoundError,
+} from "@/lib/errors/ai-suggestion-errors";
 
 /**
  * Service class for AI-powered product suggestions using RAG.
@@ -16,20 +25,200 @@ export class SuggestProductsService {
    * @param dto - The suggestion request data
    * @returns Streaming response with AI-generated suggestions
    */
-  public async suggestProducts(dto: SuggestProductsDto) {
-    const { cartItems, maxSuggestions } = dto;
+  public async suggestProducts({
+    cartItems,
+  }: Readonly<{ cartItems: CartItemWithDetails[] }>): Promise<
+    Array<{ productId: string; reason: string; productData?: ProductData }>
+  > {
+    // Step 1: Validate input
+    if (!cartItems || cartItems.length === 0) {
+      throw new NoValidSuggestionsError(
+        "No cart items provided for suggestions",
+      );
+    }
 
-    const result = streamText({
-      model: geminiProvider("gemini-2.5-flash"),
-      system: SuggestProductsPrompts.SYSTEM_PROMPT,
-      prompt: SuggestProductsPrompts.USER_PROMPT(cartItems, maxSuggestions),
-      temperature: 0.3, // Balanced creativity and consistency
-      maxOutputTokens: 1000,
-      stopWhen: stepCountIs(3), // Limit tool call steps for efficiency
-      tools: getAiTools(), // Include all available tools, including suggest_products
+    // Step 2: Create the cart items text
+    const cartItemsText = cartItems
+      .map((item) => `${item.quantity}x ${item.productVariant.product.title}`)
+      .join(", ");
+
+    // Step 3: Generate the text with tool usage
+    let result;
+    try {
+      result = await generateText({
+        model: geminiProvider("gemini-2.5-flash"),
+        system: SuggestProductsPrompts.SYSTEM_PROMPT,
+        prompt: SuggestProductsPrompts.USER_PROMPT({
+          cartItemsText,
+          maxSuggestions: MAX_SUGGESTIONS,
+        }),
+        temperature: 0.3, // Balanced creativity and consistency
+        maxOutputTokens: 2000, // Increased for tool results and analysis
+        tools: getAiTools(), // Include all available tools, including suggestProducts
+      });
+    } catch (error) {
+      console.error("AI generation error:", error);
+      throw new AiSuggestionGenerationError();
+    }
+
+    // Step 4: Get the response text (this will include tool results and AI analysis)
+    const responseText = result.text;
+    if (!responseText || responseText.trim().length === 0) {
+      throw new AiSuggestionGenerationError("AI returned empty response");
+    }
+
+    // Step 5: Extract product suggestions from the AI response
+    const suggestions = this.extractSuggestionsFromResponse(responseText);
+    if (suggestions.length === 0) {
+      throw new NoValidSuggestionsError();
+    }
+
+    // Step 6: Fetch the data for the suggested products
+    const suggestedProducts = await productService.getProducts({
+      productIds: suggestions.map((suggestion) => suggestion.productId),
     });
 
-    return result;
+    // Step 7: Check for missing products and warn about them
+    const foundProductIds = new Set(suggestedProducts.map((p) => p.id));
+    const missingProductIds = suggestions
+      .map((s) => s.productId)
+      .filter((id) => !foundProductIds.has(id));
+
+    if (missingProductIds.length > 0) {
+      console.warn(
+        `Some suggested products not found in database: ${missingProductIds.join(", ")}`,
+      );
+      // Continue with available products rather than failing completely
+    }
+
+    // Step 8: Build the final response type
+    const finalResponse = suggestions
+      .filter((suggestion) => foundProductIds.has(suggestion.productId))
+      .map((suggestion) => ({
+        productId: suggestion.productId,
+        reason: suggestion.reason,
+        productData: suggestedProducts.find(
+          (productData) => productData.id === suggestion.productId,
+        ),
+      }));
+
+    // If we end up with no valid suggestions after filtering, throw an error
+    if (finalResponse.length === 0) {
+      throw new SuggestedProductsNotFoundError(missingProductIds);
+    }
+
+    return finalResponse;
+  }
+
+  /**
+   * Extracts product suggestions from AI response text.
+   * Handles various formats the AI might use to present recommendations.
+   */
+  private extractSuggestionsFromResponse(
+    responseText: string,
+  ): Array<{ productId: string; reason: string }> {
+    const suggestions: Array<{ productId: string; reason: string }> = [];
+
+    try {
+      // First try to parse as JSON (in case AI returns structured data)
+      const jsonMatch =
+        responseText.match(/\[.*\]/g) || responseText.match(/\{.*\}/g);
+      if (jsonMatch) {
+        try {
+          const parsed = JSON.parse(jsonMatch[0]);
+          if (Array.isArray(parsed)) {
+            for (const item of parsed) {
+              if (item.productId && item.reason) {
+                suggestions.push({
+                  productId: item.productId,
+                  reason: item.reason,
+                });
+              }
+            }
+          }
+          if (suggestions.length > 0) {
+            return suggestions.slice(0, MAX_SUGGESTIONS);
+          }
+        } catch (e) {
+          // JSON parsing failed, continue with text parsing
+        }
+      }
+
+      // Fallback: Parse natural language response
+      // Look for patterns like product IDs and their associated reasons
+      const lines = responseText.split("\n").filter((line) => line.trim());
+
+      let currentSuggestion: { productId: string; reason: string } | null =
+        null;
+
+      for (const line of lines) {
+        const trimmedLine = line.trim();
+
+        // Look for product ID patterns (UUID format)
+        const uuidMatch = trimmedLine.match(
+          /[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/i,
+        );
+        if (uuidMatch) {
+          // If we had a previous suggestion, save it
+          if (
+            currentSuggestion &&
+            currentSuggestion.productId &&
+            currentSuggestion.reason
+          ) {
+            suggestions.push(currentSuggestion);
+          }
+
+          // Start new suggestion
+          currentSuggestion = {
+            productId: uuidMatch[0],
+            reason: "",
+          };
+
+          // Extract reason from the same line after the ID
+          const afterId = trimmedLine.split(uuidMatch[0])[1]?.trim() || "";
+          if (afterId) {
+            currentSuggestion.reason = afterId.replace(/^[:-]\s*/, "");
+          }
+        } else if (currentSuggestion && !currentSuggestion.reason) {
+          // This might be a continuation of the reason
+          currentSuggestion.reason = trimmedLine.replace(/^[:-]\s*/, "");
+        }
+      }
+
+      // Don't forget the last suggestion
+      if (
+        currentSuggestion &&
+        currentSuggestion.productId &&
+        currentSuggestion.reason
+      ) {
+        suggestions.push(currentSuggestion);
+      }
+
+      // If no structured suggestions found, try a simpler approach
+      if (suggestions.length === 0) {
+        // Look for any UUIDs in the text and create basic suggestions
+        const uuidRegex =
+          /[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/gi;
+        const uuids = responseText.match(uuidRegex);
+
+        if (uuids) {
+          for (const uuid of uuids.slice(0, MAX_SUGGESTIONS)) {
+            suggestions.push({
+              productId: uuid,
+              reason:
+                "Recommended complementary product based on your cart items",
+            });
+          }
+        }
+      }
+
+      return suggestions.slice(0, MAX_SUGGESTIONS);
+    } catch (error) {
+      console.error("Error parsing AI response:", error);
+      throw new AiSuggestionParsingError(
+        `Failed to parse AI response: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
+    }
   }
 }
 

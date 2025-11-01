@@ -12,7 +12,6 @@ import { Sparkles, Loader2, ShoppingBag } from "lucide-react";
 import type { ProductWithDetails } from "@/app/api/shop/types";
 import type { SelectProductVariant } from "@/database/schemas/product-variants";
 import type { SelectProductOption } from "@/database/schemas/product-options";
-import type { CartItemForSuggestion } from "@/app/api/ai/suggest-products/dto";
 import { DefaultChatTransport } from "ai";
 
 /**
@@ -47,7 +46,7 @@ export function SuggestedProducts(): ReactNode {
   });
 
   // Extract cart items for suggestions
-  const cartItemsForSuggestions = useMemo((): CartItemForSuggestion[] => {
+  const cartItemsForSuggestions = useMemo((): any[] => {
     if (!cart?.lines) return [];
 
     return cart.lines.map((item) => ({
