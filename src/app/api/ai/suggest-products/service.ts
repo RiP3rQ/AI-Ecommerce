@@ -39,7 +39,10 @@ export class SuggestProductsService {
 
     // Step 2: Create the cart items text
     const cartItemsText = cartItems
-      .map((item) => `${item.quantity}x ${item.productVariant.product.title}`)
+      .map(
+        (item) =>
+          `${item.quantity}x ${item.productVariant.product.title} (PRODUCT_ID: ${item.productVariant.product.id})`,
+      )
       .join(", ");
 
     // Step 3: Generate the text with tool usage

@@ -1,6 +1,7 @@
 import { tool, type ToolSet } from "ai";
 import z from "zod";
 import { findSimilarProducts } from "./tool-helpers/suggest-products";
+import { uuidSchema } from "@/app/api/product/[id]/dto";
 
 export function getAiTools(): ToolSet | undefined {
   return {
@@ -10,11 +11,9 @@ export function getAiTools(): ToolSet | undefined {
       inputSchema: z.object({
         cartItems: z.array(
           z.object({
-            productId: z.string(),
-            productTitle: z.string(),
-            productDescription: z.string().nullable(),
+            productId: uuidSchema,
             quantity: z.number(),
-            tags: z.array(z.string()).nullable(),
+            productTitle: z.string(),
           }),
         ),
       }),

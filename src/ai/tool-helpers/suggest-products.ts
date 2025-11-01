@@ -60,9 +60,7 @@ export async function findSimilarProducts(
   cartItems: Array<{
     productId: string;
     productTitle: string;
-    productDescription?: string | null;
     quantity: number;
-    tags?: string[] | null;
   }>,
 ): Promise<
   Array<{
@@ -81,14 +79,7 @@ export async function findSimilarProducts(
   const db = drizzleDbClient();
 
   // Filter out cart items that have valid UUID format (to avoid DB errors)
-  const validCartProductIds = cartItems
-    .map((item) => item.productId)
-    .filter((id) => {
-      // Check if ID is a valid UUID format to avoid PostgreSQL errors
-      const uuidRegex =
-        /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-      return uuidRegex.test(id);
-    });
+  const validCartProductIds = cartItems.map((item) => item.productId);
 
   // Fetch categories for cart items to exclude them from suggestions
   console.log("Fetching cart item categories...");
@@ -98,6 +89,8 @@ export async function findSimilarProducts(
     })
     .from(products)
     .where(inArray(products.id, validCartProductIds));
+
+  console.log("cartCategories", cartCategories);
 
   // Extract unique category IDs from cart items (filter out nulls)
   const cartCategoryIds = Array.from(
@@ -147,10 +140,14 @@ export async function findSimilarProducts(
       whereConditions.push(not(inArray(products.id, validCartProductIds)));
     }
 
+    console.log("validCartProductIds", validCartProductIds);
+
     // Exclude products from categories already in cart
     if (cartCategoryIds.length > 0) {
       whereConditions.push(not(inArray(products.categoryId, cartCategoryIds)));
     }
+
+    console.log("cartCategoryIds", cartCategoryIds);
 
     console.log("Fetching similar products...");
 
