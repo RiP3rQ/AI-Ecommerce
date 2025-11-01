@@ -3,6 +3,8 @@
 import { type ReactNode, Suspense } from "react";
 import { Gallery } from "./gallery";
 import { ProductDescription } from "./description";
+import { AddReviewBox } from "./add-review-box";
+import { ReviewsList } from "./reviews-list";
 import type { SelectProductImage } from "@/database/schema";
 import useSWR, { type SWRResponse } from "swr";
 import type { ProductData } from "@/app/api/product/[id]/types";
@@ -51,6 +53,66 @@ export function ProductDetails({
           </Suspense>
         </div>
       </div>
+
+      {/* Reviews Section */}
+      <div className="mt-12 mb-12 space-y-8">
+        {/* Add Review Box */}
+        <Suspense
+          fallback={
+            <div className="h-64 bg-neutral-100 dark:bg-neutral-800 rounded-lg animate-pulse" />
+          }
+        >
+          <AddReviewBox productUuid={productUuid} />
+        </Suspense>
+
+        {/* Reviews List */}
+        <Suspense
+          fallback={
+            <div className="h-96 bg-neutral-100 dark:bg-neutral-800 rounded-lg animate-pulse" />
+          }
+        >
+          <ReviewsList reviews={mockReviews} isLoading={false} />
+        </Suspense>
+      </div>
     </div>
   );
 }
+
+// Mock review data - replace with actual API data later
+const mockReviews = [
+  {
+    id: "1",
+    rating: 4.5,
+    content:
+      "Great product! Exactly what I was looking for. The quality is excellent and it arrived quickly. Highly recommend!",
+    createdAt: new Date("2024-11-15"),
+    user: {
+      id: "user1",
+      name: "John Doe",
+      email: "john@example.com",
+    },
+  },
+  {
+    id: "2",
+    rating: 5.0,
+    content:
+      "Absolutely love this! The design is modern and it works perfectly. Customer service was also very helpful when I had questions.",
+    createdAt: new Date("2024-11-10"),
+    user: {
+      id: "user2",
+      name: "Jane Smith",
+      email: "jane@example.com",
+    },
+  },
+  {
+    id: "3",
+    rating: 3.5,
+    content:
+      "Good product overall, but there's room for improvement in the packaging. The item itself is fine, just wish it came better protected.",
+    createdAt: new Date("2024-11-05"),
+    user: {
+      id: "user3",
+      email: "alex@example.com",
+    },
+  },
+];
