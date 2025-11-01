@@ -2,7 +2,16 @@ import { embed } from "ai";
 import { drizzleDbClient } from "@/database";
 import { products } from "@/database/schema";
 import { geminiProvider } from "../gemini-provider";
-import { cosineDistance, desc, gt, ne, and, sql } from "drizzle-orm";
+import {
+  cosineDistance,
+  desc,
+  gt,
+  ne,
+  and,
+  sql,
+  not,
+  inArray,
+} from "drizzle-orm";
 
 /**
  * Configuration for embedding similarity search.
@@ -112,11 +121,9 @@ export async function findSimilarProducts(
       ne(products.availableForSale, false),
     ];
 
-    // Only add exclusion for valid UUIDs to prevent DB errors
+    // Exclude cart items from suggestions
     if (validCartProductIds.length > 0) {
-      whereConditions.push(
-        ...validCartProductIds.map((id) => ne(products.id, id)),
-      );
+      whereConditions.push(not(inArray(products.id, validCartProductIds)));
     }
 
     console.log("Fetching similar products...");

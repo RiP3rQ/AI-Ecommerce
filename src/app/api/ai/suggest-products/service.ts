@@ -43,9 +43,10 @@ export class SuggestProductsService {
       .join(", ");
 
     // Step 3: Generate the text with tool usage
-    let result;
+    let responseText: string = "";
     try {
-      result = await generateText({
+      console.log("Generating text...");
+      const response = await generateText({
         model: geminiProvider("gemini-2.5-flash"),
         system: SuggestProductsPrompts.SYSTEM_PROMPT,
         prompt: SuggestProductsPrompts.USER_PROMPT({
@@ -56,19 +57,24 @@ export class SuggestProductsService {
         maxOutputTokens: 2000, // Increased for tool results and analysis
         tools: getAiTools(), // Include all available tools, including suggestProducts
       });
+      console.log("response", response);
+      // TODO: HANDLE THE RESPONSE PROPERLY
+      responseText = response.text;
     } catch (error) {
       console.error("AI generation error:", error);
       throw new AiSuggestionGenerationError();
     }
 
+    console.log("responseText", responseText);
+
     // Step 4: Get the response text (this will include tool results and AI analysis)
-    const responseText = result.text;
     if (!responseText || responseText.trim().length === 0) {
       throw new AiSuggestionGenerationError("AI returned empty response");
     }
 
     // Step 5: Extract product suggestions from the AI response
     const suggestions = this.extractSuggestionsFromResponse(responseText);
+    console.log("suggestions", suggestions);
     if (suggestions.length === 0) {
       throw new NoValidSuggestionsError();
     }
@@ -77,6 +83,8 @@ export class SuggestProductsService {
     const suggestedProducts = await productService.getProducts({
       productIds: suggestions.map((suggestion) => suggestion.productId),
     });
+
+    console.log("suggestedProducts", suggestedProducts);
 
     // Step 7: Check for missing products and warn about them
     const foundProductIds = new Set(suggestedProducts.map((p) => p.id));
@@ -112,7 +120,7 @@ export class SuggestProductsService {
 
   /**
    * Extracts product suggestions from AI response text.
-   * Handles various formats the AI might use to present recommendations.
+   * Parses XML format as specified in the system prompt.
    */
   private extractSuggestionsFromResponse(
     responseText: string,
@@ -120,7 +128,42 @@ export class SuggestProductsService {
     const suggestions: Array<{ productId: string; reason: string }> = [];
 
     try {
-      // First try to parse as JSON (in case AI returns structured data)
+      // Parse XML response format as specified in the prompt
+      const xmlMatch = responseText.match(
+        /<suggestions>[\s\S]*?<\/suggestions>/,
+      );
+      if (xmlMatch) {
+        const xmlContent = xmlMatch[0];
+
+        // Extract individual suggestions using regex
+        const suggestionMatches = xmlContent.match(
+          /<suggestion>[\s\S]*?<\/suggestion>/g,
+        );
+
+        if (suggestionMatches) {
+          for (const suggestionXml of suggestionMatches) {
+            const productIdMatch = suggestionXml.match(
+              /<productId>(.*?)<\/productId>/,
+            );
+            const reasonMatch = suggestionXml.match(/<reason>(.*?)<\/reason>/);
+
+            if (productIdMatch && reasonMatch) {
+              const productId = productIdMatch[1].trim();
+              const reason = reasonMatch[1].trim();
+
+              if (productId && reason) {
+                suggestions.push({ productId, reason });
+              }
+            }
+          }
+        }
+
+        if (suggestions.length > 0) {
+          return suggestions.slice(0, MAX_SUGGESTIONS);
+        }
+      }
+
+      // Fallback: Try to parse as JSON (legacy support)
       const jsonMatch =
         responseText.match(/\[.*\]/g) || responseText.match(/\{.*\}/g);
       if (jsonMatch) {
@@ -140,75 +183,22 @@ export class SuggestProductsService {
             return suggestions.slice(0, MAX_SUGGESTIONS);
           }
         } catch (e) {
-          // JSON parsing failed, continue with text parsing
+          // JSON parsing failed, continue with fallback
         }
       }
 
-      // Fallback: Parse natural language response
-      // Look for patterns like product IDs and their associated reasons
-      const lines = responseText.split("\n").filter((line) => line.trim());
+      // Final fallback: Look for any UUIDs in the text and create basic suggestions
+      const uuidRegex =
+        /[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/gi;
+      const uuids = responseText.match(uuidRegex);
 
-      let currentSuggestion: { productId: string; reason: string } | null =
-        null;
-
-      for (const line of lines) {
-        const trimmedLine = line.trim();
-
-        // Look for product ID patterns (UUID format)
-        const uuidMatch = trimmedLine.match(
-          /[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/i,
-        );
-        if (uuidMatch) {
-          // If we had a previous suggestion, save it
-          if (
-            currentSuggestion &&
-            currentSuggestion.productId &&
-            currentSuggestion.reason
-          ) {
-            suggestions.push(currentSuggestion);
-          }
-
-          // Start new suggestion
-          currentSuggestion = {
-            productId: uuidMatch[0],
-            reason: "",
-          };
-
-          // Extract reason from the same line after the ID
-          const afterId = trimmedLine.split(uuidMatch[0])[1]?.trim() || "";
-          if (afterId) {
-            currentSuggestion.reason = afterId.replace(/^[:-]\s*/, "");
-          }
-        } else if (currentSuggestion && !currentSuggestion.reason) {
-          // This might be a continuation of the reason
-          currentSuggestion.reason = trimmedLine.replace(/^[:-]\s*/, "");
-        }
-      }
-
-      // Don't forget the last suggestion
-      if (
-        currentSuggestion &&
-        currentSuggestion.productId &&
-        currentSuggestion.reason
-      ) {
-        suggestions.push(currentSuggestion);
-      }
-
-      // If no structured suggestions found, try a simpler approach
-      if (suggestions.length === 0) {
-        // Look for any UUIDs in the text and create basic suggestions
-        const uuidRegex =
-          /[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/gi;
-        const uuids = responseText.match(uuidRegex);
-
-        if (uuids) {
-          for (const uuid of uuids.slice(0, MAX_SUGGESTIONS)) {
-            suggestions.push({
-              productId: uuid,
-              reason:
-                "Recommended complementary product based on your cart items",
-            });
-          }
+      if (uuids) {
+        for (const uuid of uuids.slice(0, MAX_SUGGESTIONS)) {
+          suggestions.push({
+            productId: uuid,
+            reason:
+              "Recommended complementary product based on your cart items",
+          });
         }
       }
 

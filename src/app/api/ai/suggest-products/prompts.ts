@@ -12,15 +12,26 @@ Guidelines for recommendations:
 - Select up to 4 of the most compelling suggestions from the tool results
 - Provide specific, actionable reasoning for each suggestion
 
-IMPORTANT: Always use the suggestProducts tool first to retrieve similar products, then analyze and select from those results. Do not invent or guess product IDs - only suggest products that were returned by the tool.
-
-After using the tool and analyzing the results, provide your final recommendations.`,
+<CRITICAL>
+- Always use the suggestProducts tool first to retrieve similar products, then analyze and select from those results. Do not invent or guess product IDs - only suggest products that were returned by the tool.
+- Then after using the suggestProducts tool, provide your final recommendations. Make sure to return always the ID of the product and the reason for the suggestion.
+- Structure your response like this:
+<suggestions>
+  <suggestion>
+    <productId>{SUGGESTED_PRODUCT_ID}</productId> // The ID of the suggested product
+    <reason>{REASON_FOR_THE_SUGGESTION}</reason> // The reason for the suggestion
+  </suggestion>
+  <suggestion>
+    <productId>{SUGGESTED_PRODUCT_ID}</productId> // The ID of the suggested product
+    <reason>{REASON_FOR_THE_SUGGESTION}</reason> // The reason for the suggestion
+  </suggestion>
+</suggestions>
+</CRITICAL>
+`,
 
   USER_PROMPT: ({
     cartItemsText,
     maxSuggestions,
   }: Readonly<{ cartItemsText: string; maxSuggestions: number }>) =>
-    `A user has these items in their cart: ${cartItemsText}
-
-Please suggest up to ${maxSuggestions} complementary products that would work well with these items. First use the suggestProducts tool to find similar products, then analyze the results and provide your top recommendations with clear reasoning for each.`,
+    `A user has these items in their cart: ${cartItemsText}. Please suggest up to ${maxSuggestions} complementary products that would work well with these items.`,
 } as const;
