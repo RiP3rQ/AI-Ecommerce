@@ -117,7 +117,23 @@ export class ProductService {
 
     // Step 1: Get product data with joins
     const productsData = await dbClient
-      .select()
+      .select({
+        products: {
+          id: products.id,
+          title: products.title,
+          description: products.description,
+          descriptionHtml: products.descriptionHtml,
+          tags: products.tags,
+          categoryId: products.categoryId,
+          availableForSale: products.availableForSale,
+          createdAt: products.createdAt,
+          updatedAt: products.updatedAt,
+          // Make sure to not include embeddings
+        },
+        product_variants: productVariants,
+        product_images: productImages,
+        product_options: productOptions,
+      })
       .from(products)
       .where(inArray(products.id, productIds))
       .leftJoin(productVariants, eq(products.id, productVariants.productId))
@@ -144,7 +160,10 @@ export class ProductService {
 
       if (!productsMap.has(productId)) {
         productsMap.set(productId, {
-          product: row.products,
+          product: {
+            ...row.products,
+            embedding: null,
+          },
           variants: [],
           images: [],
           options: [],
