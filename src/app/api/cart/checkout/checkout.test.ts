@@ -275,7 +275,7 @@ describe("/api/cart/checkout", () => {
           // Simulate price change after cart creation (but before checkout)
           await db
             .update(productVariants)
-            .set({ price: 1500 }) // New price: $15.00
+            .set({ price: 1500, updatedAt: new Date() }) // New price: $15.00
             .where(eq(productVariants.id, variant.id));
 
           // Act: Complete checkout
