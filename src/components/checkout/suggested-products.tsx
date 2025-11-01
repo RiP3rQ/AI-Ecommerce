@@ -24,7 +24,9 @@ export function SuggestedProducts(): ReactNode {
   const { cart, isLoading: cartLoading } = useCart();
 
   // State for suggestions
-  const [suggestions, setSuggestions] = useState<SuggestProductsResponse["data"]>([]);
+  const [suggestions, setSuggestions] = useState<
+    SuggestProductsResponse["data"]
+  >([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,7 +44,9 @@ export function SuggestedProducts(): ReactNode {
       setSuggestions(response.data);
     } catch (err) {
       console.error("Error generating suggestions:", err);
-      setError(err instanceof Error ? err.message : "Failed to generate suggestions");
+      setError(
+        err instanceof Error ? err.message : "Failed to generate suggestions",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -125,9 +129,12 @@ export function SuggestedProducts(): ReactNode {
         <Card>
           <CardContent className="p-6 text-center">
             <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Generating Suggestions</h3>
+            <h3 className="text-lg font-semibold mb-2">
+              Generating Suggestions
+            </h3>
             <p className="text-muted-foreground">
-              Our AI is analyzing your cart and finding perfect recommendations...
+              Our AI is analyzing your cart and finding perfect
+              recommendations...
             </p>
           </CardContent>
         </Card>
@@ -137,9 +144,7 @@ export function SuggestedProducts(): ReactNode {
       {error && (
         <Card className="border-destructive">
           <CardContent className="p-4">
-            <div className="text-sm text-destructive mb-2">
-              {error}
-            </div>
+            <div className="text-sm text-destructive mb-2">{error}</div>
             <Button
               onClick={handleGenerateSuggestions}
               variant="outline"
@@ -173,11 +178,17 @@ export function SuggestedProducts(): ReactNode {
                 options: suggestion.productData.product_options || [],
                 // Add required fields from ProductWithDetails
                 category: null, // AI suggestions don't include category
-                featuredImage: suggestion.productData.product_images?.[0] || null,
-                minPrice: suggestion.productData.priceRange.minVariantPrice.amount,
-                maxPrice: suggestion.productData.priceRange.maxVariantPrice.amount,
-                currencyCode: suggestion.productData.priceRange.minVariantPrice.currencyCode,
-                variantCount: suggestion.productData.product_variants?.length || 0,
+                featuredImage:
+                  suggestion.productData.product_images?.[0] || null,
+                minPrice:
+                  suggestion.productData.priceRange.minVariantPrice.amount,
+                maxPrice:
+                  suggestion.productData.priceRange.maxVariantPrice.amount,
+                currencyCode:
+                  suggestion.productData.priceRange.minVariantPrice
+                    .currencyCode,
+                variantCount:
+                  suggestion.productData.product_variants?.length || 0,
               };
 
               return (

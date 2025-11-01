@@ -133,7 +133,6 @@ export async function findSimilarProducts(
       .orderBy(desc(similarity))
       .limit(SIMILARITY_CONFIG.maxSuggestions);
 
-
     console.log("Similar products fetched...");
     console.log("similarProducts", similarProducts);
 
