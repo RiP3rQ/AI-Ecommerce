@@ -13,7 +13,10 @@ Guidelines for recommendations:
 
 Always use the suggest_products tool first to get relevant product data, then provide your expert analysis and recommendations based on that information.`,
 
-  USER_PROMPT: (cartItems: SuggestProductsDto["cartItems"], maxSuggestions: number) =>
+  USER_PROMPT: (
+    cartItems: SuggestProductsDto["cartItems"],
+    maxSuggestions: number,
+  ) =>
     `A user has these items in their cart: ${cartItems
       .map((item) => `${item.quantity}x ${item.productTitle}`)
       .join(", ")}
