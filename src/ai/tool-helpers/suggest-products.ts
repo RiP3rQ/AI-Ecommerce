@@ -11,7 +11,7 @@ const SIMILARITY_CONFIG = {
   model: geminiProvider.textEmbeddingModel("gemini-embedding-001"),
   outputDimensionality: 1536,
   similarityThreshold: 0.3, // Minimum similarity score (0-1)
-  maxSuggestions: 5, // Maximum number of suggestions to return
+  maxSuggestions: 4, // Maximum number of suggestions to return
 } as const;
 
 /**
@@ -59,11 +59,11 @@ export async function findSimilarProducts(
   Array<{
     id: string;
     title: string;
-    description: string | null;
     tags: string[] | null;
     similarity: number;
   }>
 > {
+  console.log("Executing findSimilarProducts...");
   if (cartItems.length === 0) {
     return [];
   }
@@ -71,6 +71,7 @@ export async function findSimilarProducts(
   const db = drizzleDbClient();
 
   // Create embedding text from cart items
+  console.log("Creating cart embedding text...");
   const cartText = createCartEmbeddingText(cartItems);
 
   try {
@@ -84,6 +85,8 @@ export async function findSimilarProducts(
         },
       },
     });
+
+    console.log("Generated embedding for the cart...");
 
     const cartEmbedding = result.embedding;
 
@@ -116,11 +119,12 @@ export async function findSimilarProducts(
       );
     }
 
+    console.log("Fetching similar products...");
+
     const similarProducts = await db
       .select({
         id: products.id,
         title: products.title,
-        description: products.description,
         tags: products.tags,
         similarity,
       })
@@ -128,6 +132,10 @@ export async function findSimilarProducts(
       .where(and(...whereConditions))
       .orderBy(desc(similarity))
       .limit(SIMILARITY_CONFIG.maxSuggestions);
+
+
+    console.log("Similar products fetched...");
+    console.log("similarProducts", similarProducts);
 
     return similarProducts;
   } catch (error) {

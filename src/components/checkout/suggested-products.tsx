@@ -1,7 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect, type ReactNode } from "react";
-import { useChat } from "@ai-sdk/react";
+import { useState, useEffect, type ReactNode } from "react";
 import { ProductCardWithAddToCart } from "./product-card-with-add-to-cart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,19 +11,8 @@ import { Sparkles, Loader2, ShoppingBag } from "lucide-react";
 import type { ProductWithDetails } from "@/app/api/shop/types";
 import type { SelectProductVariant } from "@/database/schemas/product-variants";
 import type { SelectProductOption } from "@/database/schemas/product-options";
-import { DefaultChatTransport } from "ai";
-
-/**
- * Type for AI-suggested products from the API
- */
-interface SuggestedProduct {
-  productId: string;
-  title: string;
-  description: string | null;
-  tags: string[] | null;
-  relevanceScore: number;
-  reasoning: string;
-}
+import { getProductSuggestions } from "@/lib/ai-api";
+import type { SuggestProductsResponse } from "@/app/api/ai/suggest-products/types";
 
 /**
  * Component that displays AI-powered suggested products.
@@ -35,115 +23,38 @@ export function SuggestedProducts(): ReactNode {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { cart, isLoading: cartLoading } = useCart();
 
-  // Initialize useChat hook for AI-powered suggestions
-  const { messages, sendMessage, status, error, clearError } = useChat({
-    transport: new DefaultChatTransport({
-      api: "/api/ai/suggest-products",
-    }),
-    onError: (error) => {
-      console.error("Error generating suggestions:", error);
-    },
-  });
+  // State for suggestions
+  const [suggestions, setSuggestions] = useState<SuggestProductsResponse["data"]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Extract cart items for suggestions
-  const cartItemsForSuggestions = useMemo((): any[] => {
-    if (!cart?.lines) return [];
+  // Check if user has items in cart
+  const hasCartItems = cart?.lines && cart.lines.length > 0;
 
-    return cart.lines.map((item) => ({
-      productId: item.merchandise.product.id,
-      productTitle: item.merchandise.product.title,
-      productDescription: null, // Cart doesn't include description
-      quantity: item.quantity,
-      tags: null, // Cart doesn't include tags
-    }));
-  }, [cart]);
+  const handleGenerateSuggestions = async () => {
+    if (!hasCartItems) return;
 
-  // Extract streaming text and suggestions from messages
-  const latestAssistantMessage = messages
-    .filter((msg) => msg.role === "assistant")
-    .slice(-1)[0];
-
-  console.log("latestAssistantMessage", latestAssistantMessage);
-
-  const isStreaming = status === "streaming" || status === "submitted";
-  const streamingText =
-    latestAssistantMessage?.parts
-      .filter((part) => part.type === "text")
-      .map((part) => part.text)
-      .join("") || "";
-
-  console.log("streamingText", streamingText);
-
-  // Parse suggestions from the final assistant message
-  const suggestedProducts = useMemo((): SuggestedProduct[] => {
-    if (!latestAssistantMessage || status !== "ready") return [];
-
-    // Look for tool results in the message parts
-    const toolResults = latestAssistantMessage.parts
-      .filter(
-        (
-          part,
-        ): part is Extract<
-          typeof part,
-          { type: "dynamic-tool"; state: "output-available" }
-        > =>
-          part.type === "dynamic-tool" &&
-          part.toolName === "suggestProducts" &&
-          part.state === "output-available",
-      )
-      .map((part) => part.output)
-      .filter(Boolean);
-
-    if (toolResults.length === 0) return [];
+    setIsLoading(true);
+    setError(null);
 
     try {
-      const result = toolResults[0] as {
-        suggestions: Array<{
-          id: string;
-          title: string;
-          description: string | null;
-          tags: string[] | null;
-          relevanceScore: number;
-        }>;
-      };
-
-      return result.suggestions.map((suggestion) => ({
-        productId: suggestion.id,
-        title: suggestion.title,
-        description: suggestion.description,
-        tags: suggestion.tags,
-        relevanceScore: suggestion.relevanceScore,
-        reasoning: `Based on your cart items, this product complements your selection with ${Math.round(suggestion.relevanceScore * 100)}% relevance.`,
-      }));
-    } catch (error) {
-      console.error("Error parsing suggestions:", error);
-      return [];
+      const response = await getProductSuggestions();
+      setSuggestions(response.data);
+    } catch (err) {
+      console.error("Error generating suggestions:", err);
+      setError(err instanceof Error ? err.message : "Failed to generate suggestions");
+    } finally {
+      setIsLoading(false);
     }
-  }, [latestAssistantMessage, status]);
-
-  console.log("suggestedProducts", suggestedProducts);
-
-  // State for full product data needed for ProductCardWithAddToCart
-  const [fullProductData, setFullProductData] = useState<
-    Array<
-      ProductWithDetails & {
-        variants: SelectProductVariant[];
-        options: SelectProductOption[];
-      }
-    >
-  >([]);
-
-  const handleGenerateSuggestions = () => {
-    if (cartItemsForSuggestions.length === 0) return;
-
-    // Clear any previous error
-    clearError();
-
-    // Send message to AI with cart items data
-    sendMessage({
-      text: `Please analyze these cart items and suggest ${Math.min(5, cartItemsForSuggestions.length * 2)} complementary products that would go well with them: ${JSON.stringify(cartItemsForSuggestions)}`,
-    });
   };
+
+  // Reset suggestions when cart changes
+  useEffect(() => {
+    if (!hasCartItems) {
+      setSuggestions([]);
+      setError(null);
+    }
+  }, [hasCartItems]);
 
   if (authLoading || cartLoading) {
     return (
@@ -178,7 +89,7 @@ export function SuggestedProducts(): ReactNode {
     );
   }
 
-  if (cartItemsForSuggestions.length === 0) {
+  if (!hasCartItems) {
     return (
       <Card>
         <CardContent className="p-6 text-center">
@@ -197,10 +108,10 @@ export function SuggestedProducts(): ReactNode {
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">You might also like</h2>
 
-        {suggestedProducts.length === 0 && !isStreaming && !streamingText && (
+        {suggestions.length === 0 && !isLoading && (
           <Button
             onClick={handleGenerateSuggestions}
-            disabled={isStreaming || status === "error"}
+            disabled={isLoading}
             className="gap-2"
           >
             <Sparkles className="h-4 w-4" />
@@ -209,41 +120,30 @@ export function SuggestedProducts(): ReactNode {
         )}
       </div>
 
-      {/* AI Thinking Process */}
-      {isStreaming && (
+      {/* Loading State */}
+      {isLoading && (
         <Card>
-          <CardHeader>
-            <CardTitle className="text-sm flex items-center gap-2">
-              <Sparkles className="h-4 w-4" />
-              AI Assistant is working...
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-sm text-muted-foreground whitespace-pre-wrap">
-              {streamingText ||
-                "Analyzing your cart and finding perfect recommendations..."}
-              <div className="flex items-center gap-2 mt-2">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Processing your request...
-              </div>
-            </div>
+          <CardContent className="p-6 text-center">
+            <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Generating Suggestions</h3>
+            <p className="text-muted-foreground">
+              Our AI is analyzing your cart and finding perfect recommendations...
+            </p>
           </CardContent>
         </Card>
       )}
 
       {/* Error State */}
-      {status === "error" && error && (
+      {error && (
         <Card className="border-destructive">
           <CardContent className="p-4">
-            <div className="text-sm text-destructive">
-              Sorry, I couldn't generate suggestions right now. Please try
-              again.
+            <div className="text-sm text-destructive mb-2">
+              {error}
             </div>
             <Button
-              onClick={clearError}
+              onClick={handleGenerateSuggestions}
               variant="outline"
               size="sm"
-              className="mt-2"
             >
               Try Again
             </Button>
@@ -252,7 +152,7 @@ export function SuggestedProducts(): ReactNode {
       )}
 
       {/* Product Suggestions */}
-      {fullProductData.length > 0 && (
+      {suggestions.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
@@ -263,22 +163,36 @@ export function SuggestedProducts(): ReactNode {
 
           {/* Grid layout for product cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {fullProductData.map((product) => (
-              <ProductCardWithAddToCart
-                key={product.id}
-                product={{
-                  ...product,
-                  variants: (product as any).product_variants || [],
-                  options: (product as any).product_options || [],
-                }}
-              />
-            ))}
+            {suggestions.map((suggestion) => {
+              if (!suggestion.productData) return null;
+
+              // Transform ProductData to ProductWithVariantsAndOptions
+              const product = {
+                ...suggestion.productData,
+                variants: suggestion.productData.product_variants || [],
+                options: suggestion.productData.product_options || [],
+                // Add required fields from ProductWithDetails
+                category: null, // AI suggestions don't include category
+                featuredImage: suggestion.productData.product_images?.[0] || null,
+                minPrice: suggestion.productData.priceRange.minVariantPrice.amount,
+                maxPrice: suggestion.productData.priceRange.maxVariantPrice.amount,
+                currencyCode: suggestion.productData.priceRange.minVariantPrice.currencyCode,
+                variantCount: suggestion.productData.product_variants?.length || 0,
+              };
+
+              return (
+                <ProductCardWithAddToCart
+                  key={suggestion.productId}
+                  product={product}
+                />
+              );
+            })}
           </div>
         </div>
       )}
 
       {/* Initial state - show button to generate suggestions */}
-      {suggestedProducts.length === 0 && !isStreaming && !streamingText && (
+      {suggestions.length === 0 && !isLoading && !error && (
         <Card>
           <CardContent className="p-6 text-center">
             <Sparkles className="mx-auto h-12 w-12 text-primary mb-4" />
@@ -291,7 +205,7 @@ export function SuggestedProducts(): ReactNode {
             </p>
             <Button
               onClick={handleGenerateSuggestions}
-              disabled={isStreaming}
+              disabled={isLoading}
               size="lg"
             >
               <Sparkles className="mr-2 h-4 w-4" />

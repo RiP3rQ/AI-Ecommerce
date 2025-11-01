@@ -25,7 +25,6 @@ export function getAiTools(): ToolSet | undefined {
           suggestions: similarProducts.map((product) => ({
             id: product.id,
             title: product.title,
-            description: product.description,
             tags: product.tags,
             relevanceScore: product.similarity,
           })),
@@ -37,7 +36,6 @@ export function getAiTools(): ToolSet | undefined {
           z.object({
             id: z.string(),
             title: z.string(),
-            description: z.string().nullable(),
             tags: z.array(z.string()).nullable(),
             relevanceScore: z.number(),
           }),
