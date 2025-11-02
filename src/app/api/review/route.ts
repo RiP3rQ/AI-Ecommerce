@@ -3,6 +3,7 @@ import { handleApiError } from "@/lib/errors";
 import { reviewService } from "./service";
 import { type CreateReviewDto, createReviewSchema, getReviewsSchema } from "./dto";
 import type { ReviewsResponse, CreateReviewResponse } from "./types";
+import { validateServerSession } from "@/lib/api-helpers";
 import { drizzleDbClient } from "@/database";
 
 /**
@@ -12,7 +13,7 @@ import { drizzleDbClient } from "@/database";
  * Query Parameters:
  * - page (optional): Page number (default: 1)
  * - limit (optional): Items per page (default: 20, max: 100)
- * - productId (optional): Filter by product UUID
+ * - productId: Filter by product UUID
  *
  * @param request - The incoming request
  * @returns Paginated reviews with filtering applied
@@ -31,7 +32,7 @@ export async function GET(
       limit: searchParams.get("limit")
         ? Number.parseInt(searchParams.get("limit")!)
         : 20,
-      productId: searchParams.get("productId") || undefined,
+      productId: searchParams.get("productId"),
     };
 
     const validatedDto = getReviewsSchema.parse(queryParams);
@@ -60,7 +61,6 @@ export async function GET(
  *
  * Body Parameters:
  * - productId (required): UUID of the product
- * - userId (required): UUID of the user creating the review
  * - content (required): Review content (10-1000 characters)
  * - rating (required): Rating from 0.5 to 5.0
  *
@@ -71,23 +71,17 @@ export async function POST(
   request: NextRequest,
 ): Promise<NextResponse<CreateReviewResponse | unknown>> {
   try {
-    // Step 1: Parse and validate request body
+    // Step 1: Validate user session
+    const user = await validateServerSession();
+
+    // Step 2: Parse and validate request body
     const body = await request.json();
-    const { userId, ...reviewData } = body;
+    const validatedDto = createReviewSchema.parse(body);
 
-    if (!userId) {
-      return NextResponse.json(
-        { message: "User ID is required" },
-        { status: 400 },
-      );
-    }
-
-    const validatedDto = createReviewSchema.parse(reviewData);
-
-    // Step 2: Create the review
+    // Step 3: Create the review
     const newReview = await reviewService.createReview({
       dto: validatedDto,
-      userId,
+      userId: user.id,
       db: drizzleDbClient(),
     });
 
