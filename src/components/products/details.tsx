@@ -207,12 +207,14 @@ function ReviewSummarySection({
               {summary.summary}
             </p>
             <div className="text-xs text-neutral-500 dark:text-neutral-400">
-              Based on {summary.reviewCount} customer review{summary.reviewCount !== 1 ? 's' : ''}
+              Based on {summary.reviewCount} customer review
+              {summary.reviewCount !== 1 ? "s" : ""}
             </div>
           </div>
         ) : (
           <p className="text-sm text-neutral-500 dark:text-neutral-400 italic">
-            Click "Summarize Reviews" to generate an AI-powered summary of all customer reviews for this product.
+            Click "Summarize Reviews" to generate an AI-powered summary of all
+            customer reviews for this product.
           </p>
         )}
       </CardContent>
