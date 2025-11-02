@@ -27,6 +27,7 @@ export class RegisterService {
       .insert(profiles)
       .values({
         id: dto.userId,
+        email: dto.email,
         acceptedDataPolicy: true,
       })
       .returning();

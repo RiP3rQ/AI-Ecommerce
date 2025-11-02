@@ -1,6 +1,5 @@
 import {
-  boolean,
-  integer,
+  numeric,
   pgTable,
   text,
   uuid,
@@ -31,7 +30,7 @@ export const reviews = pgTable(
     userId: uuid("user_id")
       .notNull()
       .references(() => profiles.id, { onDelete: "cascade" }),
-    rating: integer("rating").notNull(), // Assuming a 1-5 star rating
+    rating: numeric("rating", { precision: 3, scale: 1 }).notNull(), // Supports half-star ratings (e.g., 4.5)
     content: text("content").notNull(),
     embeddingStatus: embeddingStatusEnum("embedding_status").default("pending"),
     embedding: vector("embedding", { dimensions: 1536 }), // For AI summarization

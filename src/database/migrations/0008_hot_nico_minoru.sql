@@ -1,0 +1,1 @@
+ALTER TABLE "profiles" ADD COLUMN "email" text DEFAULT '' NOT NULL;
