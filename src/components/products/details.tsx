@@ -18,6 +18,7 @@ import { BASE_URL } from "@/lib/utils";
 import { ReviewsResponse } from "@/app/api/review/types";
 import type { ReviewSummaryData } from "@/app/api/ai/summorize-reviews/types";
 import type { AskReviewsResponse } from "@/app/api/ai/ask-reviews/types";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 
 export function ProductDetails({
   productUuid,
@@ -26,7 +27,7 @@ export function ProductDetails({
   const [summary, setSummary] = useState<ReviewSummaryData | null>(null);
   const [isSummarizing, setIsSummarizing] = useState(false);
 
-  // State for Q&A functionality
+  // State for Q&A functionality (only if feature is enabled)
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState<{
     answer: string;
@@ -57,8 +58,10 @@ export function ProductDetails({
     swrFetcher,
   );
 
-  // Function to generate review summary
+  // Function to generate review summary (only if feature is enabled)
   const handleSummarizeReviews = async () => {
+    if (!isFeatureEnabled("aiSummarizeReviews")) return;
+
     setIsSummarizing(true);
     try {
       const response = await fetch(`${BASE_URL}/api/ai/summorize-reviews`, {
@@ -85,9 +88,9 @@ export function ProductDetails({
     }
   };
 
-  // Function to ask questions about reviews
+  // Function to ask questions about reviews (only if feature is enabled)
   const handleAskQuestion = async () => {
-    if (!question.trim()) return;
+    if (!isFeatureEnabled("aiAskReviews") || !question.trim()) return;
 
     setIsAsking(true);
     try {
@@ -170,22 +173,26 @@ export function ProductDetails({
         </Suspense>
 
         {/* Review Summary */}
-        <ReviewSummarySection
-          summary={summary}
-          isSummarizing={isSummarizing}
-          onSummarize={handleSummarizeReviews}
-          hasReviews={Boolean(reviewsData?.data?.reviews?.length)}
-        />
+        {isFeatureEnabled("aiSummarizeReviews") && (
+          <ReviewSummarySection
+            summary={summary}
+            isSummarizing={isSummarizing}
+            onSummarize={handleSummarizeReviews}
+            hasReviews={Boolean(reviewsData?.data?.reviews?.length)}
+          />
+        )}
 
         {/* Ask Reviews Section */}
-        <AskReviewsSection
-          question={question}
-          answer={answer}
-          isAsking={isAsking}
-          onQuestionChange={setQuestion}
-          onAskQuestion={handleAskQuestion}
-          hasReviews={Boolean(reviewsData?.data?.reviews?.length)}
-        />
+        {isFeatureEnabled("aiAskReviews") && (
+          <AskReviewsSection
+            question={question}
+            answer={answer}
+            isAsking={isAsking}
+            onQuestionChange={setQuestion}
+            onAskQuestion={handleAskQuestion}
+            hasReviews={Boolean(reviewsData?.data?.reviews?.length)}
+          />
+        )}
 
         {/* Reviews List */}
         <Suspense

@@ -2,17 +2,15 @@
 
 import { useState, useEffect, type ReactNode } from "react";
 import { ProductCardWithAddToCart } from "./product-card-with-add-to-cart";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AuthGuard } from "@/components/auth-guard";
 import { useAuth } from "@/hooks/use-auth";
 import { useCart } from "@/providers/cart-provider";
 import { Sparkles, Loader2, ShoppingBag } from "lucide-react";
-import type { ProductWithDetails } from "@/app/api/shop/types";
-import type { SelectProductVariant } from "@/database/schemas/product-variants";
-import type { SelectProductOption } from "@/database/schemas/product-options";
 import { getProductSuggestions } from "@/lib/ai-api";
 import type { SuggestProductsResponse } from "@/app/api/ai/suggest-products/types";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 
 /**
  * Component that displays AI-powered suggested products.
@@ -20,6 +18,11 @@ import type { SuggestProductsResponse } from "@/app/api/ai/suggest-products/type
  * Protected feature - requires authentication.
  */
 export function SuggestedProducts(): ReactNode {
+  // Feature flag check
+  if (!isFeatureEnabled("aiProductSuggestions")) {
+    return null;
+  }
+
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { cart, isLoading: cartLoading } = useCart();
 
