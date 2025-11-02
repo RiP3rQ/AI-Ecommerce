@@ -1,20 +1,29 @@
 "use client";
 
-import { type ReactNode, Suspense } from "react";
+import { type ReactNode, Suspense, useState } from "react";
 import { Gallery } from "./gallery";
 import { ProductDescription } from "./description";
 import { AddReviewBox } from "./add-review-box";
 import { ReviewsList } from "./reviews-list";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Sparkles, RefreshCw } from "lucide-react";
 import type { SelectProductImage } from "@/database/schema";
 import useSWR, { type SWRResponse } from "swr";
 import type { ProductData } from "@/app/api/product/[id]/types";
 import { swrFetcher } from "@/lib/swr-fetcher";
 import { BASE_URL } from "@/lib/utils";
 import { ReviewsResponse } from "@/app/api/review/types";
+import type { ReviewSummaryData } from "@/app/api/ai/summorize-reviews/types";
 
 export function ProductDetails({
   productUuid,
 }: Readonly<{ productUuid: string }>): ReactNode {
+  // State for review summary
+  const [summary, setSummary] = useState<ReviewSummaryData | null>(null);
+  const [isSummarizing, setIsSummarizing] = useState(false);
+
   // Fetch product data
   const { data, isLoading, error } = useSWR<SWRResponse<ProductData>>(
     `${BASE_URL}/api/product/${productUuid}`,
@@ -30,6 +39,34 @@ export function ProductDetails({
     productUuid ? `${BASE_URL}/api/review?productId=${productUuid}` : null,
     swrFetcher,
   );
+
+  // Function to generate review summary
+  const handleSummarizeReviews = async () => {
+    setIsSummarizing(true);
+    try {
+      const response = await fetch(`${BASE_URL}/api/ai/summorize-reviews`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          productId: productUuid,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate summary");
+      }
+
+      const result = await response.json();
+      setSummary(result.data);
+    } catch (error) {
+      console.error("Failed to summarize reviews:", error);
+      // Could add toast notification here
+    } finally {
+      setIsSummarizing(false);
+    }
+  };
 
   if (isLoading) return <div>Loading...</div>;
 
@@ -80,6 +117,14 @@ export function ProductDetails({
           />
         </Suspense>
 
+        {/* Review Summary */}
+        <ReviewSummarySection
+          summary={summary}
+          isSummarizing={isSummarizing}
+          onSummarize={handleSummarizeReviews}
+          hasReviews={Boolean(reviewsData?.data?.reviews?.length)}
+        />
+
         {/* Reviews List */}
         <Suspense
           fallback={
@@ -93,5 +138,84 @@ export function ProductDetails({
         </Suspense>
       </div>
     </div>
+  );
+}
+
+/**
+ * Component for displaying and generating review summaries.
+ */
+function ReviewSummarySection({
+  summary,
+  isSummarizing,
+  onSummarize,
+  hasReviews,
+}: Readonly<{
+  summary: ReviewSummaryData | null;
+  isSummarizing: boolean;
+  onSummarize: () => void;
+  hasReviews: boolean;
+}>): ReactNode {
+  if (!hasReviews) {
+    return null; // Don't show if no reviews exist
+  }
+
+  return (
+    <Card className="w-full">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Sparkles className="h-5 w-5" />
+            AI Review Summary
+          </CardTitle>
+          <Button
+            onClick={onSummarize}
+            disabled={isSummarizing}
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            {isSummarizing ? (
+              <>
+                <RefreshCw className="h-4 w-4 animate-spin" />
+                Generating...
+              </>
+            ) : summary ? (
+              <>
+                <RefreshCw className="h-4 w-4" />
+                Regenerate
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4" />
+                Summarize Reviews
+              </>
+            )}
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent className="pt-0">
+        {isSummarizing ? (
+          <div className="space-y-3">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-5/6" />
+            <Skeleton className="h-4 w-4/5" />
+            <Skeleton className="h-4 w-3/4" />
+          </div>
+        ) : summary ? (
+          <div className="space-y-3">
+            <p className="text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed">
+              {summary.summary}
+            </p>
+            <div className="text-xs text-neutral-500 dark:text-neutral-400">
+              Based on {summary.reviewCount} customer review{summary.reviewCount !== 1 ? 's' : ''}
+            </div>
+          </div>
+        ) : (
+          <p className="text-sm text-neutral-500 dark:text-neutral-400 italic">
+            Click "Summarize Reviews" to generate an AI-powered summary of all customer reviews for this product.
+          </p>
+        )}
+      </CardContent>
+    </Card>
   );
 }
