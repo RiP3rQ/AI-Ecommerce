@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 import { CartItemList } from "@/components/checkout/cart-item-list";
 import { OrderSummary } from "@/components/checkout/order-summary";
 import { SuggestedProducts } from "@/components/checkout/suggested-products";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { CheckoutActions } from "@/components/checkout/checkout-actions";
 
@@ -29,8 +28,6 @@ export default function CheckoutPage(): ReactNode {
           <h2 className="text-xl font-semibold mb-4">Your Cart</h2>
           <CartItemList />
         </div>
-
-        <Separator />
 
         {/* Suggested Products */}
         <SuggestedProducts />
