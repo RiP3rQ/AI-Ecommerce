@@ -27,6 +27,8 @@ type ReviewFormData = z.infer<typeof reviewFormSchema>;
 interface AddReviewBoxProps {
   /** Product UUID for which the review is being added */
   readonly productUuid: string;
+  /** Callback when a review is successfully submitted */
+  readonly onReviewSubmitted?: () => void;
   /** Additional CSS classes */
   readonly className?: string;
 }
@@ -37,6 +39,7 @@ interface AddReviewBoxProps {
  */
 export function AddReviewBox({
   productUuid,
+  onReviewSubmitted,
   className,
 }: AddReviewBoxProps): ReactNode {
   const [formData, setFormData] = useState<ReviewFormData>({
@@ -94,21 +97,22 @@ export function AddReviewBox({
     setErrors({});
 
     try {
-      // TODO: Implement API call to submit review
-      // For now, just simulate submission
-      console.log("Submitting review:", { productUuid, ...formData });
+      // Submit review to API
+      await fetch("/api/review", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          productId: productUuid,
+          ...formData,
+        }),
+      });
 
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Reset form on success
-      setFormData({ content: "", rating: 0 });
-
-      // TODO: Show success message and refresh reviews list
-      alert("Review submitted successfully!");
+      onReviewSubmitted?.();
     } catch (error) {
       console.error("Failed to submit review:", error);
-      setErrors({ content: "Failed to submit review. Please try again." });
+      setErrors({ content: error instanceof Error ? error.message : "Failed to submit review. Please try again." });
     } finally {
       setIsSubmitting(false);
     }

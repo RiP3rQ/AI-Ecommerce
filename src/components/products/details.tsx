@@ -10,12 +10,24 @@ import useSWR, { type SWRResponse } from "swr";
 import type { ProductData } from "@/app/api/product/[id]/types";
 import { swrFetcher } from "@/lib/swr-fetcher";
 import { BASE_URL } from "@/lib/utils";
+import { ReviewsResponse } from "@/app/api/review/types";
 
 export function ProductDetails({
   productUuid,
 }: Readonly<{ productUuid: string }>): ReactNode {
+  // Fetch product data
   const { data, isLoading, error } = useSWR<SWRResponse<ProductData>>(
     `${BASE_URL}/api/product/${productUuid}`,
+    swrFetcher,
+  );
+
+  // Fetch reviews for this product
+  const {
+    data: reviewsData,
+    isLoading: reviewsLoading,
+    mutate: mutateReviews,
+  } = useSWR<SWRResponse<ReviewsResponse>>(
+    productUuid ? `${BASE_URL}/api/review?productId=${productUuid}` : null,
     swrFetcher,
   );
 
@@ -62,7 +74,10 @@ export function ProductDetails({
             <div className="h-64 bg-neutral-100 dark:bg-neutral-800 rounded-lg animate-pulse" />
           }
         >
-          <AddReviewBox productUuid={productUuid} />
+          <AddReviewBox
+            productUuid={productUuid}
+            onReviewSubmitted={mutateReviews}
+          />
         </Suspense>
 
         {/* Reviews List */}
@@ -71,48 +86,13 @@ export function ProductDetails({
             <div className="h-96 bg-neutral-100 dark:bg-neutral-800 rounded-lg animate-pulse" />
           }
         >
-          <ReviewsList reviews={mockReviews} isLoading={false} />
+          <ReviewsList
+            reviews={reviewsData?.data?.data?.reviews}
+            isLoading={reviewsLoading}
+          />
         </Suspense>
       </div>
     </div>
   );
 }
 
-// Mock review data - replace with actual API data later
-const mockReviews = [
-  {
-    id: "1",
-    rating: 4.5,
-    content:
-      "Great product! Exactly what I was looking for. The quality is excellent and it arrived quickly. Highly recommend!",
-    createdAt: new Date("2024-11-15"),
-    user: {
-      id: "user1",
-      name: "John Doe",
-      email: "john@example.com",
-    },
-  },
-  {
-    id: "2",
-    rating: 5.0,
-    content:
-      "Absolutely love this! The design is modern and it works perfectly. Customer service was also very helpful when I had questions.",
-    createdAt: new Date("2024-11-10"),
-    user: {
-      id: "user2",
-      name: "Jane Smith",
-      email: "jane@example.com",
-    },
-  },
-  {
-    id: "3",
-    rating: 3.5,
-    content:
-      "Good product overall, but there's room for improvement in the packaging. The item itself is fine, just wish it came better protected.",
-    createdAt: new Date("2024-11-05"),
-    user: {
-      id: "user3",
-      email: "alex@example.com",
-    },
-  },
-];

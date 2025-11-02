@@ -6,6 +6,7 @@ import { StarRating } from "@/components/ui/star-rating";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Empty, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
 import { cn } from "@/lib/utils";
+import { ReviewWithUser } from "@/app/api/review/types";
 
 /**
  * Review data structure.
@@ -25,7 +26,7 @@ export interface Review {
 
 interface ReviewsListProps {
   /** Array of reviews to display */
-  readonly reviews?: Review[];
+  readonly reviews?: ReviewWithUser[];
   /** Whether reviews are currently loading */
   readonly isLoading?: boolean;
   /** Additional CSS classes */
@@ -37,12 +38,16 @@ interface ReviewsListProps {
  * Shows reviews in a modern card layout with ratings and user information.
  */
 export function ReviewsList({
-  reviews = [],
+  reviews,
   isLoading = false,
   className,
 }: ReviewsListProps): ReactNode {
   if (isLoading) {
     return <ReviewsListSkeleton className={className} />;
+  }
+
+  if (!reviews) {
+    return null;
   }
 
   if (reviews.length === 0) {
@@ -76,7 +81,7 @@ export function ReviewsList({
 /**
  * Individual review card component.
  */
-function ReviewCard({ review }: { review: Review }): ReactNode {
+function ReviewCard({ review }: Readonly<{ review: ReviewWithUser }>): ReactNode {
   const formattedDate = new Date(review.createdAt).toLocaleDateString("en-US", {
     year: "numeric",
     month: "short",
