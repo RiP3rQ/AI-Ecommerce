@@ -66,7 +66,7 @@ export function formatFullPrice({
  * VERCEL_PROJECT_PRODUCTION_URL - is the production URL of the application provided by Vercel.
  * http://localhost:3000 - is the local development URL.
  */
-export const BASE_URL = process.env.VERCEL_PROJECT_PRODUCTION_URL
+export const BASE_URL = process.env.NODE_ENV === "production"
   ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
   : "http://localhost:3000";
 
