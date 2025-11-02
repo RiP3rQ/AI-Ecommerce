@@ -24,6 +24,7 @@ export async function createProfileFixture({
   // Get the base fixture data
   const profileData = {
     id: overrides.id ?? faker.string.uuid(),
+    email: overrides.email ?? faker.internet.email(),
     acceptedDataPolicy: overrides.acceptedDataPolicy ?? false,
   } satisfies InsertProfile;
 

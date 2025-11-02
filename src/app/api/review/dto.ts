@@ -38,7 +38,7 @@ export const getReviewsSchema = z.object({
     .default(20),
 
   // Filtering
-  productId: uuidSchema,
+  productId: uuidSchema.optional(),
 });
 
 export type GetReviewsDto = z.infer<typeof getReviewsSchema>;

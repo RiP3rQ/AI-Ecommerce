@@ -211,4 +211,24 @@ export const dbHelpers = {
       db.execute(sql`TRUNCATE TABLE orders CASCADE`),
     ]);
   },
+
+  /**
+   * Truncates review-related tables for faster test setup.
+   * Use this when testing review functionality.
+   *
+   * OPTIMIZATION: Truncates reviews and profiles tables
+   *
+   * @param db - Database connection to use for truncation
+   */
+  async truncateReviewTables(db?: TestDatabase): Promise<void> {
+    if (!db) {
+      db = createTestDb();
+    }
+
+    // OPTIMIZATION: Execute in parallel
+    await Promise.all([
+      db.execute(sql`TRUNCATE TABLE reviews CASCADE`),
+      db.execute(sql`TRUNCATE TABLE profiles CASCADE`),
+    ]);
+  },
 };
