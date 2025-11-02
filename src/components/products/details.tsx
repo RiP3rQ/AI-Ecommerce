@@ -8,7 +8,8 @@ import { ReviewsList } from "./reviews-list";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Sparkles, RefreshCw } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Sparkles, RefreshCw, MessageCircle, Send } from "lucide-react";
 import type { SelectProductImage } from "@/database/schema";
 import useSWR, { type SWRResponse } from "swr";
 import type { ProductData } from "@/app/api/product/[id]/types";
@@ -16,6 +17,7 @@ import { swrFetcher } from "@/lib/swr-fetcher";
 import { BASE_URL } from "@/lib/utils";
 import { ReviewsResponse } from "@/app/api/review/types";
 import type { ReviewSummaryData } from "@/app/api/ai/summorize-reviews/types";
+import type { AskReviewsResponse } from "@/app/api/ai/ask-reviews/types";
 
 export function ProductDetails({
   productUuid,
@@ -23,6 +25,21 @@ export function ProductDetails({
   // State for review summary
   const [summary, setSummary] = useState<ReviewSummaryData | null>(null);
   const [isSummarizing, setIsSummarizing] = useState(false);
+
+  // State for Q&A functionality
+  const [question, setQuestion] = useState("");
+  const [answer, setAnswer] = useState<{
+    answer: string;
+    relevantReviews: Array<{
+      id: string;
+      content: string;
+      rating: string;
+      similarity: number;
+    }>;
+    confidence: "high" | "medium" | "low";
+    totalReviewsFound: number;
+  } | null>(null);
+  const [isAsking, setIsAsking] = useState(false);
 
   // Fetch product data
   const { data, isLoading, error } = useSWR<SWRResponse<ProductData>>(
@@ -65,6 +82,41 @@ export function ProductDetails({
       // Could add toast notification here
     } finally {
       setIsSummarizing(false);
+    }
+  };
+
+  // Function to ask questions about reviews
+  const handleAskQuestion = async () => {
+    if (!question.trim()) return;
+
+    setIsAsking(true);
+    try {
+      const response = await fetch(`${BASE_URL}/api/ai/ask-reviews`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          productId: productUuid,
+          question: question.trim(),
+          maxReviews: 5,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to get answer");
+      }
+
+      const result: AskReviewsResponse = await response.json();
+      setAnswer(result.data);
+
+      // Reset question
+      setQuestion("");
+    } catch (error) {
+      console.error("Failed to ask question:", error);
+      // Could add toast notification here
+    } finally {
+      setIsAsking(false);
     }
   };
 
@@ -122,6 +174,16 @@ export function ProductDetails({
           summary={summary}
           isSummarizing={isSummarizing}
           onSummarize={handleSummarizeReviews}
+          hasReviews={Boolean(reviewsData?.data?.reviews?.length)}
+        />
+
+        {/* Ask Reviews Section */}
+        <AskReviewsSection
+          question={question}
+          answer={answer}
+          isAsking={isAsking}
+          onQuestionChange={setQuestion}
+          onAskQuestion={handleAskQuestion}
           hasReviews={Boolean(reviewsData?.data?.reviews?.length)}
         />
 
@@ -216,6 +278,183 @@ function ReviewSummarySection({
             Click "Summarize Reviews" to generate an AI-powered summary of all
             customer reviews for this product.
           </p>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+/**
+ * Component for asking questions about reviews and displaying AI answers.
+ */
+function AskReviewsSection({
+  question,
+  answer,
+  isAsking,
+  onQuestionChange,
+  onAskQuestion,
+  hasReviews,
+}: Readonly<{
+  question: string;
+  answer: {
+    answer: string;
+    relevantReviews: Array<{
+      id: string;
+      content: string;
+      rating: string;
+      similarity: number;
+    }>;
+    confidence: "high" | "medium" | "low";
+    totalReviewsFound: number;
+  } | null;
+  isAsking: boolean;
+  onQuestionChange: (question: string) => void;
+  onAskQuestion: () => void;
+  hasReviews: boolean;
+}>): ReactNode {
+  if (!hasReviews) {
+    return null; // Don't show if no reviews exist
+  }
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      onAskQuestion();
+    }
+  };
+
+  const getConfidenceColor = (confidence: "high" | "medium" | "low") => {
+    switch (confidence) {
+      case "high":
+        return "text-green-600 dark:text-green-400";
+      case "medium":
+        return "text-yellow-600 dark:text-yellow-400";
+      case "low":
+        return "text-red-600 dark:text-red-400";
+    }
+  };
+
+  const getConfidenceText = (confidence: "high" | "medium" | "low") => {
+    switch (confidence) {
+      case "high":
+        return "High confidence";
+      case "medium":
+        return "Medium confidence";
+      case "low":
+        return "Low confidence";
+    }
+  };
+
+  return (
+    <Card className="w-full">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg flex items-center gap-2">
+          <MessageCircle className="h-5 w-5" />
+          Ask About This Product
+        </CardTitle>
+        <p className="text-sm text-neutral-600 dark:text-neutral-400">
+          Get answers about fit, sizing, colors, and more from real customer
+          reviews
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Question Input */}
+        <div className="space-y-2">
+          <Textarea
+            placeholder="e.g., How does this shirt fit? Is the color as shown? Does it run true to size?"
+            value={question}
+            onChange={(e) => onQuestionChange(e.target.value)}
+            onKeyPress={handleKeyPress}
+            className="min-h-[80px] resize-none"
+            disabled={isAsking}
+            maxLength={500}
+          />
+          <div className="flex justify-between items-center">
+            <span className="text-xs text-neutral-500 dark:text-neutral-400">
+              {question.length}/500 characters
+            </span>
+            <Button
+              onClick={onAskQuestion}
+              disabled={!question.trim() || isAsking || question.length < 5}
+              size="sm"
+            >
+              {isAsking ? (
+                <>
+                  <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                  Thinking...
+                </>
+              ) : (
+                <>
+                  <Send className="h-4 w-4 mr-2" />
+                  Ask Question
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+
+        {/* Answer Display */}
+        {answer && (
+          <div className="border-t pt-4 space-y-4">
+            {/* Answer */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <h4 className="font-medium text-neutral-900 dark:text-neutral-100">
+                  AI Answer
+                </h4>
+                <span
+                  className={`text-xs px-2 py-1 rounded-full ${getConfidenceColor(
+                    answer.confidence,
+                  )} bg-neutral-100 dark:bg-neutral-800`}
+                >
+                  {getConfidenceText(answer.confidence)}
+                </span>
+              </div>
+              <p className="text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed">
+                {answer.answer}
+              </p>
+            </div>
+
+            {/* Relevant Reviews */}
+            <div className="space-y-2">
+              <h5 className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+                Based on {answer.relevantReviews.length} relevant review
+                {answer.relevantReviews.length !== 1 ? "s" : ""} (out of{" "}
+                {answer.totalReviewsFound} total)
+              </h5>
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {answer.relevantReviews.map((review, index) => (
+                  <div
+                    key={review.id}
+                    className="p-3 bg-neutral-50 dark:bg-neutral-800 rounded-lg"
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-neutral-600 dark:text-neutral-400">
+                        Review {index + 1} • {review.rating} stars
+                      </span>
+                      <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                        {Math.round(review.similarity * 100)}% relevant
+                      </span>
+                    </div>
+                    <p className="text-xs text-neutral-700 dark:text-neutral-300 line-clamp-3">
+                      {review.content}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Helper Text */}
+        {!answer && !isAsking && (
+          <div className="text-center py-4">
+            <p className="text-sm text-neutral-500 dark:text-neutral-400">
+              Ask specific questions about fit, sizing, colors, quality, or any
+              other aspect of this product. Our AI will search through customer
+              reviews to provide you with detailed, experience-based answers.
+            </p>
+          </div>
         )}
       </CardContent>
     </Card>
