@@ -80,7 +80,7 @@ export class ReviewService {
       id: review.id,
       productId: review.productId,
       userId: review.userId,
-      rating: Number(review.rating),
+      rating: review.rating,
       content: review.content,
       embeddingStatus: review.embeddingStatus,
       createdAt: review.createdAt,
@@ -127,7 +127,7 @@ export class ReviewService {
     id: string;
     productId: string;
     userId: string;
-    rating: number;
+    rating: string;
     content: string;
     embeddingStatus: string | null;
     createdAt: Date;
@@ -157,21 +157,15 @@ export class ReviewService {
       .values({
         productId: dto.productId,
         userId,
-        rating: Math.round(dto.rating * 2) / 2, // Ensure 0.5 increments, store as decimal
+        rating: dto.rating.toString(),
         content: dto.content,
         embeddingStatus: "pending",
+        updatedAt: new Date(),
       })
       .returning();
 
     // Generate embedding asynchronously (don't block the response)
-    this.generateReviewEmbedding(newReview.id, dto.content, db).catch(
-      (error) => {
-        console.error(
-          `Failed to generate embedding for review ${newReview.id}:`,
-          error,
-        );
-      },
-    );
+    this.generateReviewEmbedding(newReview.id, dto.content, db);
 
     return newReview;
   }
@@ -206,6 +200,7 @@ export class ReviewService {
         .set({
           embedding: result.embedding,
           embeddingStatus: "generated",
+          updatedAt: new Date(),
         })
         .where(eq(reviews.id, reviewId));
 
@@ -221,6 +216,7 @@ export class ReviewService {
         .update(reviews)
         .set({
           embeddingStatus: "failed",
+          updatedAt: new Date(),
         })
         .where(eq(reviews.id, reviewId));
     }
