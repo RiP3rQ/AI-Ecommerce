@@ -1,4 +1,4 @@
-import { boolean, pgTable, uuid } from "drizzle-orm/pg-core";
+import { boolean, pgTable, text, uuid } from "drizzle-orm/pg-core";
 import { DEFAULT_DATE_TABLES } from "../helpers/dates";
 
 /**
@@ -7,6 +7,7 @@ import { DEFAULT_DATE_TABLES } from "../helpers/dates";
  */
 export const profiles = pgTable("profiles", {
   id: uuid("id").primaryKey(), // References auth.users.id
+  email: text("email").notNull(),
   acceptedDataPolicy: boolean("accepted_data_policy").notNull().default(false),
   ...DEFAULT_DATE_TABLES,
 });
