@@ -8,10 +8,11 @@ import { AuthGuard } from "@/components/auth-guard";
 import { useAuth } from "@/hooks/use-auth";
 import { useCart } from "@/providers/cart-provider";
 import { Sparkles, Loader2, ShoppingBag } from "lucide-react";
-import { getProductSuggestions } from "@/lib/ai-api";
+import { getProductSuggestions, ApiResponseError } from "@/lib/ai-api";
 import type { SuggestProductsResponse } from "@/app/api/ai/suggest-products/types";
 import { isFeatureEnabled } from "@/lib/feature-flags";
 import { Separator } from "../ui/separator";
+import { toast } from "sonner";
 
 /**
  * Component that displays AI-powered suggested products.
@@ -48,9 +49,25 @@ export function SuggestedProducts(): ReactNode {
       setSuggestions(response.data);
     } catch (err) {
       console.error("Error generating suggestions:", err);
-      setError(
-        err instanceof Error ? err.message : "Failed to generate suggestions",
-      );
+
+      // Extract error message
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to generate suggestions";
+
+      // Handle rate limiting specially (429 status code)
+      if (err instanceof ApiResponseError && err.status === 429) {
+        toast.error("AI usage limit reached", {
+          description:
+            "You've reached your monthly AI usage limit. Please try again next month.",
+          duration: 6000,
+        });
+      } else {
+        toast.error("Failed to generate suggestions", {
+          description: errorMessage || "Please try again later.",
+        });
+      }
+
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }

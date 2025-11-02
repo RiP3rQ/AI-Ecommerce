@@ -4,7 +4,7 @@ import { summarizeReviewsService } from "./service";
 import { summarizeReviewsSchema } from "./dto";
 import type { SummarizeReviewsResponse } from "./types";
 import { drizzleDbClient } from "@/database";
-import { validateServerSession } from "@/lib/api-helpers";
+import { checkAndSaveAiUsage, validateServerSession } from "@/lib/api-helpers";
 
 /**
  * POST /api/ai/summorize-reviews
@@ -20,19 +20,28 @@ export async function POST(
   request: NextRequest,
 ): Promise<NextResponse<SummarizeReviewsResponse | unknown>> {
   try {
+    const dbClient = drizzleDbClient();
+
     // Step 1: Validate user session
     const user = await validateServerSession();
 
-    // Step 2: Parse and validate request body
+    // Step 2: Check AI usage
+    await checkAndSaveAiUsage({
+      dbClient,
+      userId: user.id,
+    });
+
+    // Step 3: Parse and validate request body
     const body = await request.json();
     const validatedDto = summarizeReviewsSchema.parse(body);
 
-    // Step 3: Generate review summary
+    // Step 4: Generate review summary
     const summaryData = await summarizeReviewsService.summarizeReviews({
       dto: validatedDto,
-      db: drizzleDbClient(),
+      db: dbClient,
     });
 
+    // Step 5: Return the summary
     return NextResponse.json(
       {
         success: true,

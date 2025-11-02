@@ -4,7 +4,7 @@ import { askReviewsService } from "./service";
 import { askReviewsSchema } from "./dto";
 import type { AskReviewsResponse } from "./types";
 import { drizzleDbClient } from "@/database";
-import { validateServerSession } from "@/lib/api-helpers";
+import { checkAndSaveAiUsage, validateServerSession } from "@/lib/api-helpers";
 
 /**
  * POST /api/ai/ask-reviews
@@ -22,19 +22,28 @@ export async function POST(
   request: NextRequest,
 ): Promise<NextResponse<AskReviewsResponse | unknown>> {
   try {
-    // Step 1: Validate user session
-    await validateServerSession();
+    const dbClient = drizzleDbClient();
 
-    // Step 2: Parse and validate request body
+    // Step 1: Validate user session
+    const user = await validateServerSession();
+
+    // Step 2: Check AI usage
+    await checkAndSaveAiUsage({
+      dbClient,
+      userId: user.id,
+    });
+
+    // Step 3: Parse and validate request body
     const body = await request.json();
     const validatedDto = askReviewsSchema.parse(body);
 
-    // Step 3: Generate answer using AI and review embeddings
+    // Step 4: Generate answer using AI and review embeddings
     const answerData = await askReviewsService.askReviews({
       dto: validatedDto,
-      db: drizzleDbClient(),
+      db: dbClient,
     });
 
+    // Step 5: Return the answer
     return NextResponse.json(
       {
         success: true,
