@@ -57,6 +57,13 @@
       "when": 1761512523734,
       "tag": "0007_seed-images-for-products",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1762084684709,
+      "tag": "0008_violet_vindicator",
+      "breakpoints": true
     }
   ]
 }
