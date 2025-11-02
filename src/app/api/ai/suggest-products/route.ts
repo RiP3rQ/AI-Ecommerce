@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { handleApiError } from "@/lib/errors";
 import { suggestProductsService } from "./service";
-import { validateServerSession } from "@/lib/api-helpers";
+import { checkAndSaveAiUsage, validateServerSession } from "@/lib/api-helpers";
 import { CartItemWithDetails } from "../../cart/types";
 import { cartService } from "../../cart/service";
 import { drizzleDbClient } from "@/database";
@@ -32,21 +32,29 @@ export async function POST(request: NextRequest): Promise<
   >
 > {
   try {
+    const dbClient = drizzleDbClient();
+
     // Step 1: Validate session
     const user = await validateServerSession();
 
-    // Step 2: Get cart items
-    const cartItems = await cartService.getCart({
+    // Step 2: Check AI usage
+    await checkAndSaveAiUsage({
+      dbClient,
       userId: user.id,
-      db: drizzleDbClient(),
     });
 
-    // Step 2: Generate streaming product suggestions using RAG
+    // Step 3: Get cart items
+    const cartItems = await cartService.getCart({
+      userId: user.id,
+      db: dbClient,
+    });
+
+    // Step 4: Generate streaming product suggestions using RAG
     const suggestedProducts = await suggestProductsService.suggestProducts({
       cartItems: cartItems.cart.items,
     });
 
-    // Step 3: Return the streaming response directly
+    // Step 5: Return the streaming response directly
     return NextResponse.json(
       {
         success: true,
