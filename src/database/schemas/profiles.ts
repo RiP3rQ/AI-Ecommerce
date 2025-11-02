@@ -7,7 +7,7 @@ import { DEFAULT_DATE_TABLES } from "../helpers/dates";
  */
 export const profiles = pgTable("profiles", {
   id: uuid("id").primaryKey(), // References auth.users.id
-  email: text("email").notNull(),
+  email: text("email").notNull().default(""),
   acceptedDataPolicy: boolean("accepted_data_policy").notNull().default(false),
   ...DEFAULT_DATE_TABLES,
 });
