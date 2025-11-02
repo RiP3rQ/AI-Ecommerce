@@ -19,6 +19,7 @@ import { ReviewsResponse } from "@/app/api/review/types";
 import type { ReviewSummaryData } from "@/app/api/ai/summorize-reviews/types";
 import type { AskReviewsResponse } from "@/app/api/ai/ask-reviews/types";
 import { isFeatureEnabled } from "@/lib/feature-flags";
+import { toast } from "sonner";
 
 export function ProductDetails({
   productUuid,
@@ -75,14 +76,35 @@ export function ProductDetails({
       });
 
       if (!response.ok) {
-        throw new Error("Failed to generate summary");
+        const errorData = await response
+          .json()
+          .catch(() => ({ message: "Unknown error" }));
+
+        // Handle rate limiting specially
+        if (response.status === 429) {
+          toast.error("AI usage limit reached", {
+            description:
+              "You've reached your monthly AI usage limit. Please try again next month.",
+            duration: 6000,
+          });
+          return;
+        }
+
+        // Handle other errors
+        toast.error("Failed to generate summary", {
+          description: errorData.message || "Please try again later.",
+        });
+        return;
       }
 
       const result = await response.json();
       setSummary(result.data);
     } catch (error) {
       console.error("Failed to summarize reviews:", error);
-      // Could add toast notification here
+      toast.error("Connection error", {
+        description:
+          "Unable to connect to the server. Please check your internet connection and try again.",
+      });
     } finally {
       setIsSummarizing(false);
     }
@@ -107,7 +129,25 @@ export function ProductDetails({
       });
 
       if (!response.ok) {
-        throw new Error("Failed to get answer");
+        const errorData = await response
+          .json()
+          .catch(() => ({ message: "Unknown error" }));
+
+        // Handle rate limiting specially
+        if (response.status === 429) {
+          toast.error("AI usage limit reached", {
+            description:
+              "You've reached your monthly AI usage limit. Please try again next month.",
+            duration: 6000,
+          });
+          return;
+        }
+
+        // Handle other errors
+        toast.error("Failed to get answer", {
+          description: errorData.message || "Please try again later.",
+        });
+        return;
       }
 
       const result: AskReviewsResponse = await response.json();
@@ -117,7 +157,10 @@ export function ProductDetails({
       setQuestion("");
     } catch (error) {
       console.error("Failed to ask question:", error);
-      // Could add toast notification here
+      toast.error("Connection error", {
+        description:
+          "Unable to connect to the server. Please check your internet connection and try again.",
+      });
     } finally {
       setIsAsking(false);
     }
