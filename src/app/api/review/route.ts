@@ -1,7 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { handleApiError } from "@/lib/errors";
 import { reviewService } from "./service";
-import { type CreateReviewDto, createReviewSchema, getReviewsSchema } from "./dto";
+import {
+  type CreateReviewDto,
+  createReviewSchema,
+  getReviewsSchema,
+} from "./dto";
 import type { ReviewsResponse, CreateReviewResponse } from "./types";
 import { validateServerSession } from "@/lib/api-helpers";
 import { drizzleDbClient } from "@/database";

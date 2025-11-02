@@ -1,15 +1,19 @@
-import { describe, it, expect, beforeEach, beforeAll, afterAll, vi, afterEach } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  beforeAll,
+  afterAll,
+  vi,
+  afterEach,
+} from "vitest";
 import { faker } from "@faker-js/faker";
 import { NextRequest } from "next/server";
 import { GET, POST } from "./route";
 import { reviewService } from "./service";
-import {
-  createTestableUnit,
-  dbHelpers,
-} from "@/test/utils/db-helper";
-import {
-  createProductFixture,
-} from "@/test/fixtures/products";
+import { createTestableUnit, dbHelpers } from "@/test/utils/db-helper";
+import { createProductFixture } from "@/test/fixtures/products";
 import { createProfileFixture } from "@/test/fixtures/profiles";
 import type { ReviewsResponse, CreateReviewResponse } from "./types";
 import {
@@ -275,7 +279,7 @@ describe("/api/review", () => {
               },
               userId: user.id,
               db,
-            })
+            }),
           ).rejects.toThrow();
         });
       });
@@ -298,7 +302,7 @@ describe("/api/review", () => {
               },
               userId: faker.string.uuid(),
               db,
-            })
+            }),
           ).rejects.toThrow();
         });
       });
@@ -386,7 +390,7 @@ describe("/api/review", () => {
 
           // Act: Call GET endpoint with productId filter
           const request = new NextRequest(
-            `http://localhost:3000/api/review?productId=${product1.id}`
+            `http://localhost:3000/api/review?productId=${product1.id}`,
           );
           const response = await GET(request);
           const data = (await response.json()) as ReviewsResponse;
@@ -427,7 +431,7 @@ describe("/api/review", () => {
 
           // Act: Call GET endpoint with pagination
           const request = new NextRequest(
-            "http://localhost:3000/api/review?page=1&limit=2"
+            "http://localhost:3000/api/review?page=1&limit=2",
           );
           const response = await GET(request);
           const data = (await response.json()) as ReviewsResponse;

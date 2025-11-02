@@ -3,16 +3,9 @@ import { embed } from "ai";
 import { reviews, products, profiles } from "@/database/schema";
 import { geminiProvider } from "@/ai/gemini-provider";
 import { eq, desc, sql, count } from "drizzle-orm";
-import {
-  ProductNotFoundError,
-  UserNotFoundError,
-} from "@/lib/errors";
+import { ProductNotFoundError, UserNotFoundError } from "@/lib/errors";
 import type { CreateReviewDto, GetReviewsDto } from "./dto";
-import type {
-  ReviewsData,
-  ReviewWithUser,
-  PaginationMeta,
-} from "./types";
+import type { ReviewsData, ReviewWithUser, PaginationMeta } from "./types";
 import type { TestDatabase } from "@/test/utils/db-helper";
 
 /**
@@ -53,7 +46,11 @@ export class ReviewService {
     const [{ totalCount }] = await db
       .select({ totalCount: count(reviews.id) })
       .from(reviews)
-      .where(whereConditions.length > 0 ? sql`${sql.join(whereConditions, " AND ")}` : undefined);
+      .where(
+        whereConditions.length > 0
+          ? sql`${sql.join(whereConditions, " AND ")}`
+          : undefined,
+      );
 
     // Get reviews with user information
     const reviewResults = await db
@@ -70,7 +67,11 @@ export class ReviewService {
       })
       .from(reviews)
       .innerJoin(profiles, eq(reviews.userId, profiles.id))
-      .where(whereConditions.length > 0 ? sql`${sql.join(whereConditions, " AND ")}` : undefined)
+      .where(
+        whereConditions.length > 0
+          ? sql`${sql.join(whereConditions, " AND ")}`
+          : undefined,
+      )
       .orderBy(desc(reviews.createdAt))
       .limit(limit)
       .offset(offset);
@@ -163,9 +164,14 @@ export class ReviewService {
       .returning();
 
     // Generate embedding asynchronously (don't block the response)
-    this.generateReviewEmbedding(newReview.id, dto.content, db).catch((error) => {
-      console.error(`Failed to generate embedding for review ${newReview.id}:`, error);
-    });
+    this.generateReviewEmbedding(newReview.id, dto.content, db).catch(
+      (error) => {
+        console.error(
+          `Failed to generate embedding for review ${newReview.id}:`,
+          error,
+        );
+      },
+    );
 
     return newReview;
   }
@@ -205,7 +211,10 @@ export class ReviewService {
 
       console.log(`Successfully generated embedding for review ${reviewId}`);
     } catch (error) {
-      console.error(`Failed to generate embedding for review ${reviewId}:`, error);
+      console.error(
+        `Failed to generate embedding for review ${reviewId}:`,
+        error,
+      );
 
       // Mark the embedding status as failed
       await db

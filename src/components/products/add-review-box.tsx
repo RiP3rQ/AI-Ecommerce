@@ -112,7 +112,12 @@ export function AddReviewBox({
       onReviewSubmitted?.();
     } catch (error) {
       console.error("Failed to submit review:", error);
-      setErrors({ content: error instanceof Error ? error.message : "Failed to submit review. Please try again." });
+      setErrors({
+        content:
+          error instanceof Error
+            ? error.message
+            : "Failed to submit review. Please try again.",
+      });
     } finally {
       setIsSubmitting(false);
     }

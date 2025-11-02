@@ -81,7 +81,9 @@ export function ReviewsList({
 /**
  * Individual review card component.
  */
-function ReviewCard({ review }: Readonly<{ review: ReviewWithUser }>): ReactNode {
+function ReviewCard({
+  review,
+}: Readonly<{ review: ReviewWithUser }>): ReactNode {
   const formattedDate = new Date(review.createdAt).toLocaleDateString("en-US", {
     year: "numeric",
     month: "short",
