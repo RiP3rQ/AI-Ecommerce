@@ -26,7 +26,7 @@ export function ProductDetails({
     data: reviewsData,
     isLoading: reviewsLoading,
     mutate: mutateReviews,
-  } = useSWR<SWRResponse<ReviewsResponse>>(
+  } = useSWR<ReviewsResponse>(
     productUuid ? `${BASE_URL}/api/review?productId=${productUuid}` : null,
     swrFetcher,
   );
@@ -87,7 +87,7 @@ export function ProductDetails({
           }
         >
           <ReviewsList
-            reviews={reviewsData?.data?.data?.reviews}
+            reviews={reviewsData?.data?.reviews}
             isLoading={reviewsLoading}
           />
         </Suspense>
