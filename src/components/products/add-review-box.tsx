@@ -109,6 +109,12 @@ export function AddReviewBox({
         }),
       });
 
+      setFormData({
+        content: "",
+        rating: 0,
+      });
+      setErrors({});
+
       onReviewSubmitted?.();
     } catch (error) {
       console.error("Failed to submit review:", error);
