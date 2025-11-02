@@ -22,7 +22,7 @@ export async function createReviewFixture({
     id: overrides.id ?? faker.string.uuid(),
     productId: overrides.productId ?? faker.string.uuid(),
     userId: overrides.userId ?? faker.string.uuid(),
-    rating: overrides.rating ?? faker.number.int({ min: 1, max: 5 }),
+    rating: overrides.rating ?? faker.number.float({ min: 0.5, max: 5, fractionDigits: 1 }).toString(),
     content: overrides.content ?? faker.lorem.sentence(),
     embeddingStatus: overrides.embeddingStatus ?? "pending",
     embedding: overrides.embedding ?? null,

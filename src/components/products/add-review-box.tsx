@@ -140,7 +140,7 @@ export function AddReviewBox({
             </label>
             <div className="flex items-center gap-4">
               <StarRating
-                value={formData.rating}
+                value={formData.rating.toString()}
                 onChange={handleRatingChange}
                 isInteractive
                 size="lg"

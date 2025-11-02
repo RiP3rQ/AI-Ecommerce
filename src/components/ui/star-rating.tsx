@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 interface StarRatingProps {
   /** Current rating value (0-5 with 0.5 increments) */
-  value: number;
+  value: string;
   /** Callback when rating changes (only for interactive mode) */
   onChange?: (rating: number) => void;
   /** Whether the component is interactive (clickable) */
@@ -55,8 +55,8 @@ export function StarRating({
     const currentRating = hoverRating ?? value;
     const starValue = starIndex + 1;
 
-    if (currentRating >= starValue) return "full";
-    if (currentRating >= starValue - 0.5) return "half";
+    if (Number(currentRating) >= starValue) return "full";
+    if (Number(currentRating) >= starValue - 0.5) return "half";
     return "empty";
   };
 
@@ -135,7 +135,7 @@ export function StarRating({
     <div className={cn("inline-flex items-center gap-1", className)}>
       {[0, 1, 2, 3, 4].map(renderStar)}
       <span className="ml-2 text-sm text-neutral-600 dark:text-neutral-400">
-        {value > 0 ? `${value} stars` : "No rating"}
+        {Number(value) > 0 ? `${value} stars` : "No rating"}
       </span>
     </div>
   );
