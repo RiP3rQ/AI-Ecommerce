@@ -19,9 +19,9 @@ export function LoginButton() {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button variant="outline" size="icon" onClick={goToLogin}>
-          <LogIn className="size-4 text-blue-400" />
-          <span className="sr-only">Login</span>
+        <Button variant="outline" className="h-11 px-3" onClick={goToLogin}>
+          <LogIn className="size-4 text-blue-400 mr-2" />
+          Login
         </Button>
       </TooltipTrigger>
       <TooltipContent>

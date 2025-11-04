@@ -4,6 +4,7 @@ import { MobileMenu } from "@/components/layout/navbar/mobile-sidebar";
 import { env } from "@/env";
 import { CartModalWithTrigger } from "@/components/cart/cart-modal";
 import { LogoSquare } from "@/components/logo";
+import { AuthButton } from "@/components/global/auth-button";
 
 const { NEXT_PUBLIC_SITE_NAME } = env;
 
@@ -49,7 +50,10 @@ export async function Navbar() {
           </ul>
         </div>
         <div className="flex justify-end md:w-1/3">
-          <CartModalWithTrigger />
+          <div className="flex items-center gap-2">
+            <AuthButton />
+            <CartModalWithTrigger />
+          </div>
         </div>
       </div>
     </nav>
