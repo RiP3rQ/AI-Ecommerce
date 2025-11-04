@@ -166,7 +166,97 @@ export function ProductDetails({
     }
   };
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) {
+    return (
+      <div className="mx-auto max-w-(--breakpoint-2xl) px-4">
+        <div className="flex flex-col rounded-lg border border-neutral-200 bg-white p-8 md:p-12 lg:flex-row lg:gap-8 dark:border-neutral-800 dark:bg-black">
+          {/* Gallery Skeleton */}
+          <div className="h-full w-full basis-full lg:basis-4/6">
+            <div className="relative aspect-square h-full max-h-[550px] w-full overflow-hidden">
+              <Skeleton className="h-full w-full" />
+            </div>
+          </div>
+
+          {/* Product Description Skeleton */}
+          <div className="basis-full lg:basis-2/6 space-y-6">
+            <div className="space-y-4">
+              <Skeleton className="h-8 w-3/4" />
+              <Skeleton className="h-6 w-1/2" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-5/6" />
+            </div>
+
+            <div className="space-y-3">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+          </div>
+        </div>
+
+        {/* Reviews Section Skeleton */}
+        <div className="mt-12 mb-12 space-y-8">
+          {/* Add Review Box Skeleton */}
+          <div className="h-64 bg-neutral-100 dark:bg-neutral-800 rounded-lg animate-pulse" />
+
+          {/* Review Summary Skeleton */}
+          {isFeatureEnabled("aiSummarizeReviews") && (
+            <div className="border border-neutral-200 rounded-lg p-6 dark:border-neutral-800">
+              <div className="flex items-center justify-between mb-4">
+                <Skeleton className="h-6 w-40" />
+                <Skeleton className="h-8 w-32" />
+              </div>
+              <div className="space-y-3">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-5/6" />
+                <Skeleton className="h-4 w-4/5" />
+                <Skeleton className="h-4 w-3/4" />
+              </div>
+            </div>
+          )}
+
+          {/* Ask Reviews Section Skeleton */}
+          {isFeatureEnabled("aiAskReviews") && (
+            <div className="border border-neutral-200 rounded-lg p-6 dark:border-neutral-800">
+              <div className="space-y-4">
+                <Skeleton className="h-6 w-48" />
+                <Skeleton className="h-4 w-3/4" />
+                <div className="space-y-2">
+                  <Skeleton className="h-20 w-full" />
+                  <div className="flex justify-between items-center">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-8 w-28" />
+                  </div>
+                </div>
+                <Skeleton className="h-16 w-full" />
+              </div>
+            </div>
+          )}
+
+          {/* Reviews List Skeleton */}
+          <div className="space-y-4">
+            <Skeleton className="h-8 w-48" />
+            <div className="space-y-6">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <div key={index} className="space-y-3">
+                  <div className="flex items-center space-x-3">
+                    <Skeleton className="h-10 w-10 rounded-full" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-3 w-24" />
+                    </div>
+                  </div>
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-5/6" />
+                  <Skeleton className="h-4 w-4/6" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (error) return <div>Error: {error.message}</div>;
 

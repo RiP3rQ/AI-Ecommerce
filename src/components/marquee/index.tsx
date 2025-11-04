@@ -16,12 +16,8 @@ export function ItemsMarquee(): ReactNode {
     swrFetcher,
   );
 
-  if (!data?.data?.length) return null;
-
-  // Purposefully duplicating products to make the carousel loop and not run out of products on wide screens.
-  const carouselProducts = [...data.data];
-
-  if (!carouselProducts?.length)
+  // Show skeleton while loading or if we have no products after loading
+  if (isLoading || !data?.data?.length) {
     return (
       <div className="w-full overflow-x-auto pb-6 pt-1">
         <ul className="flex animate-carousel gap-4">
@@ -36,6 +32,10 @@ export function ItemsMarquee(): ReactNode {
         </ul>
       </div>
     );
+  }
+
+  // Purposefully duplicating products to make the carousel loop and not run out of products on wide screens.
+  const carouselProducts = [...data.data];
 
   return (
     <div className="w-full overflow-x-auto pb-6 pt-1">
