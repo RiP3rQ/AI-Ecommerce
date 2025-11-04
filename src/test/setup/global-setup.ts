@@ -55,7 +55,9 @@ export async function setup() {
       const duration = (performance.now() - start).toFixed(2);
       console.log(`✅ Migrations completed in ${duration}ms`);
     } catch (error) {
-      console.warn("⚠️  Migrations may have already been applied, continuing...");
+      console.warn(
+        "⚠️  Migrations may have already been applied, continuing...",
+      );
       console.error("Migration error:", error);
     }
 
