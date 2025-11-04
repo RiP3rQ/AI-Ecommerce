@@ -49,8 +49,6 @@ export function Filters({
           category.name.toLowerCase() === searchParamCategoryName.toLowerCase(),
       )?.id;
       if (categoryId) {
-        console.log("categoryId", categoryId);
-        console.log("searchParamCategoryName", searchParamCategoryName);
         onCategoryChange(categoryId);
       }
     }
