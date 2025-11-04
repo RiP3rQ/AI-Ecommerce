@@ -2,6 +2,7 @@
 
 import { type ReactNode, useState } from "react";
 import { z } from "zod";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -98,7 +99,7 @@ export function AddReviewBox({
 
     try {
       // Submit review to API
-      await fetch("/api/review", {
+      const response = await fetch("/api/review", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -109,21 +110,32 @@ export function AddReviewBox({
         }),
       });
 
-      setFormData({
-        content: "",
-        rating: 0,
-      });
-      setErrors({});
-
-      onReviewSubmitted?.();
+      if (response.ok) {
+        // Success
+        toast.success("Review submitted successfully!");
+        setFormData({
+          content: "",
+          rating: 0,
+        });
+        setErrors({});
+        onReviewSubmitted?.();
+      } else {
+        // Handle API errors
+        try {
+          const errorData = await response.json();
+          const errorMessage =
+            errorData.message || "Failed to submit review. Please try again.";
+          toast.error(errorMessage);
+        } catch (parseError) {
+          // If we can't parse the error response, show a generic message
+          toast.error("Failed to submit review. Please try again.");
+        }
+      }
     } catch (error) {
-      console.error("Failed to submit review:", error);
-      setErrors({
-        content:
-          error instanceof Error
-            ? error.message
-            : "Failed to submit review. Please try again.",
-      });
+      // Network or other errors
+      const errorMessage =
+        "Network error. Please check your connection and try again.";
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
