@@ -22,7 +22,7 @@ export function LogoutButton() {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button variant="outline" size="icon" onClick={logout}>
+        <Button variant="outline" className="h-11 w-11" onClick={logout}>
           <DoorOpen className="size-4 text-red-400" />
           <span className="sr-only">Logout</span>
         </Button>
