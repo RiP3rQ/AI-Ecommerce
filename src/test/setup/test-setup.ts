@@ -69,9 +69,11 @@ vi.mock("../../lib/api-helpers", () => ({
 }));
 
 // Mock AI SDK to prevent actual API calls during tests
+const mockEmbed = vi.fn();
 vi.mock("ai", () => ({
   generateText: vi.fn(),
   tool: vi.fn(),
+  embed: mockEmbed,
 }));
 
 // Mock fetch to prevent actual HTTP calls
@@ -127,6 +129,11 @@ beforeAll(() => {
   mockValidateServerSession.mockRejectedValue(
     new Error("User is not authenticated."),
   );
+
+  // Set default mock for AI embed function
+  mockEmbed.mockResolvedValue({
+    embedding: Array.from({ length: 1536 }, () => Math.random() - 0.5), // Mock 1536-dimensional embedding
+  });
 });
 
 // OPTIMIZATION: Only reset call counts in beforeEach, not entire mock implementations

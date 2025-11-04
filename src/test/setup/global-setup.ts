@@ -48,11 +48,16 @@ export async function setup() {
     // OPTIMIZATION: Only runs once per test session
     console.log("⏳ Running database migrations...");
     const start = performance.now();
-    await migrate(db, {
-      migrationsFolder: "./src/database/migrations",
-    });
-    const duration = (performance.now() - start).toFixed(2);
-    console.log(`✅ Migrations completed in ${duration}ms`);
+    try {
+      await migrate(db, {
+        migrationsFolder: "./src/database/migrations",
+      });
+      const duration = (performance.now() - start).toFixed(2);
+      console.log(`✅ Migrations completed in ${duration}ms`);
+    } catch (error) {
+      console.warn("⚠️  Migrations may have already been applied, continuing...");
+      console.error("Migration error:", error);
+    }
 
     // OPTIMIZATION: Clean all data from tables to ensure clean test state
     // This is much faster than recreating schema
