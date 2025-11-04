@@ -566,6 +566,83 @@ describe("/api/review", () => {
         });
       });
 
+      it("rejects ratings below 1 star", async () => {
+        await createTestableUnit(async (db) => {
+          // Arrange: Create test data
+          const product = await createProductFixture({
+            db,
+            overrides: { title: "Test Product" },
+          });
+
+          // Mock authenticated session
+          mockAuthenticatedApiUser({ id: faker.string.uuid() });
+
+          // Test rating of 0
+          const request0 = new NextRequest("http://localhost:3000/api/review", {
+            method: "POST",
+            body: JSON.stringify({
+              productId: product.id,
+              content: "This product is terrible!",
+              rating: 0,
+            }),
+          });
+          const response0 = await POST(request0);
+          expect(response0.status).toBe(400);
+
+          // Test rating of 0.5
+          const request05 = new NextRequest(
+            "http://localhost:3000/api/review",
+            {
+              method: "POST",
+              body: JSON.stringify({
+                productId: product.id,
+                content: "This product is terrible!",
+                rating: 0.5,
+              }),
+            },
+          );
+          const response05 = await POST(request05);
+          expect(response05.status).toBe(400);
+        });
+      });
+
+      it("accepts ratings from 1 to 5 stars", async () => {
+        await createTestableUnit(async (db) => {
+          // Arrange: Create test data
+          const product = await createProductFixture({
+            db,
+            overrides: { title: "Test Product" },
+          });
+
+          const user = await createProfileFixture({
+            db,
+            overrides: { email: "user@example.com" },
+          });
+
+          // Mock authenticated session
+          mockAuthenticatedApiUser({ id: user.id });
+
+          // Test ratings from 1 to 5
+          const validRatings = [1, 2, 3, 4, 5];
+
+          for (const rating of validRatings) {
+            const request = new NextRequest(
+              "http://localhost:3000/api/review",
+              {
+                method: "POST",
+                body: JSON.stringify({
+                  productId: product.id,
+                  content: `This product gets ${rating} star${rating === 1 ? "" : "s"}!`,
+                  rating,
+                }),
+              },
+            );
+            const response = await POST(request);
+            expect(response.status).toBe(201);
+          }
+        });
+      });
+
       it("returns 409 when user has already reviewed the product", async () => {
         await createTestableUnit(async (db) => {
           // Arrange: Create test data
