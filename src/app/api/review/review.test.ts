@@ -306,6 +306,45 @@ describe("/api/review", () => {
           ).rejects.toThrow();
         });
       });
+
+      it("throws error when user has already reviewed the product", async () => {
+        await createTestableUnit(async (db) => {
+          // Arrange: Create test data
+          const product = await createProductFixture({
+            db,
+            overrides: { title: "Test Product" },
+          });
+
+          const user = await createProfileFixture({
+            db,
+            overrides: { email: "user@example.com" },
+          });
+
+          // Create first review
+          await reviewService.createReview({
+            dto: {
+              productId: product.id,
+              content: "Great product!",
+              rating: 5.0,
+            },
+            userId: user.id,
+            db,
+          });
+
+          // Act & Assert: Try to create second review for same product
+          await expect(
+            reviewService.createReview({
+              dto: {
+                productId: product.id,
+                content: "Amazing product!",
+                rating: 4.5,
+              },
+              userId: user.id,
+              db,
+            }),
+          ).rejects.toThrow();
+        });
+      });
     });
   });
 
@@ -524,6 +563,51 @@ describe("/api/review", () => {
 
           // Assert
           expect(response.status).toBe(400);
+        });
+      });
+
+      it("returns 409 when user has already reviewed the product", async () => {
+        await createTestableUnit(async (db) => {
+          // Arrange: Create test data
+          const product = await createProductFixture({
+            db,
+            overrides: { title: "Test Product" },
+          });
+
+          const user = await createProfileFixture({
+            db,
+            overrides: { email: "user@example.com" },
+          });
+
+          // Create first review
+          await reviewService.createReview({
+            dto: {
+              productId: product.id,
+              content: "Great product!",
+              rating: 5.0,
+            },
+            userId: user.id,
+            db,
+          });
+
+          // Mock authenticated user
+          mockAuthenticatedApiUser({ id: user.id });
+
+          // Act: Try to create second review for same product
+          const request = new NextRequest("http://localhost:3000/api/review", {
+            method: "POST",
+            body: JSON.stringify({
+              productId: product.id,
+              content: "Amazing product!",
+              rating: 4.5,
+            }),
+          });
+          const response = await POST(request);
+          const data = await response.json();
+
+          // Assert
+          expect(response.status).toBe(409);
+          expect(data.message).toBe("You have already reviewed this product.");
         });
       });
     });

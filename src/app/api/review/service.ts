@@ -3,7 +3,11 @@ import { embed } from "ai";
 import { reviews, products, profiles } from "@/database/schema";
 import { geminiProvider } from "@/ai/gemini-provider";
 import { eq, desc, sql, count } from "drizzle-orm";
-import { ProductNotFoundError, UserNotFoundError } from "@/lib/errors";
+import {
+  ProductNotFoundError,
+  UserNotFoundError,
+  ReviewAlreadyExistsError,
+} from "@/lib/errors";
 import type { CreateReviewDto, GetReviewsDto } from "./dto";
 import type { ReviewsData, ReviewWithUser, PaginationMeta } from "./types";
 import type { TestDatabase } from "@/test/utils/db-helper";
@@ -149,6 +153,15 @@ export class ReviewService {
 
     if (!user) {
       throw new UserNotFoundError();
+    }
+
+    // Check if user has already reviewed this product
+    const existingReview = await db.query.reviews.findFirst({
+      where: sql`${eq(reviews.productId, dto.productId)} AND ${eq(reviews.userId, userId)}`,
+    });
+
+    if (existingReview) {
+      throw new ReviewAlreadyExistsError();
     }
 
     // Create the review with pending embedding status

@@ -39,6 +39,7 @@ export const reviews = pgTable(
   (table) => ({
     productIdIndex: index("reviews_product_id_index").on(table.productId),
     userIdIndex: index("reviews_user_id_index").on(table.userId),
+    // productUserUniqueIndex: uniqueIndex("reviews_product_user_unique_index").on(table.productId, table.userId), // Should be unique, but we don't want to enforce it for now. (for testing purposes we used the same user_id for most of the reviews)
     embeddingIndex: index("embeddingIndex").using(
       "hnsw",
       table.embedding.op("vector_cosine_ops"),
