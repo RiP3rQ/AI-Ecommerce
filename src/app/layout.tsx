@@ -63,7 +63,6 @@ export default function RootLayout({
                 {children}
                 <Toaster closeButton position="top-center" />
                 <WelcomeToast />
-                <AuthButton />
                 <ModeSwitcher />
               </main>
               <Footer />
