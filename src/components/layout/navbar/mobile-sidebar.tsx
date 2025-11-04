@@ -1,24 +1,17 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { type ReactNode, useEffect, useState } from "react";
 
 import { MenuIcon, XIcon } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogOverlay,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { env } from "@/env";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { CategoryLink } from "@/components/layout/navbar/category-link";
 
 export function MobileMenu({
   menu,
 }: {
   menu: { title: string; path: string }[];
 }): ReactNode {
-  const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const openMobileMenu = () => setIsOpen(true);
@@ -36,7 +29,7 @@ export function MobileMenu({
 
   useEffect(() => {
     setIsOpen(false);
-  }, [pathname, searchParams]);
+  }, [searchParams]);
 
   return (
     <>
@@ -67,16 +60,15 @@ export function MobileMenu({
             <ul className="flex w-full flex-col">
               {menu.map((item) => (
                 <li
-                  className="py-2 text-xl text-black transition-colors hover:text-neutral-500 dark:text-white"
+                  className="py-2 text-xl transition-colors"
                   key={item.title}
+                  onClick={closeMobileMenu}
                 >
-                  <Link
-                    href={item.path}
-                    prefetch={true}
-                    onClick={closeMobileMenu}
-                  >
-                    {item.title}
-                  </Link>
+                  <CategoryLink
+                    title={item.title}
+                    path={item.path}
+                    className="block py-2"
+                  />
                 </li>
               ))}
             </ul>

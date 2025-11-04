@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { MobileMenu } from "@/components/layout/navbar/mobile-sidebar";
+import { CategoryLink } from "@/components/layout/navbar/category-link";
 import { env } from "@/env";
 import { CartModalWithTrigger } from "@/components/cart/cart-modal";
 import { LogoSquare } from "@/components/logo";
@@ -11,8 +12,6 @@ const { NEXT_PUBLIC_SITE_NAME } = env;
 const menuItems = [
   { title: "Home", path: "/" },
   { title: "Shop", path: "/shop/all" },
-  { title: "Hoodies", path: "/shop/hoodies" },
-  { title: "T-Shirts", path: "/shop/t-shirts" },
 ];
 
 export async function Navbar() {
@@ -38,13 +37,7 @@ export async function Navbar() {
           <ul className="hidden gap-6 text-sm md:flex md:items-center">
             {menuItems.map((item) => (
               <li key={item.title}>
-                <Link
-                  href={item.path}
-                  prefetch={true}
-                  className="text-neutral-500 underline-offset-4 hover:text-black hover:underline dark:text-neutral-400 dark:hover:text-neutral-300"
-                >
-                  {item.title}
-                </Link>
+                <CategoryLink title={item.title} path={item.path} />
               </li>
             ))}
           </ul>
