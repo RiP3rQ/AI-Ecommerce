@@ -4,7 +4,7 @@ import { type ReactNode, useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface StarRatingProps {
-  /** Current rating value (0-5 with 0.5 increments) */
+  /** Current rating value (1-5 with 0.5 increments) */
   value: string;
   /** Callback when rating changes (only for interactive mode) */
   onChange?: (rating: number) => void;
@@ -18,7 +18,7 @@ interface StarRatingProps {
 
 /**
  * StarRating component for displaying and selecting star ratings.
- * Supports ratings from 0-5 with 0.5 increments.
+ * Supports ratings from 1-5 with 0.5 increments.
  */
 export function StarRating({
   value,
@@ -38,12 +38,17 @@ export function StarRating({
   const handleStarClick = (starIndex: number, isHalf: boolean) => {
     if (!isInteractive || !onChange) return;
     const rating = starIndex + (isHalf ? 0.5 : 1);
+    // Prevent selecting ratings below 1
+    if (rating < 1) return;
     onChange(rating);
   };
 
   const handleMouseEnter = (starIndex: number, isHalf: boolean) => {
     if (!isInteractive) return;
-    setHoverRating(starIndex + (isHalf ? 0.5 : 1));
+    const rating = starIndex + (isHalf ? 0.5 : 1);
+    // Prevent hovering over ratings below 1
+    if (rating < 1) return;
+    setHoverRating(rating);
   };
 
   const handleMouseLeave = () => {
@@ -113,12 +118,14 @@ export function StarRating({
         {/* Interactive areas for half-star precision */}
         {isInteractive && (
           <>
-            {/* Left half */}
-            <div
-              className="absolute inset-0 w-1/2"
-              onMouseEnter={() => handleMouseEnter(starIndex, true)}
-              onClick={() => handleStarClick(starIndex, true)}
-            />
+            {/* Left half - only enabled for stars after the first */}
+            {starIndex > 0 && (
+              <div
+                className="absolute inset-0 w-1/2"
+                onMouseEnter={() => handleMouseEnter(starIndex, true)}
+                onClick={() => handleStarClick(starIndex, true)}
+              />
+            )}
             {/* Right half */}
             <div
               className="absolute inset-0 w-1/2 left-1/2"
@@ -135,7 +142,7 @@ export function StarRating({
     <div className={cn("inline-flex items-center gap-1", className)}>
       {[0, 1, 2, 3, 4].map(renderStar)}
       <span className="ml-2 text-sm text-neutral-600 dark:text-neutral-400">
-        {Number(value) > 0 ? `${value} stars` : "No rating"}
+        {Number(value) >= 1 ? `${value} stars` : "Select rating"}
       </span>
     </div>
   );

@@ -12,7 +12,7 @@ export const createReviewSchema = z.object({
     .max(1000, "Review cannot exceed 1000 characters"),
   rating: z
     .number()
-    .min(0.5, "Rating must be at least 0.5")
+    .min(1, "Rating must be at least 1 star")
     .max(5, "Rating cannot exceed 5 stars"),
 });
 

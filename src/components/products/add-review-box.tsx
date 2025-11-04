@@ -19,7 +19,7 @@ const reviewFormSchema = z.object({
     .max(1000, "Review cannot exceed 1000 characters"),
   rating: z
     .number()
-    .min(0.5, "Please select a rating")
+    .min(1, "Rating must be at least 1 star")
     .max(5, "Rating cannot exceed 5 stars"),
 });
 
@@ -142,7 +142,7 @@ export function AddReviewBox({
   };
 
   const isFormValid =
-    formData.content.trim().length >= 10 && formData.rating >= 0.5;
+    formData.content.trim().length >= 10 && formData.rating >= 1;
 
   return (
     <Card className={cn("w-full", className)}>
