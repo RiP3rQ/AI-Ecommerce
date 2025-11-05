@@ -3,6 +3,7 @@ import { AiAssistantPrompts } from "./prompts";
 import { GOOGLE_PROVIDER_OPTIONS } from "./constants";
 import type { AiAssistantDto } from "./dto";
 import { geminiProvider } from "@/ai/gemini-provider";
+import { getAiTools } from "@/ai/tools";
 
 /**
  * Service class for AI assistant functionality.
@@ -31,6 +32,7 @@ export class AiAssistantService {
       model: geminiProvider("gemini-2.5-flash"),
       messages: convertToModelMessages(transformedMessages),
       system: AiAssistantPrompts.getDefaultSystemPrompt(),
+      tools: getAiTools(),
       providerOptions: GOOGLE_PROVIDER_OPTIONS,
     });
 
