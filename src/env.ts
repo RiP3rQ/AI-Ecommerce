@@ -1,4 +1,4 @@
-import { createEnv, StandardSchemaV1 } from "@t3-oss/env-core";
+import { createEnv, type StandardSchemaV1 } from "@t3-oss/env-core";
 import { z } from "zod";
 
 export const env = createEnv({

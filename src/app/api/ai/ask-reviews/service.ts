@@ -14,7 +14,7 @@ import { ProductNotFoundError } from "@/lib/errors";
 import type { DrizzleDbClient } from "@/database/index";
 import type { AskReviewsDto } from "./dto";
 import type { AnswerData, RelevantReview } from "./types";
-import { TestDatabase } from "@/test/utils/db-helper";
+import type { TestDatabase } from "@/test/utils/db-helper";
 
 /**
  * Configuration for embedding similarity search.

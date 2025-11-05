@@ -8,7 +8,7 @@ import {
   afterAll,
 } from "vitest";
 import { AiSdkHandler } from "./ai-sdk";
-import { generateText, type GenerateTextResult } from "ai";
+import { generateText, type Output, type GenerateTextResult } from "ai";
 import { createTestableUnit, dbHelpers } from "@/test/utils/db-helper";
 
 // Mock the AI SDK generateText function
@@ -41,7 +41,7 @@ describe("AiSdkHandler", () => {
       toolCalls: [],
       toolResults: [],
       providerMetadata: { headers: { "x-ratelimit": "100" } },
-    } as unknown as GenerateTextResult<Record<string, any>, unknown>;
+    } as unknown as GenerateTextResult<Record<string, any>, any>;
 
     it("should generate text successfully without database saving", async () => {
       mockGenerateText.mockResolvedValueOnce(mockAiResult);
@@ -264,7 +264,7 @@ describe("AiSdkHandler", () => {
         headers: { "content-type": "application/json" },
         body: { text: "Generated response" },
       },
-    } as unknown as GenerateTextResult<Record<string, any>, unknown>;
+    } as unknown as GenerateTextResult<Record<string, any>, any>;
 
     it("should save AI result to database successfully", async () => {
       await createTestableUnit(async (db) => {

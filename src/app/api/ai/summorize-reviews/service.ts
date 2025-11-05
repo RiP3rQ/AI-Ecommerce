@@ -8,7 +8,7 @@ import { ProductNotFoundError } from "@/lib/errors";
 import type { DrizzleDbClient } from "@/database/index";
 import type { SummarizeReviewsDto } from "./dto";
 import type { ReviewSummaryData } from "./types";
-import { TestDatabase } from "@/test/utils/db-helper";
+import type { TestDatabase } from "@/test/utils/db-helper";
 
 /**
  * Service class for AI-powered review summarization.

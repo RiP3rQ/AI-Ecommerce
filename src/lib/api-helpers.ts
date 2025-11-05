@@ -4,7 +4,7 @@ import { createServerSupabaseClient } from "@/supabase-auth/server";
 import { UnauthorizedError, UserNotFoundError } from "./errors";
 import { AiUsageLimitExceededError } from "./errors/ai-errors";
 import type { User } from "@supabase/supabase-js";
-import { DrizzleDbClient } from "@/database";
+import type { DrizzleDbClient } from "@/database";
 import { profiles } from "@/database/schemas/profiles";
 import { eq } from "drizzle-orm";
 

@@ -4,7 +4,7 @@ import {
   productOptions,
   products,
   productVariants,
-  SelectProduct,
+  type SelectProduct,
   type SelectProductImage,
   type SelectProductOption,
   type SelectProductVariant,
