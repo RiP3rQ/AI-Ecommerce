@@ -2,6 +2,7 @@
 
 import { SendIcon } from "lucide-react";
 import { useState } from "react";
+import { Button } from "../ui/button";
 
 interface ChatInputProps {
   onSubmit: (message: string) => void;
@@ -38,13 +39,14 @@ export const ChatInput = ({ onSubmit, disabled }: ChatInputProps) => {
           onKeyDown={handleKeyDown}
           disabled={disabled}
         />
-        <button
-          type="submit"
+        <Button
+          variant="secondary"
           disabled={!text.trim() || disabled}
-          className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+          className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed cursor-pointer"
+          type="submit"
         >
           <SendIcon size={16} />
-        </button>
+        </Button>
       </form>
     </div>
   );
