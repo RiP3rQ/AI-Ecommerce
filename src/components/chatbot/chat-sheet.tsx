@@ -1,16 +1,11 @@
 import { ReactNode } from "react";
 import {
   Sheet,
-  SheetClose,
   SheetContent,
   SheetDescription,
-  SheetFooter,
   SheetHeader,
   SheetTitle,
 } from "../ui/sheet";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
 import Chat from "./chat";
 import { Separator } from "../ui/separator";
 
