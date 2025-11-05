@@ -11,7 +11,7 @@ export function WelcomeToast() {
       toast("🚀 Welcome to AI-Powered Commerce!", {
         id: "welcome-toast",
         duration: Infinity,
-        position: "bottom-right",
+        position: "bottom-left",
         onDismiss: () => {
           document.cookie = "welcome-toast=2; max-age=31536000; path=/";
         },
