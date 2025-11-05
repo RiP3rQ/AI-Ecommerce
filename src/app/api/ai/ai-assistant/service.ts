@@ -18,11 +18,12 @@ export class AiAssistantService {
     const { messages } = dto;
 
     // Transform messages to ensure proper parts structure
-    const transformedMessages = messages.map(message => ({
+    const transformedMessages = messages.map((message) => ({
       ...message,
-      parts: message.parts.length > 0 ? message.parts : [
-        { type: "text" as const, text: message.content }
-      ],
+      parts:
+        message.parts.length > 0
+          ? message.parts
+          : [{ type: "text" as const, text: message.content }],
     }));
 
     // Generate streaming response
