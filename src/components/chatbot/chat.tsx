@@ -2,6 +2,7 @@
 
 import type { MessageType } from "@/types/chat";
 import { nanoid } from "nanoid";
+import { useEffect } from "react";
 import { ChatInput } from "./chat-input";
 import { MessageList } from "./message-list";
 import { Suggestions } from "./suggestions";
@@ -30,12 +31,30 @@ const suggestions = [
 ];
 
 export const Chat = () => {
-  const { messages, sendMessage, status, setMessages } = useChat<MessageType>({
+  const { messages, sendMessage, status, setMessages, error } = useChat<MessageType>({
     transport: new FilteredChatTransport({
       api: "/api/ai/ai-assistant",
     }),
     messages: initialMessage,
   });
+
+  // Handle errors by displaying them as AI assistant messages
+  useEffect(() => {
+    if (error) {
+      const errorMessage: MessageType = {
+        id: `error-${Date.now()}`,
+        role: "assistant",
+        parts: [
+          {
+            type: "text",
+            text: `I'm sorry, but I encountered an error: ${error.message || "An unexpected error occurred"}. Please try again or contact support if the issue persists.`,
+          },
+        ],
+      };
+
+      setMessages((prevMessages) => [...prevMessages, errorMessage]);
+    }
+  }, [error, setMessages]);
 
   const addUserMessage = (content: string) => {
     const userMessage: MessageType = {
@@ -61,6 +80,7 @@ export const Chat = () => {
     addUserMessage(suggestion);
     await sendMessage();
   };
+
 
   return (
     <div className="relative flex size-full flex-col divide-y overflow-hidden">

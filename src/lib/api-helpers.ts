@@ -71,7 +71,7 @@ export async function checkAndSaveAiUsage({
   // Check if limit would be exceeded before incrementing
   if (profile.aiUsageCount >= profile.aiUsageLimit) {
     throw new AiUsageLimitExceededError(
-      `AI usage limit exceeded for user ${userId}`,
+      `You've reached your AI usage limit. Please try again later.`,
     );
   }
 

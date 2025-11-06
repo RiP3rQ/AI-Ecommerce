@@ -5,7 +5,7 @@ import {
   reviews,
   reviewSummaries,
 } from "@/database/schema";
-import { desc, eq,  sql, and, ilike } from "drizzle-orm";
+import { desc, eq, sql, and, ilike } from "drizzle-orm";
 
 /**
  * Configuration for product queries.

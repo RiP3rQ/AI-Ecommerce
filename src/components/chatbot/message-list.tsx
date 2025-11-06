@@ -39,6 +39,7 @@ const MessageBubble = ({
   isLastMessage,
 }: MessageBubbleProps) => {
   const isUser = message.role === "user";
+  const isErrorMessage = message.id.startsWith("error-");
 
   return (
     <div className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"}`}>
@@ -61,6 +62,8 @@ const MessageBubble = ({
           className={`rounded-lg px-4 py-2 ${
             isUser
               ? "bg-blue-600 text-white"
+              : isErrorMessage
+              ? "bg-red-50 text-red-900 border border-red-200 dark:bg-red-950 dark:text-red-100 dark:border-red-800"
               : "bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100"
           }`}
         >

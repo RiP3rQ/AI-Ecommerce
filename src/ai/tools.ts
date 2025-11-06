@@ -115,17 +115,12 @@ const searchProductsByTagsTool = tool({
     "Search for products by tags (e.g., 'hoodie', 'black', 'cotton')",
   inputSchema: zodSchema(
     z.object({
-      tags: z
-        .array(z.string().min(1))
-        .min(1, "At least one tag is required"),
+      tags: z.array(z.string().min(1)).min(1, "At least one tag is required"),
       limit: z.number().min(1).max(50).default(20).optional(),
     }),
   ),
   execute: async (args) => {
-    const products = await searchProductsByTags(
-      args.tags,
-      args.limit || 20,
-    );
+    const products = await searchProductsByTags(args.tags, args.limit || 20);
 
     return {
       products: products.map((product) => ({
@@ -180,10 +175,7 @@ const getProductReviewsTool = tool({
     }),
   ),
   execute: async (args) => {
-    const reviews = await getProductReviews(
-      args.productId,
-      args.limit || 5,
-    );
+    const reviews = await getProductReviews(args.productId, args.limit || 5);
 
     return {
       reviews: reviews.map((review) => ({
@@ -207,10 +199,7 @@ const searchProductsByNameTool = tool({
     }),
   ),
   execute: async (args) => {
-    const products = await searchProductsByName(
-      args.query,
-      args.limit || 20,
-    );
+    const products = await searchProductsByName(args.query, args.limit || 20);
 
     return {
       products: products.map(
@@ -247,12 +236,10 @@ export function getToolsWithoutCart(): ToolSet {
 }
 
 const allTools = {
-  ...{...getToolsWithoutCart()},
+  ...{ ...getToolsWithoutCart() },
   suggestProducts: suggestProductsTool,
 };
 
 export function getAiTools(): ToolSet {
   return allTools;
 }
-
-
