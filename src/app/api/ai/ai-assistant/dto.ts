@@ -5,13 +5,12 @@ import { z } from "zod";
  * Validates the structure of messages, model selection, and web search option.
  */
 export const aiAssistantSchema = z.object({
+  id: z.string(),
   messages: z
     .array(
       z.object({
-        role: z.enum(["user", "assistant"]),
-        content: z.string().min(1, "Message content cannot be empty"),
         id: z.string().optional(),
-        createdAt: z.date().optional(),
+        role: z.enum(["user", "assistant"]),
         parts: z
           .array(
             z.object({
@@ -20,10 +19,14 @@ export const aiAssistantSchema = z.object({
             }),
           )
           .default([]),
+        avatar: z.string().optional(),
+        name: z.string().optional(),
       }),
     )
     .min(1, "At least one message is required")
     .max(50, "Cannot have more than 50 messages"),
+  trigger: z.string(),
+  messageId: z.string(),
 });
 
 export type AiAssistantDto = z.infer<typeof aiAssistantSchema>;

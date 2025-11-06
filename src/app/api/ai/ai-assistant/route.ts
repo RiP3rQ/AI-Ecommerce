@@ -37,7 +37,6 @@ export async function POST(request: NextRequest) {
 
     // Step 2: Parse and validate request body
     const body = await request.json();
-    console.log("body", body);
     const validatedDto = aiAssistantSchema.parse(body);
 
     // Step 3: Check AI usage limits

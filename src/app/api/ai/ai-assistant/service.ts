@@ -18,19 +18,10 @@ export class AiAssistantService {
   public async generateStreamingResponse(dto: AiAssistantDto) {
     const { messages } = dto;
 
-    // Transform messages to ensure proper parts structure
-    const transformedMessages = messages.map((message) => ({
-      ...message,
-      parts:
-        message.parts.length > 0
-          ? message.parts
-          : [{ type: "text" as const, text: message.content }],
-    }));
-
     // Generate streaming response
     const result = streamText({
       model: geminiProvider("gemini-2.5-flash"),
-      messages: convertToModelMessages(transformedMessages),
+      messages: convertToModelMessages(messages),
       system: AiAssistantPrompts.getDefaultSystemPrompt(),
       tools: getAiTools(),
       providerOptions: GOOGLE_PROVIDER_OPTIONS,
