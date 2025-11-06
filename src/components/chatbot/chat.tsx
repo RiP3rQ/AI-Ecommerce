@@ -6,7 +6,7 @@ import { ChatInput } from "./chat-input";
 import { MessageList } from "./message-list";
 import { Suggestions } from "./suggestions";
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
+import { FilteredChatTransport } from "./custom-api-transporter";
 
 const initialMessage: MessageType[] = [
   {
@@ -31,7 +31,7 @@ const suggestions = [
 
 export const Chat = () => {
   const { messages, sendMessage, status, setMessages } = useChat<MessageType>({
-    transport: new DefaultChatTransport({
+    transport: new FilteredChatTransport({
       api: "/api/ai/ai-assistant",
     }),
     messages: initialMessage,
