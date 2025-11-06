@@ -35,15 +35,16 @@ export async function POST(request: NextRequest) {
     // Step 1: Validate user session
     const user = await validateServerSession();
 
-    // Step 2: Check AI usage limits
+    // Step 2: Parse and validate request body
+    const body = await request.json();
+    console.log("body", body);
+    const validatedDto = aiAssistantSchema.parse(body);
+
+    // Step 3: Check AI usage limits
     await checkAndSaveAiUsage({
       dbClient,
       userId: user.id,
     });
-
-    // Step 3: Parse and validate request body
-    const body = await request.json();
-    const validatedDto = aiAssistantSchema.parse(body);
 
     // Step 4: Generate streaming AI response
     const result =

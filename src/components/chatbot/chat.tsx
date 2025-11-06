@@ -6,18 +6,17 @@ import { useState } from "react";
 import { ChatInput } from "./chat-input";
 import { MessageList } from "./message-list";
 import { Suggestions } from "./suggestions";
-import { useChat } from '@ai-sdk/react';
+import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 
 const initialMessage: MessageType[] = [
   {
     id: nanoid(),
-    role: 'assistant',
+    role: "assistant",
     parts: [
       {
-        type: 'text',
-        text:
-          "Hello, I'm AI-Riper! How can I assist you today? Want to get product recommendations or help with reviews? Maybe you want to get the most liked products? Let me know what you need!",
+        type: "text",
+        text: "Hello, I'm AI-Riper! How can I assist you today? Want to get product recommendations or help with reviews? Maybe you want to get the most liked products? Let me know what you need!",
       },
     ],
     avatar:
@@ -37,7 +36,7 @@ const suggestions = [
 export const Chat = () => {
   const { messages, sendMessage, status, setMessages } = useChat<MessageType>({
     transport: new DefaultChatTransport({
-      api: '/api/ai/ai-assistant',
+      api: "/api/ai/ai-assistant",
     }),
     messages: initialMessage,
   });
@@ -45,10 +44,10 @@ export const Chat = () => {
   const addUserMessage = (content: string) => {
     const userMessage: MessageType = {
       id: `user-${Date.now()}`,
-      role: 'user',
+      role: "user",
       parts: [
         {
-          type: 'text',
+          type: "text",
           text: content,
         },
       ],
@@ -77,8 +76,9 @@ export const Chat = () => {
         <Suggestions
           suggestions={suggestions}
           onSuggestionClick={handleSuggestionClick}
+          status={status}
         />
-        <ChatInput onSubmit={handleMessageSubmit} status={status}/>
+        <ChatInput onSubmit={handleMessageSubmit} status={status} />
       </div>
     </div>
   );

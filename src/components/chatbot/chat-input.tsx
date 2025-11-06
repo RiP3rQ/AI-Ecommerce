@@ -14,7 +14,11 @@ interface ChatInputProps {
   status: ChatStatus;
 }
 
-export const ChatInput = ({ onSubmit, disabled, status }: Readonly<ChatInputProps>): ReactNode => {
+export const ChatInput = ({
+  onSubmit,
+  disabled,
+  status,
+}: Readonly<ChatInputProps>): ReactNode => {
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
 
@@ -57,7 +61,7 @@ export const ChatInput = ({ onSubmit, disabled, status }: Readonly<ChatInputProp
   };
 
   const isDisabled = useMemo(() => {
-    return disabled || status !== 'ready';
+    return disabled || status !== "ready";
   }, [disabled, status]);
 
   return (
@@ -66,7 +70,7 @@ export const ChatInput = ({ onSubmit, disabled, status }: Readonly<ChatInputProp
         <div className="flex gap-2">
           <div className="flex-1">
             <textarea
-              className={`w-full resize-none rounded-lg border px-3 py-2 focus:outline-none focus:ring-1 ${
+              className={`w-full resize-none rounded-lg border px-3 py-2 focus:outline-none focus:ring-1 disabled:opacity-50 disabled:cursor-not-allowed ${
                 error
                   ? "border-red-500 focus:border-red-500 focus:ring-red-500"
                   : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"

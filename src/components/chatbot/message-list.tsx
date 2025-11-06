@@ -9,8 +9,9 @@ interface MessageListProps {
 }
 
 const MessageBubble = ({ message }: Readonly<{ message: MessageType }>) => {
-  const isUser = message.role === 'user';
-  const content = message.parts.find(part => part.type === 'text')?.text || "";
+  const isUser = message.role === "user";
+  const content =
+    message.parts.find((part) => part.type === "text")?.text || "";
 
   return (
     <div className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"}`}>
