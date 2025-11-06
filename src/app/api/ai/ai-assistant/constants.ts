@@ -5,6 +5,14 @@ import type { GoogleGenerativeAIProviderOptions } from "@ai-sdk/google";
  */
 export const AI_ASSISTANT_MODEL = "gemini-2.5-flash";
 
+/**
+ * Maximum output tokens for the AI assistant responses.
+ */
+export const MAX_OUTPUT_TOKENS = 8192;
+
+/**
+ * Google provider options.
+ */
 export const GOOGLE_PROVIDER_OPTIONS = {
   google: {
     // Enable structured outputs (default: true, but explicit for clarity)
@@ -30,7 +38,7 @@ export const GOOGLE_PROVIDER_OPTIONS = {
     ],
     // Enable thinking for improved reasoning (supported by gemini-2.5-flash)
     thinkingConfig: {
-      thinkingBudget: 8192, // Token budget for thinking process
+      thinkingBudget: MAX_OUTPUT_TOKENS / 2, // Token budget for thinking process
       includeThoughts: true, // Set to true if you want reasoning summaries
     },
     // Response modalities (default to TEXT only)

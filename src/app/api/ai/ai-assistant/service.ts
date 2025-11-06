@@ -1,6 +1,6 @@
-import { streamText, convertToModelMessages } from "ai";
+import { streamText, convertToModelMessages, stepCountIs } from "ai";
 import { AiAssistantPrompts } from "./prompts";
-import { GOOGLE_PROVIDER_OPTIONS } from "./constants";
+import { GOOGLE_PROVIDER_OPTIONS, MAX_OUTPUT_TOKENS } from "./constants";
 import type { AiAssistantDto } from "./dto";
 import { geminiProvider } from "@/ai/gemini-provider";
 import { getAiTools } from "@/ai/tools";
@@ -25,6 +25,8 @@ export class AiAssistantService {
       system: AiAssistantPrompts.getDefaultSystemPrompt(),
       tools: getAiTools(),
       providerOptions: GOOGLE_PROVIDER_OPTIONS,
+      maxOutputTokens: MAX_OUTPUT_TOKENS,
+      stopWhen: [stepCountIs(10)],
     });
 
     return result;
