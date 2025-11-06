@@ -3,7 +3,8 @@ import { AiAssistantPrompts } from "./prompts";
 import { GOOGLE_PROVIDER_OPTIONS, MAX_OUTPUT_TOKENS } from "./constants";
 import type { AiAssistantDto } from "./dto";
 import { geminiProvider } from "@/ai/gemini-provider";
-import { getToolsWithoutCart } from "@/ai/tools";
+import { getToolsWithoutSuggestProducts } from "@/ai/tools";
+import { User } from "@supabase/supabase-js";
 
 /**
  * Service class for AI assistant functionality.
@@ -15,7 +16,13 @@ export class AiAssistantService {
    * @param dto - Validated request parameters
    * @returns Streaming response result for AI conversation
    */
-  public async generateStreamingResponse(dto: AiAssistantDto) {
+  public async generateStreamingResponse({
+    dto,
+    userId,
+  }: {
+    dto: AiAssistantDto;
+    userId: User["id"];
+  }) {
     const { messages } = dto;
 
     // Generate streaming response
@@ -23,10 +30,13 @@ export class AiAssistantService {
       model: geminiProvider("gemini-2.5-flash"),
       messages: convertToModelMessages(messages),
       system: AiAssistantPrompts.getDefaultSystemPrompt(),
-      tools: getToolsWithoutCart(),
+      tools: getToolsWithoutSuggestProducts(),
       providerOptions: GOOGLE_PROVIDER_OPTIONS,
       maxOutputTokens: MAX_OUTPUT_TOKENS,
       stopWhen: [stepCountIs(10)],
+      experimental_context: {
+        userId: userId,
+      },
     });
 
     return result;
