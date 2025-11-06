@@ -1,8 +1,7 @@
 "use client";
 
-import { MessageFrom, MessageType } from "@/types/chat";
+import type { MessageType } from "@/types/chat";
 import { nanoid } from "nanoid";
-import { useState } from "react";
 import { ChatInput } from "./chat-input";
 import { MessageList } from "./message-list";
 import { Suggestions } from "./suggestions";

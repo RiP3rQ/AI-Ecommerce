@@ -1,7 +1,4 @@
-import {
-  GoogleGenerativeAIImageProviderOptions,
-  GoogleGenerativeAIProviderOptions,
-} from "@ai-sdk/google";
+import type { GoogleGenerativeAIProviderOptions } from "@ai-sdk/google";
 
 /**
  * Default model used for AI assistant responses.

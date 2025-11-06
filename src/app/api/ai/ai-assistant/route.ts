@@ -1,4 +1,4 @@
-import { type NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { handleApiError } from "@/lib/errors";
 import { aiAssistantService } from "./service";
 import { aiAssistantSchema } from "./dto";

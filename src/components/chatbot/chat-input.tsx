@@ -1,10 +1,10 @@
 "use client";
 
 import { SendIcon } from "lucide-react";
-import { ReactNode, useMemo, useState } from "react";
+import { type ReactNode, useMemo, useState } from "react";
 import { Button } from "../ui/button";
 import { chatInputSchema } from "../../schemas/chat-input-schema";
-import { ChatStatus } from "ai";
+import type { ChatStatus } from "ai";
 
 const MAX_CHARS = 1000;
 

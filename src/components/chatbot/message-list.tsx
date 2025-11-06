@@ -1,7 +1,6 @@
 "use client";
 
-import { MessageFrom, MessageType } from "@/types/chat";
-import { UIMessage, UIDataTypes, UITools } from "ai";
+import { type MessageType } from "@/types/chat";
 import Image from "next/image";
 
 interface MessageListProps {

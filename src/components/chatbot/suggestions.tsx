@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { Button } from "../ui/button";
-import { ChatStatus } from "ai";
+import type { ChatStatus } from "ai";
 
 interface SuggestionsProps {
   suggestions: string[];

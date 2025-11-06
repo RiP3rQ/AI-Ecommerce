@@ -1,4 +1,4 @@
-import { ToolUIPart, UIMessage, UIDataTypes, UITools } from "ai";
+import type { ToolUIPart, UIMessage, UIDataTypes, UITools } from "ai";
 
 export enum MessageFrom {
   USER = "user",
