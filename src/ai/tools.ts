@@ -7,8 +7,10 @@ import { searchProductsByTagsTool } from "./tools/search-by-tags";
 import { getProductDetailsTool } from "./tools/product-details";
 import { getProductReviewsTool } from "./tools/product-reviews";
 import { searchProductsByNameTool } from "./tools/search-by-name";
+import { getCartDetailsTool } from "./tools/get-cart-details";
+import { comboOutfitTool } from "./tools/combo-outfit";
 
-const toolsWithoutCart = {
+const toolsWithoutSuggestProducts = {
   getMostLikedProducts: getMostLikedProductsTool,
   getProductsByCategory: getProductsByCategoryTool,
   getAllCategories: getAllCategoriesTool,
@@ -16,10 +18,12 @@ const toolsWithoutCart = {
   getProductDetails: getProductDetailsTool,
   getProductReviews: getProductReviewsTool,
   searchProductsByName: searchProductsByNameTool,
+  getCartDetails: getCartDetailsTool,
+  comboOutfit: comboOutfitTool,
 };
 
 export function getToolsWithoutSuggestProducts(): ToolSet {
-  return toolsWithoutCart;
+  return toolsWithoutSuggestProducts;
 }
 
 const allTools = {

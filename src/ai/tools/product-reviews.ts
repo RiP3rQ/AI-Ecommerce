@@ -1,12 +1,13 @@
 import { tool, zodSchema } from "ai";
 import z from "zod";
 import { getProductReviews } from "../tool-helpers/product-tools";
+import { uuidSchema } from "@/app/api/product/[id]/dto";
 
 export const getProductReviewsTool = tool({
   description: "Get customer reviews for a specific product",
   inputSchema: zodSchema(
     z.object({
-      productId: z.string().uuid("Invalid product ID format"),
+      productId: uuidSchema,
       limit: z.number().min(1).max(20).default(5).optional(),
     }),
   ),

@@ -1,6 +1,7 @@
 import { tool, zodSchema } from "ai";
 import z from "zod";
 import { findSimilarProducts } from "../tool-helpers/suggest-products";
+import { uuidSchema } from "@/app/api/product/[id]/dto";
 
 export const suggestProductsTool = tool({
   description:
@@ -9,7 +10,7 @@ export const suggestProductsTool = tool({
     z.object({
       cartItems: z.array(
         z.object({
-          productId: z.string().uuid("Invalid product ID format"),
+          productId: uuidSchema,
           quantity: z.number(),
           productTitle: z.string(),
         }),

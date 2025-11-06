@@ -3,7 +3,8 @@ import z from "zod";
 import { getAllCategories } from "../tool-helpers/product-tools";
 
 export const getAllCategoriesTool = tool({
-  description: "Get all available product categories in the store",
+  description:
+    "Get all available product categories in the store, like 'Hoodies', 'Shirts', 'Pants', 'Shoes', 'Accessories', etc.",
   inputSchema: zodSchema(z.object({})),
   execute: async () => {
     const categories = await getAllCategories();
