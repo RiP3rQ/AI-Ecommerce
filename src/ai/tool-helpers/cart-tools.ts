@@ -95,3 +95,100 @@ export async function getCartDetails(userId: string): Promise<{
     totalItems,
   };
 }
+
+/**
+ * Adds an item to the user's cart. Creates a cart if one doesn't exist.
+ */
+export async function addToCart(
+  userId: string,
+  productVariantId: string,
+  quantity: number = 1,
+): Promise<{
+  success: boolean;
+  cartId: string;
+  cartItemId: string;
+  message: string;
+}> {
+  const db = drizzleDbClient();
+
+  try {
+    // First, ensure the user has a cart
+    let cartId: string;
+
+    const existingCart = await db
+      .select({ id: carts.id })
+      .from(carts)
+      .where(eq(carts.userId, userId))
+      .limit(1);
+
+    if (existingCart.length > 0) {
+      cartId = existingCart[0].id;
+    } else {
+      // Create a new cart for the user
+      const newCart = await db
+        .insert(carts)
+        .values({
+          userId,
+        })
+        .returning({ id: carts.id });
+
+      cartId = newCart[0].id;
+    }
+
+    // Check if this variant is already in the cart
+    const existingCartItem = await db
+      .select({
+        id: cartItems.id,
+        quantity: cartItems.quantity,
+      })
+      .from(cartItems)
+      .where(
+        and(
+          eq(cartItems.cartId, cartId),
+          eq(cartItems.productVariantId, productVariantId),
+        ),
+      )
+      .limit(1);
+
+    if (existingCartItem.length > 0) {
+      // Update quantity if item already exists
+      const newQuantity = existingCartItem[0].quantity + quantity;
+      await db
+        .update(cartItems)
+        .set({ quantity: newQuantity })
+        .where(eq(cartItems.id, existingCartItem[0].id));
+
+      return {
+        success: true,
+        cartId,
+        cartItemId: existingCartItem[0].id,
+        message: `Updated cart item quantity to ${newQuantity}`,
+      };
+    } else {
+      // Add new item to cart
+      const newCartItem = await db
+        .insert(cartItems)
+        .values({
+          cartId,
+          productVariantId,
+          quantity,
+        })
+        .returning({ id: cartItems.id });
+
+      return {
+        success: true,
+        cartId,
+        cartItemId: newCartItem[0].id,
+        message: `Added ${quantity} item(s) to cart`,
+      };
+    }
+  } catch (error) {
+    console.error("Error adding item to cart:", error);
+    return {
+      success: false,
+      cartId: "",
+      cartItemId: "",
+      message: "Failed to add item to cart",
+    };
+  }
+}
