@@ -1,15 +1,16 @@
 "use client";
 
 import { MessageFrom, MessageType } from "@/types/chat";
+import { UIMessage, UIDataTypes, UITools } from "ai";
 import Image from "next/image";
 
 interface MessageListProps {
   messages: MessageType[];
 }
 
-const MessageBubble = ({ message }: { message: MessageType }) => {
-  const isUser = message.from === MessageFrom.USER;
-  const content = message.versions[0]?.content || "";
+const MessageBubble = ({ message }: Readonly<{ message: MessageType }>) => {
+  const isUser = message.role === 'user';
+  const content = message.parts.find(part => part.type === 'text')?.text || "";
 
   return (
     <div className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"}`}>
@@ -54,7 +55,7 @@ export const MessageList = ({ messages }: MessageListProps) => {
     <div className="flex-1 overflow-y-auto p-4">
       <div className="space-y-4">
         {messages.map((message) => (
-          <MessageBubble key={message.key} message={message} />
+          <MessageBubble key={message.id} message={message} />
         ))}
       </div>
     </div>

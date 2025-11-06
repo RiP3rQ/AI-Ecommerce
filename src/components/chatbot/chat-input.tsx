@@ -1,18 +1,20 @@
 "use client";
 
 import { SendIcon } from "lucide-react";
-import { useState } from "react";
+import { ReactNode, useMemo, useState } from "react";
 import { Button } from "../ui/button";
 import { chatInputSchema } from "../../schemas/chat-input-schema";
+import { ChatStatus } from "ai";
 
 const MAX_CHARS = 1000;
 
 interface ChatInputProps {
   onSubmit: (message: string) => void;
   disabled?: boolean;
+  status: ChatStatus;
 }
 
-export const ChatInput = ({ onSubmit, disabled }: ChatInputProps) => {
+export const ChatInput = ({ onSubmit, disabled, status }: Readonly<ChatInputProps>): ReactNode => {
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
 
@@ -54,6 +56,10 @@ export const ChatInput = ({ onSubmit, disabled }: ChatInputProps) => {
     }
   };
 
+  const isDisabled = useMemo(() => {
+    return disabled || status !== 'ready';
+  }, [disabled, status]);
+
   return (
     <div className="w-full px-4 pb-4">
       <form onSubmit={handleSubmit} className="flex flex-col gap-2">
@@ -70,7 +76,7 @@ export const ChatInput = ({ onSubmit, disabled }: ChatInputProps) => {
               value={text}
               onChange={(e) => handleTextChange(e.target.value)}
               onKeyDown={handleKeyDown}
-              disabled={disabled}
+              disabled={isDisabled}
             />
             <div className="mt-1 flex items-center justify-between text-sm">
               <span
@@ -85,7 +91,7 @@ export const ChatInput = ({ onSubmit, disabled }: ChatInputProps) => {
           </div>
           <Button
             variant="secondary"
-            disabled={!text.trim() || disabled || !!error}
+            disabled={!text.trim() || isDisabled || !!error}
             className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed cursor-pointer"
             type="submit"
           >

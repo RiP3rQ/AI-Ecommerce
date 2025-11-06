@@ -6,15 +6,17 @@ import { useState } from "react";
 import { ChatInput } from "./chat-input";
 import { MessageList } from "./message-list";
 import { Suggestions } from "./suggestions";
+import { useChat } from '@ai-sdk/react';
+import { DefaultChatTransport } from "ai";
 
-const initialMessages: MessageType[] = [
+const initialMessage: MessageType[] = [
   {
-    key: nanoid(),
-    from: MessageFrom.ASSISTANT,
-    versions: [
+    id: nanoid(),
+    role: 'assistant',
+    parts: [
       {
-        id: nanoid(),
-        content:
+        type: 'text',
+        text:
           "Hello, I'm AI-Riper! How can I assist you today? Want to get product recommendations or help with reviews? Maybe you want to get the most liked products? Let me know what you need!",
       },
     ],
@@ -33,16 +35,21 @@ const suggestions = [
 ];
 
 export const Chat = () => {
-  const [messages, setMessages] = useState<MessageType[]>(initialMessages);
+  const { messages, sendMessage, status, setMessages } = useChat<MessageType>({
+    transport: new DefaultChatTransport({
+      api: '/api/ai/ai-assistant',
+    }),
+    messages: initialMessage,
+  });
 
   const addUserMessage = (content: string) => {
     const userMessage: MessageType = {
-      key: `user-${Date.now()}`,
-      from: MessageFrom.USER,
-      versions: [
+      id: `user-${Date.now()}`,
+      role: 'user',
+      parts: [
         {
-          id: `user-${Date.now()}`,
-          content,
+          type: 'text',
+          text: content,
         },
       ],
       avatar:
@@ -50,17 +57,17 @@ export const Chat = () => {
       name: "You",
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    setMessages((prevMessages) => [...prevMessages, userMessage]);
   };
 
-  const handleMessageSubmit = (message: string) => {
+  const handleMessageSubmit = async (message: string) => {
     addUserMessage(message);
-    // TODO: Implement actual API call to send message to backend
+    await sendMessage();
   };
 
-  const handleSuggestionClick = (suggestion: string) => {
+  const handleSuggestionClick = async (suggestion: string) => {
     addUserMessage(suggestion);
-    // TODO: Implement actual API call to send suggestion to backend
+    await sendMessage();
   };
 
   return (
@@ -71,7 +78,7 @@ export const Chat = () => {
           suggestions={suggestions}
           onSuggestionClick={handleSuggestionClick}
         />
-        <ChatInput onSubmit={handleMessageSubmit} />
+        <ChatInput onSubmit={handleMessageSubmit} status={status}/>
       </div>
     </div>
   );

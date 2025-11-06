@@ -1,15 +1,12 @@
-import { ToolUIPart } from "ai";
+import { ToolUIPart, UIMessage, UIDataTypes, UITools } from "ai";
 
 export enum MessageFrom {
   USER = "user",
   ASSISTANT = "assistant",
 }
 
-export interface MessageType {
-  key: string;
-  from: MessageFrom;
+export interface MessageType extends UIMessage<unknown, UIDataTypes, UITools> {
   sources?: Array<{ href: string; title: string }>;
-  versions: Array<{ id: string; content: string }>;
   reasoning?: { content: string; duration: number };
   tools?: Array<{
     name: string;
