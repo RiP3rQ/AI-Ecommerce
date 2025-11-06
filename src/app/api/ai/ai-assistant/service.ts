@@ -3,7 +3,7 @@ import { AiAssistantPrompts } from "./prompts";
 import { GOOGLE_PROVIDER_OPTIONS, MAX_OUTPUT_TOKENS } from "./constants";
 import type { AiAssistantDto } from "./dto";
 import { geminiProvider } from "@/ai/gemini-provider";
-import { getAiTools } from "@/ai/tools";
+import { getToolsWithoutCart } from "@/ai/tools";
 
 /**
  * Service class for AI assistant functionality.
@@ -23,7 +23,7 @@ export class AiAssistantService {
       model: geminiProvider("gemini-2.5-flash"),
       messages: convertToModelMessages(messages),
       system: AiAssistantPrompts.getDefaultSystemPrompt(),
-      tools: getAiTools(),
+      tools: getToolsWithoutCart(),
       providerOptions: GOOGLE_PROVIDER_OPTIONS,
       maxOutputTokens: MAX_OUTPUT_TOKENS,
       stopWhen: [stepCountIs(10)],

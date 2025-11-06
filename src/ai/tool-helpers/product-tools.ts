@@ -5,7 +5,7 @@ import {
   reviews,
   reviewSummaries,
 } from "@/database/schema";
-import { desc, eq, inArray, sql, gt, and, like } from "drizzle-orm";
+import { desc, eq,  sql, and, ilike } from "drizzle-orm";
 
 /**
  * Configuration for product queries.
@@ -261,4 +261,40 @@ export async function getProductReviews(
     .limit(limit);
 
   return reviewsData;
+}
+
+/**
+ * Searches products by name (case-insensitive).
+ */
+export async function searchProductsByName(
+  query: string,
+  limit: number = PRODUCT_CONFIG.maxResults,
+): Promise<
+  Array<{
+    id: string;
+    title: string;
+    description?: string | null;
+    tags: string[] | null;
+  }>
+> {
+  const db = drizzleDbClient();
+
+  const productsData = await db
+    .select({
+      id: products.id,
+      title: products.title,
+      description: products.description,
+      tags: products.tags,
+    })
+    .from(products)
+    .where(
+      and(
+        eq(products.availableForSale, true),
+        ilike(products.title, `%${query}%`),
+      ),
+    )
+    .orderBy(desc(products.createdAt))
+    .limit(limit);
+
+  return productsData;
 }
