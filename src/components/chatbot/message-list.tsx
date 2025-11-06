@@ -66,6 +66,7 @@ const MessageBubble = ({
         >
           {message.parts.map((part, i) => {
             if (part.type === "text") {
+              console.log("part.text", part.text);
               return (
                 <Response key={`${message.id}-${i}`}>{part.text}</Response>
               );
