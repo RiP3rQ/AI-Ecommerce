@@ -9,6 +9,13 @@ import {
 } from "@/components/ai-elements/reasoning";
 import { Response } from "@/components/ai-elements/response";
 import {
+  Tool,
+  ToolContent,
+  ToolHeader,
+  ToolInput,
+  ToolOutput,
+} from "@/components/ai-elements/tool";
+import {
   AI_ASSISTANT_AVATAR_LINK,
   AI_ASSISTANT_NAME,
   USER_AVATAR_LINK,
@@ -58,28 +65,51 @@ const MessageBubble = ({
           }`}
         >
           {message.parts.map((part, i) => {
-            switch (part.type) {
-              case "text":
-                return (
-                  <Response key={`${message.id}-${i}`}>{part.text}</Response>
-                );
-              case "reasoning":
-                return (
-                  <Reasoning
-                    key={`${message.id}-${i}`}
-                    className="w-full"
-                    isStreaming={
-                      status === "streaming" &&
-                      isLastMessage &&
-                      i === message.parts.length - 1
-                    }
-                  >
-                    <ReasoningTrigger />
-                    <ReasoningContent>{part.text}</ReasoningContent>
-                  </Reasoning>
-                );
-              default:
-                return null;
+            if (part.type === "text") {
+              return (
+                <Response key={`${message.id}-${i}`}>{part.text}</Response>
+              );
+            } else if (part.type === "reasoning") {
+              return (
+                <Reasoning
+                  key={`${message.id}-${i}`}
+                  className="w-full"
+                  isStreaming={
+                    status === "streaming" &&
+                    isLastMessage &&
+                    i === message.parts.length - 1
+                  }
+                >
+                  <ReasoningTrigger />
+                  <ReasoningContent>{part.text}</ReasoningContent>
+                </Reasoning>
+              );
+            } else if (part.type === "step-start") {
+              // Skip step-start parts as they're just indicators
+              return null;
+            } else if (part.type.startsWith("tool-")) {
+              const toolPart = part as any; // Type assertion for tool parts
+              return (
+                <Tool
+                  key={`${message.id}-${i}`}
+                  defaultOpen={
+                    toolPart.state === "output-available" ||
+                    toolPart.state === "output-error"
+                  }
+                  className="mt-4"
+                >
+                  <ToolHeader type={toolPart.type} state={toolPart.state} />
+                  <ToolContent>
+                    <ToolInput input={toolPart.input} />
+                    <ToolOutput
+                      output={toolPart.output}
+                      errorText={toolPart.errorText}
+                    />
+                  </ToolContent>
+                </Tool>
+              );
+            } else {
+              return null;
             }
           })}
         </div>
