@@ -3,16 +3,15 @@
 import { useMemo } from "react";
 import { Button } from "../ui/button";
 import type { ChatStatus } from "ai";
+import { SUGGESTION_PROMPTS } from "./constants";
 
 interface SuggestionsProps {
-  suggestions: string[];
   onSuggestionClick: (suggestion: string) => void;
   status: ChatStatus;
   disabled?: boolean;
 }
 
 export const Suggestions = ({
-  suggestions,
   onSuggestionClick,
   status,
   disabled,
@@ -23,7 +22,7 @@ export const Suggestions = ({
 
   return (
     <div className="flex flex-wrap gap-2 px-4">
-      {suggestions.map((suggestion) => (
+      {SUGGESTION_PROMPTS.map((suggestion: string) => (
         <Button
           key={suggestion}
           onClick={() => onSuggestionClick(suggestion)}

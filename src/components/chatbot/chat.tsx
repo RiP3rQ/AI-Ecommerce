@@ -1,34 +1,13 @@
 "use client";
 
 import type { MessageType } from "@/types/chat";
-import { nanoid } from "nanoid";
 import { useEffect, useRef } from "react";
 import { ChatInput } from "./chat-input";
 import { MessageList } from "./message-list";
 import { Suggestions } from "./suggestions";
 import { useChat } from "@ai-sdk/react";
 import { FilteredChatTransport } from "./custom-api-transporter";
-
-const initialMessage: MessageType[] = [
-  {
-    id: nanoid(),
-    role: "assistant",
-    parts: [
-      {
-        type: "text",
-        text: "Hello, I'm AI-Riper! How can I assist you today? Want to get product recommendations or help with reviews? Maybe you want to get the most liked products? Let me know what you need!",
-      },
-    ],
-  },
-];
-
-const suggestions = [
-  "Show me most liked products!",
-  "Show me all the hoodies I can buy",
-  "Show me all the pants I can buy",
-  "Show me all the shoes I can buy",
-  "Show me all the accessories I can buy",
-];
+import { INITIAL_MESSAGE } from "./constants";
 
 export const Chat = () => {
   const { messages, sendMessage, status, setMessages, error } =
@@ -36,7 +15,7 @@ export const Chat = () => {
       transport: new FilteredChatTransport({
         api: "/api/ai/ai-assistant",
       }),
-      messages: initialMessage,
+      messages: INITIAL_MESSAGE,
     });
 
   const prevStatusRef = useRef<string | undefined>(undefined);
@@ -118,7 +97,6 @@ export const Chat = () => {
       <MessageList messages={messages} status={status} />
       <div className="grid shrink-0 gap-4 pt-4">
         <Suggestions
-          suggestions={suggestions}
           onSuggestionClick={handleSuggestionClick}
           status={status}
         />
