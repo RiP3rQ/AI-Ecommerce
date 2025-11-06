@@ -18,9 +18,6 @@ const initialMessage: MessageType[] = [
         text: "Hello, I'm AI-Riper! How can I assist you today? Want to get product recommendations or help with reviews? Maybe you want to get the most liked products? Let me know what you need!",
       },
     ],
-    avatar:
-      "https://av26f7xvv9.ufs.sh/f/AlYD1nttismZ2zwtbIxJimuCRrYEZHOy8enaxStjXV7TMdcq",
-    name: "AI-Riper",
   },
 ];
 
@@ -50,9 +47,6 @@ export const Chat = () => {
           text: content,
         },
       ],
-      avatar:
-        "https://av26f7xvv9.ufs.sh/f/AlYD1nttismZARVXxgttismZVBg5TPXqkj63Uu4yF9CfvlLH",
-      name: "You",
     };
 
     setMessages((prevMessages) => [...prevMessages, userMessage]);
@@ -70,7 +64,7 @@ export const Chat = () => {
 
   return (
     <div className="relative flex size-full flex-col divide-y overflow-hidden">
-      <MessageList messages={messages} />
+      <MessageList messages={messages} status={status} />
       <div className="grid shrink-0 gap-4 pt-4">
         <Suggestions
           suggestions={suggestions}

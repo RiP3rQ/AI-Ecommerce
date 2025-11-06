@@ -19,8 +19,6 @@ export const aiAssistantSchema = z.object({
             }),
           )
           .default([]),
-        avatar: z.string().optional(),
-        name: z.string().optional(),
       }),
     )
     .min(1, "At least one message is required")

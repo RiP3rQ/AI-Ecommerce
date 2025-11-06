@@ -16,6 +16,4 @@ export interface MessageType extends UIMessage<unknown, UIDataTypes, UITools> {
     result: string | undefined;
     error: string | undefined;
   }>;
-  avatar: string;
-  name: string;
 }
