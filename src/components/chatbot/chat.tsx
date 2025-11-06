@@ -2,7 +2,7 @@
 
 import type { MessageType } from "@/types/chat";
 import { nanoid } from "nanoid";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { ChatInput } from "./chat-input";
 import { MessageList } from "./message-list";
 import { Suggestions } from "./suggestions";
@@ -31,12 +31,44 @@ const suggestions = [
 ];
 
 export const Chat = () => {
-  const { messages, sendMessage, status, setMessages, error } = useChat<MessageType>({
-    transport: new FilteredChatTransport({
-      api: "/api/ai/ai-assistant",
-    }),
-    messages: initialMessage,
-  });
+  const { messages, sendMessage, status, setMessages, error } =
+    useChat<MessageType>({
+      transport: new FilteredChatTransport({
+        api: "/api/ai/ai-assistant",
+      }),
+      messages: initialMessage,
+    });
+
+  const prevStatusRef = useRef<string | undefined>(undefined);
+
+  // Handle loading messages when status changes to "submitted"
+  useEffect(() => {
+    const prevStatus = prevStatusRef.current;
+    prevStatusRef.current = status;
+
+    // When status changes to "submitted", add loading message
+    if (status === "submitted" && prevStatus !== "submitted") {
+      const loadingMessage: MessageType = {
+        id: `loading-${Date.now()}`,
+        role: "assistant",
+        parts: [
+          {
+            type: "text",
+            text: "Let me think about that for a moment... 🤔",
+          },
+        ],
+      };
+
+      setMessages((prevMessages) => [...prevMessages, loadingMessage]);
+    }
+
+    // When status changes from "submitted" to something else, remove loading message
+    if (prevStatus === "submitted" && status !== "submitted") {
+      setMessages((prevMessages) =>
+        prevMessages.filter((msg) => !msg.id.startsWith("loading-")),
+      );
+    }
+  }, [status, setMessages]);
 
   // Handle errors by displaying them as AI assistant messages
   useEffect(() => {
@@ -80,7 +112,6 @@ export const Chat = () => {
     addUserMessage(suggestion);
     await sendMessage();
   };
-
 
   return (
     <div className="relative flex size-full flex-col divide-y overflow-hidden">

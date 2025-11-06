@@ -21,6 +21,7 @@ import {
   USER_AVATAR_LINK,
   USER_NAME,
 } from "./constants";
+import { Loader } from "../ai-elements/loader";
 
 interface MessageListProps {
   messages: MessageType[];
@@ -40,6 +41,7 @@ const MessageBubble = ({
 }: MessageBubbleProps) => {
   const isUser = message.role === "user";
   const isErrorMessage = message.id.startsWith("error-");
+  const isLoadingMessage = message.id.startsWith("loading-");
 
   return (
     <div className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"}`}>
@@ -63,13 +65,21 @@ const MessageBubble = ({
             isUser
               ? "bg-blue-600 text-white"
               : isErrorMessage
-              ? "bg-red-50 text-red-900 border border-red-200 dark:bg-red-950 dark:text-red-100 dark:border-red-800"
-              : "bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100"
+                ? "bg-red-50 text-red-900 border border-red-200 dark:bg-red-950 dark:text-red-100 dark:border-red-800"
+                : isLoadingMessage
+                  ? "bg-amber-50 text-amber-900 border border-amber-200 dark:bg-amber-950 dark:text-amber-100 dark:border-amber-800 animate-pulse"
+                  : "bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100"
           }`}
         >
           {message.parts.map((part, i) => {
-            if (part.type === "text") {
-              console.log("part.text", part.text);
+            if (part.type === "text" && message.id.startsWith("loading-")) {
+              return (
+                <div className="flex items-center gap-4">
+                  <Loader className="size-4" />
+                  <Response key={`${message.id}-${i}`}>{part.text}</Response>
+                </div>
+              );
+            } else if (part.type === "text") {
               return (
                 <Response key={`${message.id}-${i}`}>{part.text}</Response>
               );

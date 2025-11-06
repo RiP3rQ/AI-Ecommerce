@@ -66,7 +66,7 @@ export async function getProductsByCategory(
     .innerJoin(categories, eq(products.categoryId, categories.id))
     .where(
       and(
-        eq(categories.name, categoryName),
+        eq(sql`LOWER(${categories.name})`, sql`LOWER(${categoryName})`),
         eq(products.availableForSale, true),
       ),
     )
@@ -132,7 +132,7 @@ export async function searchProductsByTags(
 
   // Create conditions for each tag (products.tags contains any of the search tags)
   const tagConditions = tags.map(
-    (tag) => sql`${products.tags}::text LIKE ${`%${tag}%`}`,
+    (tag) => sql`LOWER(${products.tags}::text) LIKE LOWER(${`%${tag}%`})`,
   );
 
   const productsData = await db
@@ -290,7 +290,7 @@ export async function searchProductsByName(
     .where(
       and(
         eq(products.availableForSale, true),
-        ilike(products.title, `%${query}%`),
+        ilike(sql`LOWER(${products.title})`, sql`LOWER(${query})`),
       ),
     )
     .orderBy(desc(products.createdAt))
