@@ -27,21 +27,6 @@ import { AddToCartModal } from "./add-to-cart-modal";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 
-interface ProductVariant {
-  variantId: string;
-  variantTitle: string;
-  price: number;
-  currencyCode: string;
-  availableForSale: boolean;
-  selectedOptions: Array<{ name: string; value: string }>;
-}
-
-interface ProductWithVariants {
-  productId: string;
-  productTitle: string;
-  availableVariants: ProductVariant[];
-}
-
 interface SelectedProduct {
   productId: string;
   variantId: string;
@@ -102,6 +87,24 @@ const MessageBubble = ({
   } | null>(null);
 
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+
+  // State to store products from Step 1 (addToCartProductInformations)
+  // This will be used in Step 2 (clientSideConfirmationForCartModification)
+  const [productsFromStep1, setProductsFromStep1] = useState<Array<{
+    id: string;
+    title: string;
+    description?: string | null;
+    tags: string[] | null;
+    variants: Array<{
+      id: string;
+      title: string;
+      price: number;
+      currencyCode: string;
+      availableForSale: boolean;
+      selectedOptions: Array<{ name: string; value: string }>;
+      inventoryQuantity?: number | null;
+    }>;
+  }> | null>(null);
 
   console.log("message", message);
 
@@ -164,41 +167,89 @@ const MessageBubble = ({
               // Skip step-start parts as they're just indicators
               return null;
             } else if (
+              part.type === "tool-addToCartProductInformations" &&
+              part.state === "output-available"
+            ) {
+              // STEP 1: Store product data from addToCartProductInformations output
+              const toolPart = part as any;
+              const productsData = toolPart.output?.products;
+
+              // Store products in state for Step 2 to use
+              if (productsData && productsData.length > 0) {
+                const transformedProducts = productsData.map(
+                  (product: any) => ({
+                    id: product.id,
+                    title: product.title,
+                    description: product.description,
+                    tags: product.tags,
+                    variants: product.variants.map((variant: any) => ({
+                      id: variant.id,
+                      title: variant.title,
+                      price: variant.price,
+                      currencyCode: variant.currencyCode,
+                      availableForSale: variant.availableForSale,
+                      selectedOptions: variant.selectedOptions,
+                      inventoryQuantity: variant.inventoryQuantity,
+                    })),
+                  }),
+                );
+
+                // Store in state for Step 2
+                if (!productsFromStep1) {
+                  setProductsFromStep1(transformedProducts);
+                }
+              }
+
+              // Display the tool result
+              return (
+                <Tool
+                  key={`${message.id}-${i}`}
+                  defaultOpen={false}
+                  className="mt-4"
+                >
+                  <ToolHeader type={toolPart.type} state={toolPart.state} />
+                  <ToolContent>
+                    <ToolInput input={toolPart.input} />
+                    <ToolOutput
+                      output={toolPart.output}
+                      errorText={toolPart.errorText}
+                    />
+                  </ToolContent>
+                </Tool>
+              );
+            } else if (
               part.type === "tool-clientSideConfirmationForCartModification"
             ) {
               const toolPart = part as any;
 
               console.log("toolPart", toolPart);
+              console.log("productsFromStep1", productsFromStep1);
 
-              // Handle client-side confirmation tool for cart modification
+              // STEP 2: Handle client-side confirmation tool for cart modification
               if (toolPart.state === "input-available") {
-                // Transform input data for modal
-                const productsForModal = toolPart.input.products.map(
-                  (item: ProductWithVariants) => ({
-                    id: item.productId,
-                    title: item.productTitle,
-                    description: null,
-                    tags: null,
-                    variants: item.availableVariants.map(
-                      (v: ProductVariant) => ({
-                        id: v.variantId,
-                        title: v.variantTitle,
-                        price: v.price,
-                        currencyCode: v.currencyCode,
-                        availableForSale: v.availableForSale,
-                        selectedOptions: v.selectedOptions,
-                        inventoryQuantity: null,
-                      }),
-                    ),
-                  }),
-                );
+                // Use products from Step 1 state
+                if (!productsFromStep1 || productsFromStep1.length === 0) {
+                  return (
+                    <div
+                      key={`${message.id}-${i}`}
+                      className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-950"
+                    >
+                      <div className="text-sm font-medium text-red-900 dark:text-red-100">
+                        Error: No product data available from Step 1. Please try
+                        again.
+                      </div>
+                    </div>
+                  );
+                }
 
                 return (
                   <div key={`${message.id}-${i}`} className="mt-4">
                     <div className="rounded-lg border bg-blue-50 p-4 dark:bg-blue-950">
                       <div className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">
-                        🛒 Ready to add {productsForModal.length}{" "}
-                        {productsForModal.length === 1 ? "product" : "products"}{" "}
+                        🛒 Ready to add {productsFromStep1.length}{" "}
+                        {productsFromStep1.length === 1
+                          ? "product"
+                          : "products"}{" "}
                         to your cart
                       </div>
                       <p className="text-xs text-blue-700 dark:text-blue-300 mb-3">
@@ -211,7 +262,7 @@ const MessageBubble = ({
                           setAddToCartModal({
                             isOpen: true,
                             toolCallId: toolPart.toolCallId,
-                            products: productsForModal,
+                            products: productsFromStep1,
                           })
                         }
                       >
@@ -257,58 +308,6 @@ const MessageBubble = ({
               }
 
               return null;
-            } else if (
-              part.type === "tool-addToCartProductInformations" &&
-              part.state === "output-available" &&
-              (part.output as any)?.products
-            ) {
-              // Automatically show modal when addToCartProductInformations completes
-              const toolPart = part as any;
-              const productsForModal = toolPart.output.products.map(
-                (product: any) => ({
-                  id: product.id,
-                  title: product.title,
-                  description: product.description,
-                  tags: product.tags,
-                  variants: product.variants.map((variant: any) => ({
-                    id: variant.id,
-                    title: variant.title,
-                    price: variant.price,
-                    currencyCode: variant.currencyCode,
-                    availableForSale: variant.availableForSale,
-                    selectedOptions: variant.selectedOptions,
-                    inventoryQuantity: variant.inventoryQuantity,
-                  })),
-                }),
-              );
-
-              // Auto-trigger modal for successful product information retrieval
-              if (productsForModal.length > 0 && !addToCartModal) {
-                setTimeout(() => {
-                  setAddToCartModal({
-                    isOpen: true,
-                    toolCallId: `auto-${Date.now()}`, // Generate a unique ID for auto-triggered modal
-                    products: productsForModal,
-                  });
-                }, 500); // Small delay to show the tool result first
-              }
-
-              return (
-                <Tool
-                  key={`${message.id}-${i}`}
-                  defaultOpen={true}
-                  className="mt-4"
-                >
-                  <ToolHeader type={toolPart.type} state={toolPart.state} />
-                  <ToolContent>
-                    <ToolInput input={toolPart.input} />
-                    <ToolOutput
-                      output={toolPart.output}
-                      errorText={toolPart.errorText}
-                    />
-                  </ToolContent>
-                </Tool>
-              );
             } else if (part.type.startsWith("tool-")) {
               const toolPart = part as any; // Type assertion for tool parts
               return (
@@ -353,24 +352,26 @@ const MessageBubble = ({
           onClose={() => {
             setAddToCartModal(null);
             setIsAddingToCart(false);
+            setProductsFromStep1(null);
           }}
           products={addToCartModal.products}
           isLoading={isAddingToCart}
           onConfirm={(selectedItems: SelectedProduct[]) => {
             setIsAddingToCart(true);
-            // For auto-triggered modals, we call the final save tool directly
             if (!user?.id) {
               console.error("User not authenticated");
               setIsAddingToCart(false);
               return;
             }
 
+            // Return the output for the clientSideConfirmationForCartModification tool
+            // The AI will then automatically call saveTheFrontendSelectedProductToCart with this data
             addToolResult({
-              tool: "saveTheFrontendSelectedProductToCart",
-              toolCallId: `save-${Date.now()}`,
+              tool: "clientSideConfirmationForCartModification",
+              toolCallId: addToCartModal.toolCallId,
               output: {
                 userId: user.id,
-                items: selectedItems.map((item) => ({
+                selectedItems: selectedItems.map((item) => ({
                   productVariantId: item.variantId,
                   quantity: item.quantity,
                 })),
@@ -378,6 +379,7 @@ const MessageBubble = ({
             });
             setAddToCartModal(null);
             setIsAddingToCart(false);
+            setProductsFromStep1(null);
           }}
         />
       )}

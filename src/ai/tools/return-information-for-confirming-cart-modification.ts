@@ -4,40 +4,50 @@ import z from "zod";
 
 /**
  * Client-side tool that triggers the variant selection modal.
- * This tool is executed on the frontend and allows the user to:
- * - Choose product variants (size, color, etc.)
- * - Select quantity for each product
- * - Confirm or cancel the addition to cart
+ * This tool has NO execute function, which means it runs on the frontend.
  *
- * After user selection, the frontend will call saveTheFrontendSelectedProductToCart
- * with the selected variant IDs and quantities.
+ * Flow:
+ * 1. AI calls addToCartProductInformations (Step 1) - product data is stored in frontend state
+ * 2. AI calls this tool (Step 2) - frontend displays modal using the stored product data
+ * 3. User selects variants and quantities in the modal
+ * 4. Frontend calls addToolResult with the user's selections
+ * 5. AI receives the output and proceeds to call saveTheFrontendSelectedProductToCart (Step 3)
+ *
+ * The AI will WAIT at this step until the user completes their selection.
  */
+
+// Input schema: simple trigger - the product data is already in frontend state from Step 1
+const clientSideConfirmationInputSchema = z.object({
+  readyToConfirm: z
+    .boolean()
+    .describe(
+      "Always set to true. This triggers the modal using products from Step 1.",
+    ),
+});
+
+// Output schema: what the frontend returns after user selection
+export const clientSideConfirmationOutputSchema = z.object({
+  userId: uuidSchema.describe("The authenticated user's ID"),
+  selectedItems: z
+    .array(
+      z.object({
+        productVariantId: uuidSchema.describe(
+          "The ID of the selected product variant",
+        ),
+        quantity: z
+          .number()
+          .min(1)
+          .max(10)
+          .describe("The quantity selected by the user"),
+      }),
+    )
+    .min(1, "At least one item must be selected"),
+});
+
 export const clientSideConfirmationForCartModificationTool = tool({
   description:
-    "[STEP 2 OF 3: Add-to-Cart Flow] AUTOMATICALLY shows a modal to the user with variant options (sizes, colors, etc.) for each product. User selects variants and quantities in the modal. Returns selected productVariantId and quantity for each item. THIS IS THE ONLY WAY TO HANDLE USER INTERACTION - never ask user to manually specify sizes.",
-  inputSchema: zodSchema(
-    z.array(
-      z.object({
-        productId: uuidSchema,
-        productTitle: z.string().min(1, "Product title cannot be empty"),
-        availableVariants: z.array(
-          z.object({
-            variantId: uuidSchema,
-            variantTitle: z.string(),
-            price: z.number(),
-            currencyCode: z.string(),
-            availableForSale: z.boolean(),
-            selectedOptions: z.array(
-              z.object({
-                name: z.string(),
-                value: z.string(),
-              }),
-            ),
-          }),
-        ),
-      }),
-    ),
-  ),
+    "[STEP 2 OF 3: Add-to-Cart Flow] Shows an interactive modal to the user with the product variants from Step 1. The frontend will display options (sizes, colors, etc.) for the user to choose from. This tool PAUSES execution and WAITS for the user to select their preferred variants and quantities. The user's selections are returned as output containing userId and selectedItems array. You MUST pass this exact output to 'saveTheFrontendSelectedProductToCart' in Step 3. Always call this immediately after Step 1 completes.",
+  inputSchema: zodSchema(clientSideConfirmationInputSchema),
   // NO execute function - this is handled on the client-side
-  // Frontend shows modal and returns: { productVariantId, quantity }[] for each selected variant
+  // The frontend will call addToolResult with output matching clientSideConfirmationOutputSchema
 });
