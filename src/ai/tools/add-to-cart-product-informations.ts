@@ -21,7 +21,8 @@ export const addToCartProductInformationsTool = tool({
   ),
   execute: async (args) => {
     const productIds = args.map((item) => item.productId);
-    const productsWithVariants = await getProductDetailsWithVariants(productIds);
+    const productsWithVariants =
+      await getProductDetailsWithVariants(productIds);
     return {
       products: productsWithVariants,
     };

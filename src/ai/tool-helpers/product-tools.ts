@@ -266,9 +266,7 @@ export async function getProductDetailsWithVariants(
       tags: products.tags,
     })
     .from(products)
-    .where(
-      sql`${products.id} = ANY(${productIds}::uuid[])`,
-    );
+    .where(sql`${products.id} = ANY(${productIds}::uuid[])`);
 
   // Get variants for all products
   const variantsData = await db
@@ -283,9 +281,7 @@ export async function getProductDetailsWithVariants(
       inventoryQuantity: productVariants.inventoryQuantity,
     })
     .from(productVariants)
-    .where(
-      sql`${productVariants.productId} = ANY(${productIds}::uuid[])`,
-    );
+    .where(sql`${productVariants.productId} = ANY(${productIds}::uuid[])`);
 
   // Map variants to products
   return productsData.map((product) => ({

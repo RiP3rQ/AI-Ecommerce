@@ -30,9 +30,11 @@ const toolsWithoutSuggestProducts = {
   // Step 1: [SERVER] Get product details with all available variants
   addToCartProductInformations: addToCartProductInformationsTool,
   // Step 2: [CLIENT] Show modal for user to select variants and quantities
-  clientSideConfirmationForCartModification: clientSideConfirmationForCartModificationTool,
+  clientSideConfirmationForCartModification:
+    clientSideConfirmationForCartModificationTool,
   // Step 3: [SERVER] Save the selected variants to the cart
-  saveTheFrontendSelectedProductToCart: saveTheFrontendSelectedProductToCartTool,
+  saveTheFrontendSelectedProductToCart:
+    saveTheFrontendSelectedProductToCartTool,
 };
 
 export function getToolsWithoutSuggestProducts(): ToolSet {

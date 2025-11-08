@@ -8,7 +8,7 @@ import z from "zod";
  * - Choose product variants (size, color, etc.)
  * - Select quantity for each product
  * - Confirm or cancel the addition to cart
- * 
+ *
  * After user selection, the frontend will call saveTheFrontendSelectedProductToCart
  * with the selected variant IDs and quantities.
  */
