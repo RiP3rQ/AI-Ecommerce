@@ -6,7 +6,7 @@ This document describes the implementation of the AI-powered add-to-cart flow th
 
 ## Flow Architecture
 
-### 3-Step Process
+### 4-Step Process
 
 #### Step 1: Server-Side - Get Product Details with Variants
 **Tool:** `addToCartProductInformations`
@@ -33,8 +33,15 @@ This document describes the implementation of the AI-powered add-to-cart flow th
 **Tool:** `saveTheFrontendSelectedProductToCart`
 - **Type:** Server-side tool with `execute` function
 - **Purpose:** Saves user-selected items to the database
-- **Input:** `{ userId, items: [{ productVariantId, quantity }] }`
-- **Output:** Success response with details of added items
+- **Input:** `{ userId, selectedItems: [{ productVariantId, quantity }] }`
+- **Output:** Success response with details of added items.
+
+#### Step 4: Client-Side - Revalidate Frontend Cart
+**Tool:** `revalidateFrontendCart`
+- **Type:** Client-side tool WITHOUT `execute` function
+- **Purpose:** Revalidates the frontend cart items to reflect changes after items have been added.
+- **Input:** `{ readyToRevalidate: true }`
+- **Output:** None. This triggers a client-side action.
 
 ## Frontend Components
 
@@ -115,7 +122,8 @@ interface AddToCartModalProps {
 7. **User confirms:** Clicks "Add X Items to Cart"
 8. **Frontend calls addToolResult():** Sends selections to backend
 9. **AI calls Step 3:** Saves items to database
-10. **AI confirms:** "Successfully added X items to your cart!"
+10. **AI calls Step 4:** Revalidates the frontend cart.
+11. **AI confirms:** "Successfully added X items to your cart!"
 
 ## Key Features
 

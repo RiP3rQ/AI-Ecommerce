@@ -10,7 +10,7 @@ import { getProductDetailsWithVariants } from "../tool-helpers/product-tools";
  */
 export const addToCartProductInformationsTool = tool({
   description:
-    "[STEP 1 OF 3: Add-to-Cart Flow] Fetches product details with ALL available variants (sizes, colors, etc.) and prices from the database. Use real product IDs from previous search tools only. After this tool completes, you MUST immediately call 'clientSideConfirmationForCartModification' with the products from the output to show the user a selection modal.",
+    "[STEP 1 OF 4: Add-to-Cart Flow] Fetches product details with ALL available variants (sizes, colors, etc.) and prices from the database. Use real product IDs from previous search tools only. After this tool completes, you MUST immediately call 'clientSideConfirmationForCartModification' with the products from the output to show the user a selection modal.",
   inputSchema: zodSchema(
     z.object({
       products: z

@@ -12,6 +12,7 @@ import { comboOutfitTool } from "./tools/combo-outfit";
 import { addToCartProductInformationsTool } from "./tools/add-to-cart-product-informations";
 import { clientSideConfirmationForCartModificationTool } from "./tools/return-information-for-confirming-cart-modification";
 import { saveTheFrontendSelectedProductToCartTool } from "./tools/confirm-add-to-cart";
+import { revalidateFrontendCartTool } from "./tools/revalidate-frontend-cart";
 
 const toolsWithoutSuggestProducts = {
   // GENERAL PRODUCTS TOOLS
@@ -26,7 +27,7 @@ const toolsWithoutSuggestProducts = {
   getCartDetails: getCartDetailsTool,
   // COMBO TOOL FOR GENERATING OUTFIT COMBINATIONS
   comboOutfit: comboOutfitTool,
-  // ADD-TO-CART FLOW (3 STEPS):
+  // ADD-TO-CART FLOW (4 STEPS):
   // Step 1: [SERVER] Get product details with all available variants
   addToCartProductInformations: addToCartProductInformationsTool,
   // Step 2: [CLIENT] Show modal for user to select variants and quantities
@@ -35,6 +36,8 @@ const toolsWithoutSuggestProducts = {
   // Step 3: [SERVER] Save the selected variants to the cart
   saveTheFrontendSelectedProductToCart:
     saveTheFrontendSelectedProductToCartTool,
+  // Step 4: [CLIENT] Revalidate frontend cart items
+  revalidateFrontendCart: revalidateFrontendCartTool,
 };
 
 export function getToolsWithoutSuggestProducts(): ToolSet {

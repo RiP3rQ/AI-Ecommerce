@@ -11,7 +11,7 @@ import { uuidSchema } from "@/app/api/product/[id]/dto";
  */
 export const saveTheFrontendSelectedProductToCartTool = tool({
   description:
-    "[STEP 3 OF 3: Add-to-Cart Flow] Saves the selected product variants and quantities to the user's cart in the database. You MUST pass the exact output from 'clientSideConfirmationForCartModification' as input to this tool (userId and selectedItems). Do not modify the data - use it as-is.",
+    "[STEP 3 OF 4: Add-to-Cart Flow] Saves the selected product variants and quantities to the user's cart in the database. You MUST pass the exact output from 'clientSideConfirmationForCartModification' as input to this tool (userId and selectedItems). Do not modify the data - use it as-is. After this tool successfully completes, you MUST call 'revalidateFrontendCart' to update the user's cart on the frontend.",
   inputSchema: zodSchema(
     z.object({
       userId: uuidSchema.describe("User ID from Step 2 output"),

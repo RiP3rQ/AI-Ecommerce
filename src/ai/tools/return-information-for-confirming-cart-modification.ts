@@ -12,6 +12,7 @@ import z from "zod";
  * 3. User selects variants and quantities in the modal
  * 4. Frontend calls addToolResult with the user's selections
  * 5. AI receives the output and proceeds to call saveTheFrontendSelectedProductToCart (Step 3)
+ * 6. AI calls revalidateFrontendCart (Step 4) to update the cart on the frontend.
  *
  * The AI will WAIT at this step until the user completes their selection.
  */
@@ -46,7 +47,7 @@ export const clientSideConfirmationOutputSchema = z.object({
 
 export const clientSideConfirmationForCartModificationTool = tool({
   description:
-    "[STEP 2 OF 3: Add-to-Cart Flow] Shows an interactive modal to the user with the product variants from Step 1. The frontend will display options (sizes, colors, etc.) for the user to choose from. This tool PAUSES execution and WAITS for the user to select their preferred variants and quantities. The user's selections are returned as output containing userId and selectedItems array. You MUST pass this exact output to 'saveTheFrontendSelectedProductToCart' in Step 3. Always call this immediately after Step 1 completes.",
+    "[STEP 2 OF 4: Add-to-Cart Flow] Shows an interactive modal to the user with the product variants from Step 1. The frontend will display options (sizes, colors, etc.) for the user to choose from. This tool PAUSES execution and WAITS for the user to select their preferred variants and quantities. The user's selections are returned as output containing userId and selectedItems array. You MUST pass this exact output to 'saveTheFrontendSelectedProductToCart' in Step 3. Always call this immediately after Step 1 completes.",
   inputSchema: zodSchema(clientSideConfirmationInputSchema),
   // NO execute function - this is handled on the client-side
   // The frontend will call addToolResult with output matching clientSideConfirmationOutputSchema
