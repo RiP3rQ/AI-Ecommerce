@@ -1,9 +1,9 @@
 import type { NextRequest } from "next/server";
 import { handleApiError } from "@/lib/errors";
 import { aiAssistantService } from "./service";
-import { aiAssistantSchema } from "./dto";
 import { drizzleDbClient } from "@/database";
 import { checkAndSaveAiUsage, validateServerSession } from "@/lib/api-helpers";
+import { BodyType } from "./types";
 
 // Allow streaming responses up to configured duration (default: 30 seconds)
 export const maxDuration = 30; // 30 seconds
@@ -35,9 +35,8 @@ export async function POST(request: NextRequest) {
     // Step 1: Validate user session
     const user = await validateServerSession();
 
-    // Step 2: Parse and validate request body
-    const body = await request.json();
-    const validatedDto = aiAssistantSchema.parse(body);
+    // Step 2: Parse the request body
+    const body: BodyType = await request.json();
 
     // Step 3: Check AI usage limits
     await checkAndSaveAiUsage({
@@ -47,7 +46,7 @@ export async function POST(request: NextRequest) {
 
     // Step 4: Generate streaming AI response
     const result = await aiAssistantService.generateStreamingResponse({
-      dto: validatedDto,
+      body,
       userId: user.id,
       abortSignal: request.signal,
     });

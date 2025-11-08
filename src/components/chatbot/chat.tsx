@@ -6,9 +6,11 @@ import { ChatInput } from "./chat-input";
 import { MessageList } from "./message-list";
 import { Suggestions } from "./suggestions";
 import { useChat } from "@ai-sdk/react";
-import { FilteredChatTransport } from "./custom-api-transporter";
 import { INITIAL_MESSAGE } from "./constants";
-import { lastAssistantMessageIsCompleteWithToolCalls } from "ai";
+import {
+  DefaultChatTransport,
+  lastAssistantMessageIsCompleteWithToolCalls,
+} from "ai";
 
 export const Chat = () => {
   const {
@@ -20,7 +22,7 @@ export const Chat = () => {
     addToolResult,
     stop: abort,
   } = useChat<MessageType>({
-    transport: new FilteredChatTransport({
+    transport: new DefaultChatTransport({
       api: "/api/ai/ai-assistant",
     }),
     messages: INITIAL_MESSAGE,

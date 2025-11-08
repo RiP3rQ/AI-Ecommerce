@@ -1,3 +1,4 @@
+import { MessageType } from "@/types/chat";
 import type { UIMessage } from "ai";
 
 /**
@@ -19,4 +20,11 @@ export interface AiAssistantResponse {
     sources?: string[];
     reasoning?: string;
   };
+}
+
+export interface BodyType {
+  id: string;
+  messages: MessageType[];
+  trigger: string;
+  messageId: string;
 }
