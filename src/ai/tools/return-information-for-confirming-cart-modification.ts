@@ -14,7 +14,7 @@ import z from "zod";
  */
 export const clientSideConfirmationForCartModificationTool = tool({
   description:
-    "[Step 2: Call AFTER addToCartProductInformations] Shows a modal to the user with variant options (sizes, colors, etc.) for each product. User selects variants and quantities. Returns selected productVariantId and quantity for each item.",
+    "[STEP 2 OF 3: Add-to-Cart Flow] AUTOMATICALLY shows a modal to the user with variant options (sizes, colors, etc.) for each product. User selects variants and quantities in the modal. Returns selected productVariantId and quantity for each item. THIS IS THE ONLY WAY TO HANDLE USER INTERACTION - never ask user to manually specify sizes.",
   inputSchema: zodSchema(
     z.array(
       z.object({

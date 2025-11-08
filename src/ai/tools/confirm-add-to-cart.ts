@@ -10,7 +10,7 @@ import { uuidSchema } from "@/app/api/product/[id]/dto";
  */
 export const saveTheFrontendSelectedProductToCartTool = tool({
   description:
-    "[Step 3: Call AFTER user confirms in clientSideConfirmationForCartModification] Saves the selected product variants and quantities to the user's cart in the database. Can add multiple items at once.",
+    "[STEP 3 OF 3: Add-to-Cart Flow] Saves the selected product variants and quantities to the user's cart in the database. Called automatically after user confirms in the modal. Can add multiple items at once.",
   inputSchema: zodSchema(
     z.object({
       userId: uuidSchema,

@@ -18,6 +18,13 @@ export const Chat = () => {
       }),
       messages: INITIAL_MESSAGE,
       sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
+      // run client-side tools that are automatically executed:
+      async onToolCall({ toolCall }) {
+        // Check if it's a dynamic tool first for proper type narrowing
+        if (toolCall.dynamic) {
+          return;
+        }
+      },
     });
 
   const prevStatusRef = useRef<string | undefined>(undefined);
