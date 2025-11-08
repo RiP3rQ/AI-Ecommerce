@@ -37,6 +37,9 @@ export class AiAssistantService {
       experimental_context: {
         userId: userId,
       },
+      onError: (error) => {
+        console.error("[AI-Assistant] AI generation error:", error);
+      },
     });
 
     return result;

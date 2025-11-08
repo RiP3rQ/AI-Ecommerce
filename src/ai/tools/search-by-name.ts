@@ -3,7 +3,8 @@ import z from "zod";
 import { searchProductsByName } from "../tool-helpers/product-tools";
 
 export const searchProductsByNameTool = tool({
-  description: "Search for products by name",
+  description:
+    "Search for products by name or part of the name or part of the description",
   inputSchema: zodSchema(
     z.object({
       query: z.string().min(1, "Search query cannot be empty"),

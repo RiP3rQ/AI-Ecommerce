@@ -6,7 +6,7 @@ import {
   reviewSummaries,
   productVariants,
 } from "@/database/schema";
-import { desc, eq, sql, and, ilike } from "drizzle-orm";
+import { desc, eq, sql, and, ilike, inArray, or } from "drizzle-orm";
 
 /**
  * Configuration for product queries.
@@ -266,7 +266,7 @@ export async function getProductDetailsWithVariants(
       tags: products.tags,
     })
     .from(products)
-    .where(sql`${products.id} = ANY(${productIds}::uuid[])`);
+    .where(inArray(products.id, productIds));
 
   // Get variants for all products
   const variantsData = await db
@@ -281,7 +281,7 @@ export async function getProductDetailsWithVariants(
       inventoryQuantity: productVariants.inventoryQuantity,
     })
     .from(productVariants)
-    .where(sql`${productVariants.productId} = ANY(${productIds}::uuid[])`);
+    .where(inArray(productVariants.productId, productIds));
 
   // Map variants to products
   return productsData.map((product) => ({
@@ -361,7 +361,10 @@ export async function searchProductsByName(
     .where(
       and(
         eq(products.availableForSale, true),
-        ilike(sql`LOWER(${products.title})`, sql`LOWER(${query})`),
+        or(
+          ilike(sql`LOWER(${products.title})`, sql`LOWER(${query})`),
+          ilike(sql`LOWER(${products.description})`, sql`LOWER(${query})`),
+        ),
       ),
     )
     .orderBy(desc(products.createdAt))
