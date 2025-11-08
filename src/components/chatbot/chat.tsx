@@ -8,14 +8,16 @@ import { Suggestions } from "./suggestions";
 import { useChat } from "@ai-sdk/react";
 import { FilteredChatTransport } from "./custom-api-transporter";
 import { INITIAL_MESSAGE } from "./constants";
+import { lastAssistantMessageIsCompleteWithToolCalls } from "ai";
 
 export const Chat = () => {
-  const { messages, sendMessage, status, setMessages, error } =
+  const { messages, sendMessage, status, setMessages, error, addToolResult } =
     useChat<MessageType>({
       transport: new FilteredChatTransport({
         api: "/api/ai/ai-assistant",
       }),
       messages: INITIAL_MESSAGE,
+      sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
     });
 
   const prevStatusRef = useRef<string | undefined>(undefined);
@@ -94,7 +96,11 @@ export const Chat = () => {
 
   return (
     <div className="relative flex size-full flex-col divide-y overflow-hidden">
-      <MessageList messages={messages} status={status} />
+      <MessageList
+        messages={messages}
+        status={status}
+        addToolResult={addToolResult}
+      />
       <div className="grid shrink-0 gap-4 pt-4">
         <Suggestions
           onSuggestionClick={handleSuggestionClick}

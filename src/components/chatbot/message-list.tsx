@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useState } from "react";
 import { type MessageType } from "@/types/chat";
 import Image from "next/image";
 import {
@@ -22,26 +23,83 @@ import {
   USER_NAME,
 } from "./constants";
 import { Loader } from "../ai-elements/loader";
+import { AddToCartModal } from "./add-to-cart-modal";
+import { Button } from "@/components/ui/button";
+
+interface ProductVariant {
+  variantId: string;
+  variantTitle: string;
+  price: number;
+  currencyCode: string;
+  availableForSale: boolean;
+  selectedOptions: Array<{ name: string; value: string }>;
+}
+
+interface ProductWithVariants {
+  productId: string;
+  productTitle: string;
+  availableVariants: ProductVariant[];
+}
+
+interface SelectedProduct {
+  productId: string;
+  variantId: string;
+  quantity: number;
+}
 
 interface MessageListProps {
   messages: MessageType[];
   status?: string;
+  addToolResult: (params: {
+    tool: string;
+    toolCallId: string;
+    output: unknown;
+  }) => void;
 }
 
 interface MessageBubbleProps {
   message: MessageType;
   status?: string;
   isLastMessage?: boolean;
+  addToolResult: (params: {
+    tool: string;
+    toolCallId: string;
+    output: unknown;
+  }) => void;
 }
 
 const MessageBubble = ({
   message,
   status,
   isLastMessage,
+  addToolResult,
 }: MessageBubbleProps) => {
   const isUser = message.role === "user";
   const isErrorMessage = message.id.startsWith("error-");
   const isLoadingMessage = message.id.startsWith("loading-");
+
+  // State for add-to-cart modal
+  const [addToCartModal, setAddToCartModal] = useState<{
+    isOpen: boolean;
+    toolCallId: string;
+    products: Array<{
+      id: string;
+      title: string;
+      description?: string | null;
+      tags: string[] | null;
+      variants: Array<{
+        id: string;
+        title: string;
+        price: number;
+        currencyCode: string;
+        availableForSale: boolean;
+        selectedOptions: Array<{ name: string; value: string }>;
+        inventoryQuantity?: number | null;
+      }>;
+    }>;
+  } | null>(null);
+
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
 
   return (
     <div className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"}`}>
@@ -101,6 +159,98 @@ const MessageBubble = ({
             } else if (part.type === "step-start") {
               // Skip step-start parts as they're just indicators
               return null;
+            } else if (
+              part.type === "tool-clientSideConfirmationForCartModification"
+            ) {
+              const toolPart = part as any;
+
+              // Handle client-side confirmation tool for cart modification
+              if (toolPart.state === "input-available") {
+                // Transform input data for modal
+                const productsForModal = toolPart.input.map(
+                  (item: ProductWithVariants) => ({
+                    id: item.productId,
+                    title: item.productTitle,
+                    description: null,
+                    tags: null,
+                    variants: item.availableVariants.map(
+                      (v: ProductVariant) => ({
+                        id: v.variantId,
+                        title: v.variantTitle,
+                        price: v.price,
+                        currencyCode: v.currencyCode,
+                        availableForSale: v.availableForSale,
+                        selectedOptions: v.selectedOptions,
+                        inventoryQuantity: null,
+                      }),
+                    ),
+                  }),
+                );
+
+                return (
+                  <div key={`${message.id}-${i}`} className="mt-4">
+                    <div className="rounded-lg border bg-blue-50 p-4 dark:bg-blue-950">
+                      <div className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">
+                        🛒 Ready to add {productsForModal.length}{" "}
+                        {productsForModal.length === 1 ? "product" : "products"}{" "}
+                        to your cart
+                      </div>
+                      <p className="text-xs text-blue-700 dark:text-blue-300 mb-3">
+                        Review the products and select your preferred variants
+                        and quantities.
+                      </p>
+                      <Button
+                        size="sm"
+                        onClick={() =>
+                          setAddToCartModal({
+                            isOpen: true,
+                            toolCallId: toolPart.toolCallId,
+                            products: productsForModal,
+                          })
+                        }
+                      >
+                        Review & Add to Cart
+                      </Button>
+                    </div>
+                  </div>
+                );
+              }
+
+              // Show output state
+              if (toolPart.state === "output-available") {
+                return (
+                  <Tool
+                    key={`${message.id}-${i}`}
+                    defaultOpen={false}
+                    className="mt-4"
+                  >
+                    <ToolHeader type={toolPart.type} state={toolPart.state} />
+                    <ToolContent>
+                      <ToolInput input={toolPart.input} />
+                      <ToolOutput
+                        output={toolPart.output}
+                        errorText={toolPart.errorText}
+                      />
+                    </ToolContent>
+                  </Tool>
+                );
+              }
+
+              // Handle error state
+              if (toolPart.state === "output-error") {
+                return (
+                  <div
+                    key={`${message.id}-${i}`}
+                    className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-950"
+                  >
+                    <div className="text-sm font-medium text-red-900 dark:text-red-100">
+                      Error: {toolPart.errorText}
+                    </div>
+                  </div>
+                );
+              }
+
+              return null;
             } else if (part.type.startsWith("tool-")) {
               const toolPart = part as any; // Type assertion for tool parts
               return (
@@ -137,11 +287,42 @@ const MessageBubble = ({
           className="h-8 w-8 rounded-full"
         />
       )}
+
+      {/* Add to Cart Modal */}
+      {addToCartModal && (
+        <AddToCartModal
+          isOpen={addToCartModal.isOpen}
+          onClose={() => {
+            setAddToCartModal(null);
+            setIsAddingToCart(false);
+          }}
+          products={addToCartModal.products}
+          isLoading={isAddingToCart}
+          onConfirm={(selectedItems: SelectedProduct[]) => {
+            setIsAddingToCart(true);
+            // Send the selected variants back to the backend via addToolResult
+            addToolResult({
+              tool: "clientSideConfirmationForCartModification",
+              toolCallId: addToCartModal.toolCallId,
+              output: selectedItems.map((item) => ({
+                productVariantId: item.variantId,
+                quantity: item.quantity,
+              })),
+            });
+            setAddToCartModal(null);
+            setIsAddingToCart(false);
+          }}
+        />
+      )}
     </div>
   );
 };
 
-export const MessageList = ({ messages, status }: MessageListProps) => {
+export const MessageList = ({
+  messages,
+  status,
+  addToolResult,
+}: MessageListProps) => {
   return (
     <div className="flex-1 overflow-y-auto p-4">
       <div className="space-y-4">
@@ -151,6 +332,7 @@ export const MessageList = ({ messages, status }: MessageListProps) => {
             message={message}
             status={status}
             isLastMessage={index === messages.length - 1}
+            addToolResult={addToolResult}
           />
         ))}
       </div>
