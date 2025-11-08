@@ -12,6 +12,7 @@ import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { AssistantButton } from "@/components/global/assistant-button";
 
 import "./globals.css";
+import { CartProvider } from "@/providers/cart-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -60,14 +61,16 @@ export default function RootLayout({
               enableSystem
               disableTransitionOnChange
             >
-              <main>
-                {children}
-                <Toaster closeButton position="top-center" />
-                <WelcomeToast />
-                <AssistantButton />
-                <ModeSwitcher />
-              </main>
-              <Footer />
+              <CartProvider>
+                <main>
+                  {children}
+                  <Toaster closeButton position="top-center" />
+                  <WelcomeToast />
+                  <AssistantButton />
+                  <ModeSwitcher />
+                </main>
+                <Footer />
+              </CartProvider>
             </ThemeProvider>
           </TooltipProvider>
         </NuqsAdapter>

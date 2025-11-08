@@ -365,12 +365,12 @@ export async function searchProductsByName(
   // Each word must appear in either title or description
   const wordConditions = searchWords.map((word) =>
     or(
-      sql`LOWER(${products.title}) LIKE ${`%${word}%`}`,
-      sql`LOWER(${products.description}) LIKE ${`%${word}%`}`,
+      ilike(products.title, `%${word}%`),
+      ilike(products.description, `%${word}%`),
     ),
   );
 
-  const productsData = await db
+  const productsQuery = db
     .select({
       id: products.id,
       title: products.title,
@@ -386,7 +386,10 @@ export async function searchProductsByName(
       ),
     )
     .orderBy(desc(products.createdAt))
+    .groupBy(products.id, products.title, products.description, products.tags)
     .limit(limit);
+
+  const productsData = await productsQuery.execute();
 
   return productsData;
 }

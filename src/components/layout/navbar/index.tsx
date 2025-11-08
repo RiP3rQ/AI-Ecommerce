@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { MobileMenu } from "@/components/layout/navbar/mobile-sidebar";
 import { CategoryLink } from "@/components/layout/navbar/category-link";
 import { env } from "@/env";
-import { CartModalWithTrigger } from "@/components/cart/cart-modal";
+import { CartDrawerWithTrigger } from "@/components/cart/cart-drawer";
 import { LogoSquare } from "@/components/logo";
 import { AuthButton } from "@/components/global/auth-button";
 
@@ -45,7 +45,7 @@ export async function Navbar() {
         <div className="flex justify-end md:w-1/3">
           <div className="flex items-center gap-2">
             <AuthButton />
-            <CartModalWithTrigger />
+            <CartDrawerWithTrigger />
           </div>
         </div>
       </div>

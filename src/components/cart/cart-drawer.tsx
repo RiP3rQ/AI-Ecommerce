@@ -1,16 +1,9 @@
 "use client";
 
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import OpenCart from "./open-cart-button";
-import { ShoppingCartIcon, ChevronRightCircleIcon } from "lucide-react";
-import { Price } from "../custom-price";
-import { DeleteItemButton } from "./delete-item-button";
-import Image from "next/image";
-import { CheckoutButton } from "./checkout-button";
-import { EditItemQuantityButton } from "./edit-quantity-button";
+import { ChevronRightCircleIcon } from "lucide-react";
 import { useCart } from "@/providers/cart-provider";
-import { DEFAULT_OPTION } from "@/lib/constants";
-import { createUrl } from "@/lib/utils";
 import {
   Drawer,
   DrawerTitle,
@@ -21,20 +14,22 @@ import {
 } from "../ui/drawer";
 import { Button } from "../ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
-import Link from "next/link";
-import { useAuth } from "@/hooks/use-auth";
 import { CartItems } from "./cart-items";
 
-export function CartModalWithTrigger(): ReactNode {
+export function CartDrawerWithTrigger(): ReactNode {
   const [quantity, setQuantity] = useState<number>(0);
-  const { cart, isOpen, setIsOpen, openCart, closeCart } = useCart();
+  const { cart, isOpen, setIsOpen, openCart, directionOfTheSheet } = useCart();
 
   useEffect(() => {
     setQuantity(cart?.totalQuantity || 0);
   }, [cart]);
 
   return (
-    <Drawer open={isOpen} onOpenChange={setIsOpen} direction="right">
+    <Drawer
+      open={isOpen}
+      onOpenChange={setIsOpen}
+      direction={directionOfTheSheet}
+    >
       <DrawerTrigger asChild>
         <button
           aria-label="Open cart"

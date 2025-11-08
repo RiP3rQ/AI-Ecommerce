@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import {
   Sheet,
   SheetContent,
@@ -8,6 +8,7 @@ import {
 } from "../ui/sheet";
 import Chat from "./chat";
 import { Separator } from "../ui/separator";
+import { useCart } from "@/providers/cart-provider";
 
 export function ChatSheet({
   open,
@@ -16,6 +17,16 @@ export function ChatSheet({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }>): ReactNode {
+  const { setDirectionOfTheSheet } = useCart();
+
+  useEffect(() => {
+    if (open) {
+      setDirectionOfTheSheet("left");
+    } else {
+      setDirectionOfTheSheet("right");
+    }
+  }, [open]);
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="z-[100] sm:max-w-xl w-xl">
