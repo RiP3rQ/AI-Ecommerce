@@ -4,7 +4,7 @@ import { searchProductsByName } from "../tool-helpers/product-tools";
 
 export const searchProductsByNameTool = tool({
   description:
-    "Search for products by name or part of the name or part of the description",
+    "Search for products by name, description, or keywords. Supports multi-word queries where all words must be present (e.g., 'green hoodie' will find 'Comfy Green Pullover Hoodie')",
   inputSchema: zodSchema(
     z.object({
       query: z.string().min(1, "Search query cannot be empty"),

@@ -336,6 +336,7 @@ export async function getProductReviews(
 
 /**
  * Searches products by name (case-insensitive).
+ * Supports multi-word queries where all words must be present in title or description.
  */
 export async function searchProductsByName(
   query: string,
@@ -350,6 +351,25 @@ export async function searchProductsByName(
 > {
   const db = drizzleDbClient();
 
+  // Split query into individual words and filter out empty strings
+  const searchWords = query
+    .toLowerCase()
+    .split(/\s+/)
+    .filter((word) => word.length > 0);
+
+  if (searchWords.length === 0) {
+    return [];
+  }
+
+  // Create conditions for each search word
+  // Each word must appear in either title or description
+  const wordConditions = searchWords.map((word) =>
+    or(
+      sql`LOWER(${products.title}) LIKE ${`%${word}%`}`,
+      sql`LOWER(${products.description}) LIKE ${`%${word}%`}`,
+    ),
+  );
+
   const productsData = await db
     .select({
       id: products.id,
@@ -361,10 +381,8 @@ export async function searchProductsByName(
     .where(
       and(
         eq(products.availableForSale, true),
-        or(
-          ilike(sql`LOWER(${products.title})`, sql`LOWER(${query})`),
-          ilike(sql`LOWER(${products.description})`, sql`LOWER(${query})`),
-        ),
+        // All search words must match (AND logic between words)
+        and(...wordConditions),
       ),
     )
     .orderBy(desc(products.createdAt))
