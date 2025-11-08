@@ -15,7 +15,7 @@ import useSWR, { type SWRResponse } from "swr";
 import type { ProductData } from "@/app/api/product/[id]/types";
 import { swrFetcher } from "@/lib/swr-fetcher";
 import { BASE_URL } from "@/lib/utils";
-import { ReviewsResponse } from "@/app/api/review/types";
+import type { ReviewsResponse } from "@/app/api/review/types";
 import type { ReviewSummaryData } from "@/app/api/ai/summorize-reviews/types";
 import type { AskReviewsResponse } from "@/app/api/ai/ask-reviews/types";
 import { isFeatureEnabled } from "@/lib/feature-flags";

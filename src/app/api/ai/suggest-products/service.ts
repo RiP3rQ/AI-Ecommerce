@@ -2,10 +2,10 @@ import { generateText, stepCountIs } from "ai";
 import { geminiProvider } from "@/ai/gemini-provider";
 import { getAiTools } from "@/ai/tools";
 import { SuggestProductsPrompts } from "./prompts";
-import { CartItemWithDetails } from "../../cart/types";
+import type { CartItemWithDetails } from "../../cart/types";
 import { MAX_SUGGESTIONS } from "./constants";
 import { productService } from "../../product/[id]/service";
-import { ProductData } from "../../product/[id]/types";
+import type { ProductData } from "../../product/[id]/types";
 import {
   AiSuggestionGenerationError,
   AiSuggestionParsingError,

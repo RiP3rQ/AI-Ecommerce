@@ -5,7 +5,7 @@ import { checkAndSaveAiUsage, validateServerSession } from "@/lib/api-helpers";
 import { CartItemWithDetails } from "../../cart/types";
 import { cartService } from "../../cart/service";
 import { drizzleDbClient } from "@/database";
-import { ProductData } from "../../product/[id]/types";
+import type { ProductData } from "../../product/[id]/types";
 
 /**
  * POST /api/ai/suggest-products

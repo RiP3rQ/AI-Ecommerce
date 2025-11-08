@@ -1,6 +1,10 @@
 import { faker } from "@faker-js/faker";
 import type { TestDatabase } from "../utils/db-helper";
-import { InsertReview, reviews, SelectReview } from "@/database/schema";
+import {
+  type InsertReview,
+  reviews,
+  type SelectReview,
+} from "@/database/schema";
 
 /**
  * Creates a test profile in the database.

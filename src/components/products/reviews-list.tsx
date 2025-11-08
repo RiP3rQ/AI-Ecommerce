@@ -1,12 +1,12 @@
 "use client";
 
-import { type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { StarRating } from "@/components/ui/star-rating";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Empty, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
 import { cn } from "@/lib/utils";
-import { ReviewWithUser } from "@/app/api/review/types";
+import type { ReviewWithUser } from "@/app/api/review/types";
 
 /**
  * Review data structure.

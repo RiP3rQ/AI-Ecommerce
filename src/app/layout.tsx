@@ -1,16 +1,18 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
 import { ThemeProvider } from "next-themes";
 import { ModeSwitcher } from "@/components/global/theme-switcher";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { WelcomeToast } from "@/components/welcome-toast";
 import { Toaster } from "sonner";
-import { AuthButton } from "@/components/global/auth-button";
 import { env } from "@/env";
 import { BASE_URL } from "@/lib/utils";
 import Footer from "@/components/layout/footer";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { AssistantButton } from "@/components/global/assistant-button";
+
+import "./globals.css";
+import { CartProvider } from "@/providers/cart-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -59,13 +61,16 @@ export default function RootLayout({
               enableSystem
               disableTransitionOnChange
             >
-              <main>
-                {children}
-                <Toaster closeButton position="top-center" />
-                <WelcomeToast />
-                <ModeSwitcher />
-              </main>
-              <Footer />
+              <CartProvider>
+                <main>
+                  {children}
+                  <Toaster closeButton position="top-center" />
+                  <WelcomeToast />
+                  <AssistantButton />
+                  <ModeSwitcher />
+                </main>
+                <Footer />
+              </CartProvider>
             </ThemeProvider>
           </TooltipProvider>
         </NuqsAdapter>

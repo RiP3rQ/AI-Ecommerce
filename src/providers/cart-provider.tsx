@@ -32,6 +32,7 @@ type CartContextType = {
   cart: FrontendCart | undefined;
   isLoading: boolean;
   error: Error | null;
+  mutate: () => Promise<CartResponse | undefined>;
   addItem: (
     variant: SelectProductVariant,
     product: SelectProduct,
@@ -46,12 +47,17 @@ type CartContextType = {
   removeItem: (cartItemId: string) => Promise<void>;
   openCart: () => void;
   closeCart: () => void;
+  directionOfTheSheet: "left" | "right";
+  setDirectionOfTheSheet: (direction: "left" | "right") => void;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [directionOfTheSheet, setDirectionOfTheSheet] = useState<
+    "left" | "right"
+  >("right");
   const cartUrl = `${BASE_URL}/api/cart`;
   const { isAuthenticated } = useAuth();
 
@@ -60,6 +66,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     data: cartResponse,
     error,
     isLoading,
+    mutate,
   } = useSWR<CartResponse>(isAuthenticated ? cartUrl : null, swrFetcher);
 
   // Local cart state that gets updated when we make changes
@@ -67,12 +74,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     cartResponse ? transformCartResponse(cartResponse) : undefined,
   );
 
-  // Update local state when SWR data changes (initial load)
+  // Update local state when SWR data changes
   useEffect(() => {
-    if (cartResponse && !cart) {
+    if (cartResponse) {
       setCart(transformCartResponse(cartResponse));
+      // If cart already exists, open the cart
+      if (cart) {
+        setIsOpen(true);
+      }
     }
-  }, [cartResponse, cart]);
+  }, [cartResponse]);
 
   const addItem = async (
     variant: SelectProductVariant,
@@ -340,11 +351,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       cart,
       isLoading,
       error,
+      mutate,
       addItem,
       updateItemQuantity,
       removeItem,
       openCart,
       closeCart,
+      directionOfTheSheet,
+      setDirectionOfTheSheet,
     }),
     [
       clearCart,
@@ -353,11 +367,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       cart,
       isLoading,
       error,
+      mutate,
       addItem,
       updateItemQuantity,
       removeItem,
       openCart,
       closeCart,
+      directionOfTheSheet,
+      setDirectionOfTheSheet,
     ],
   );
 

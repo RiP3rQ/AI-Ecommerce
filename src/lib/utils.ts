@@ -63,12 +63,13 @@ export function formatFullPrice({
 /**
  * The base URL of the application.
  * This is used to generate the metadata for the application.
- * VERCEL_PROJECT_PRODUCTION_URL - is the production URL of the application provided by Vercel.
+ * VERCEL_URL - is the URL of the current deployment provided by Vercel.
  * http://localhost:3000 - is the local development URL.
  */
 export const BASE_URL =
-  process.env.NODE_ENV === "production"
-    ? `https://ai-ecommerce-seven.vercel.app`
+  process.env.NEXT_PUBLIC_VERCEL_ENV === "production" ||
+  process.env.NEXT_PUBLIC_VERCEL_ENV === "preview"
+    ? `https://${process.env.VERCEL_URL}`
     : "http://localhost:3000";
 
 /**

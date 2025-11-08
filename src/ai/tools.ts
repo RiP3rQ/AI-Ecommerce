@@ -1,48 +1,55 @@
-import { tool, type ToolSet } from "ai";
-import z from "zod";
-import { findSimilarProducts } from "./tool-helpers/suggest-products";
-import { uuidSchema } from "@/app/api/product/[id]/dto";
+import { type ToolSet } from "ai";
+import { suggestProductsTool } from "./tools/suggest-products";
+import { getMostLikedProductsTool } from "./tools/most-liked-products";
+import { getProductsByCategoryTool } from "./tools/products-by-category";
+import { getAllCategoriesTool } from "./tools/all-categories";
+import { searchProductsByTagsTool } from "./tools/search-by-tags";
+import { getProductDetailsTool } from "./tools/product-details";
+import { getProductReviewsTool } from "./tools/product-reviews";
+import { searchProductsByNameTool } from "./tools/search-by-name";
+import { getCartDetailsTool } from "./tools/get-cart-details";
+import { comboOutfitTool } from "./tools/combo-outfit";
+import { addToCartProductInformationsTool } from "./tools/add-to-cart-product-informations";
+import { clientSideConfirmationForCartModificationTool } from "./tools/return-information-for-confirming-cart-modification";
+import { saveTheFrontendSelectedProductToCartTool } from "./tools/confirm-add-to-cart";
+import { revalidateFrontendCartTool } from "./tools/revalidate-frontend-cart";
 
-export function getAiTools(): ToolSet | undefined {
-  return {
-    suggestProducts: tool({
-      description:
-        "Suggest products similar to items in the user's cart using AI embeddings",
-      inputSchema: z.object({
-        cartItems: z.array(
-          z.object({
-            productId: uuidSchema,
-            quantity: z.number(),
-            productTitle: z.string(),
-          }),
-        ),
-      }),
-      execute: async ({ cartItems }) => {
-        const similarProducts = await findSimilarProducts(cartItems);
+const toolsWithoutSuggestProducts = {
+  // GENERAL PRODUCTS TOOLS
+  getMostLikedProducts: getMostLikedProductsTool,
+  getProductsByCategory: getProductsByCategoryTool,
+  getAllCategories: getAllCategoriesTool,
+  searchProductsByTags: searchProductsByTagsTool,
+  getProductDetails: getProductDetailsTool,
+  getProductReviews: getProductReviewsTool,
+  searchProductsByName: searchProductsByNameTool,
+  // CART TOOLS
+  getCartDetails: getCartDetailsTool,
+  // COMBO TOOL FOR GENERATING OUTFIT COMBINATIONS
+  comboOutfit: comboOutfitTool,
+  // ADD-TO-CART FLOW (4 STEPS):
+  // Step 1: [SERVER] Get product details with all available variants
+  addToCartProductInformations: addToCartProductInformationsTool,
+  // Step 2: [CLIENT] Show modal for user to select variants and quantities
+  clientSideConfirmationForCartModification:
+    clientSideConfirmationForCartModificationTool,
+  // Step 3: [SERVER] Save the selected variants to the cart
+  saveTheFrontendSelectedProductToCart:
+    saveTheFrontendSelectedProductToCartTool,
+  // Step 4: [CLIENT] Revalidate frontend cart items
+  revalidateFrontendCart: revalidateFrontendCartTool,
+};
 
-        return {
-          suggestions: similarProducts.map((product) => ({
-            id: product.id,
-            title: product.title,
-            description: product.description,
-            tags: product.tags,
-            relevanceScore: product.similarity,
-          })),
-          totalSuggestions: similarProducts.length,
-        };
-      },
-      outputSchema: z.object({
-        suggestions: z.array(
-          z.object({
-            id: z.string(),
-            title: z.string(),
-            description: z.string().nullable(),
-            tags: z.array(z.string()).nullable(),
-            relevanceScore: z.number(),
-          }),
-        ),
-        totalSuggestions: z.number(),
-      }),
-    }),
-  };
+export function getToolsWithoutSuggestProducts(): ToolSet {
+  return toolsWithoutSuggestProducts;
+}
+
+const allTools = {
+  ...{ ...getToolsWithoutSuggestProducts() },
+  // SUGGEST PRODUCTS TOOL BASED ON THE CART ITEMS - RAG
+  suggestProducts: suggestProductsTool,
+};
+
+export function getAiTools(): ToolSet {
+  return allTools;
 }
