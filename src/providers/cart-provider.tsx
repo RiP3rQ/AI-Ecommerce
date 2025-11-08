@@ -32,6 +32,7 @@ type CartContextType = {
   cart: FrontendCart | undefined;
   isLoading: boolean;
   error: Error | null;
+  mutate: () => Promise<CartResponse | undefined>;
   addItem: (
     variant: SelectProductVariant,
     product: SelectProduct,
@@ -60,6 +61,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     data: cartResponse,
     error,
     isLoading,
+    mutate,
   } = useSWR<CartResponse>(isAuthenticated ? cartUrl : null, swrFetcher);
 
   // Local cart state that gets updated when we make changes
@@ -340,6 +342,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       cart,
       isLoading,
       error,
+      mutate,
       addItem,
       updateItemQuantity,
       removeItem,
@@ -353,6 +356,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       cart,
       isLoading,
       error,
+      mutate,
       addItem,
       updateItemQuantity,
       removeItem,

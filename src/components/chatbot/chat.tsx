@@ -10,9 +10,13 @@ import { INITIAL_MESSAGE } from "./constants";
 import {
   DefaultChatTransport,
   lastAssistantMessageIsCompleteWithToolCalls,
+  tool,
 } from "ai";
+import { toast } from "sonner";
+import { useCart } from "@/providers/cart-provider";
 
 export const Chat = () => {
+  const { mutate: mutateCart } = useCart();
   const {
     messages,
     sendMessage,
@@ -32,6 +36,32 @@ export const Chat = () => {
       // Check if it's a dynamic tool first for proper type narrowing
       if (toolCall.dynamic) {
         return;
+      }
+
+      // Handle `revalidateFrontendCart`
+      if (toolCall.toolName === "revalidateFrontendCart") {
+        // Revalidate the cart data
+        mutateCart()
+          .then(() => {
+            toast.success("Cart updated successfully! 🛒", {
+              description:
+                "Your cart has been refreshed with the latest items.",
+            });
+          })
+          .catch((error) => {
+            console.error("Failed to revalidate cart:", error);
+            toast.error("Failed to update cart", {
+              description:
+                "There was an issue refreshing your cart. Please try again.",
+            });
+          });
+
+        // Add tool result
+        addToolResult({
+          tool: "revalidateFrontendCart",
+          toolCallId: toolCall.toolCallId,
+          output: true,
+        });
       }
     },
   });
