@@ -9,10 +9,12 @@ import { getProductReviewsTool } from "./tools/product-reviews";
 import { searchProductsByNameTool } from "./tools/search-by-name";
 import { getCartDetailsTool } from "./tools/get-cart-details";
 import { comboOutfitTool } from "./tools/combo-outfit";
-import { addToCartTool } from "./tools/add-to-cart";
-import { confirmAddToCartTool } from "./tools/confirm-add-to-cart";
+import { addToCartProductInformationsTool } from "./tools/add-to-cart-product-informations";
+import { clientSideConfirmationForCartModificationTool } from "./tools/return-information-for-confirming-cart-modification";
+import { saveTheFrontendSelectedProductToCartTool } from "./tools/confirm-add-to-cart";
 
 const toolsWithoutSuggestProducts = {
+  // GENERAL PRODUCTS TOOLS
   getMostLikedProducts: getMostLikedProductsTool,
   getProductsByCategory: getProductsByCategoryTool,
   getAllCategories: getAllCategoriesTool,
@@ -20,10 +22,17 @@ const toolsWithoutSuggestProducts = {
   getProductDetails: getProductDetailsTool,
   getProductReviews: getProductReviewsTool,
   searchProductsByName: searchProductsByNameTool,
+  // CART TOOLS
   getCartDetails: getCartDetailsTool,
+  // COMBO TOOL FOR GENERATING OUTFIT COMBINATIONS
   comboOutfit: comboOutfitTool,
-  addToCart: addToCartTool,
-  confirmAddToCart: confirmAddToCartTool,
+  // ADD-TO-CART FLOW (3 STEPS):
+  // Step 1: [SERVER] Get product details with all available variants
+  addToCartProductInformations: addToCartProductInformationsTool,
+  // Step 2: [CLIENT] Show modal for user to select variants and quantities
+  clientSideConfirmationForCartModification: clientSideConfirmationForCartModificationTool,
+  // Step 3: [SERVER] Save the selected variants to the cart
+  saveTheFrontendSelectedProductToCart: saveTheFrontendSelectedProductToCartTool,
 };
 
 export function getToolsWithoutSuggestProducts(): ToolSet {
@@ -32,6 +41,7 @@ export function getToolsWithoutSuggestProducts(): ToolSet {
 
 const allTools = {
   ...{ ...getToolsWithoutSuggestProducts() },
+  // SUGGEST PRODUCTS TOOL BASED ON THE CART ITEMS - RAG
   suggestProducts: suggestProductsTool,
 };
 

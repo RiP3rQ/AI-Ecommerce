@@ -4,6 +4,7 @@ import {
   categories,
   reviews,
   reviewSummaries,
+  productVariants,
 } from "@/database/schema";
 import { desc, eq, sql, and, ilike } from "drizzle-orm";
 
@@ -230,6 +231,80 @@ export async function getProductDetails(productId: string): Promise<{
     averageRating: stats.averageRating ?? undefined,
     reviewCount: stats.reviewCount,
   };
+}
+
+/**
+ * Gets detailed information about products including all available variants with prices.
+ * Used for add-to-cart flow to show all variant options to the user.
+ */
+export async function getProductDetailsWithVariants(
+  productIds: string[],
+): Promise<
+  Array<{
+    id: string;
+    title: string;
+    description?: string | null;
+    tags: string[] | null;
+    variants: Array<{
+      id: string;
+      title: string;
+      price: number;
+      currencyCode: string;
+      availableForSale: boolean;
+      selectedOptions: { name: string; value: string }[];
+      inventoryQuantity?: number | null;
+    }>;
+  }>
+> {
+  const db = drizzleDbClient();
+
+  const productsData = await db
+    .select({
+      id: products.id,
+      title: products.title,
+      description: products.description,
+      tags: products.tags,
+    })
+    .from(products)
+    .where(
+      sql`${products.id} = ANY(${productIds}::uuid[])`,
+    );
+
+  // Get variants for all products
+  const variantsData = await db
+    .select({
+      id: productVariants.id,
+      productId: productVariants.productId,
+      title: productVariants.title,
+      price: productVariants.price,
+      currencyCode: productVariants.currencyCode,
+      availableForSale: productVariants.availableForSale,
+      selectedOptions: productVariants.selectedOptions,
+      inventoryQuantity: productVariants.inventoryQuantity,
+    })
+    .from(productVariants)
+    .where(
+      sql`${productVariants.productId} = ANY(${productIds}::uuid[])`,
+    );
+
+  // Map variants to products
+  return productsData.map((product) => ({
+    id: product.id,
+    title: product.title,
+    description: product.description,
+    tags: product.tags,
+    variants: variantsData
+      .filter((variant) => variant.productId === product.id)
+      .map((variant) => ({
+        id: variant.id,
+        title: variant.title,
+        price: variant.price,
+        currencyCode: variant.currencyCode,
+        availableForSale: variant.availableForSale,
+        selectedOptions: variant.selectedOptions,
+        inventoryQuantity: variant.inventoryQuantity,
+      })),
+  }));
 }
 
 /**
