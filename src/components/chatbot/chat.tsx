@@ -11,21 +11,28 @@ import { INITIAL_MESSAGE } from "./constants";
 import { lastAssistantMessageIsCompleteWithToolCalls } from "ai";
 
 export const Chat = () => {
-  const { messages, sendMessage, status, setMessages, error, addToolResult } =
-    useChat<MessageType>({
-      transport: new FilteredChatTransport({
-        api: "/api/ai/ai-assistant",
-      }),
-      messages: INITIAL_MESSAGE,
-      sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
-      // run client-side tools that are automatically executed:
-      async onToolCall({ toolCall }) {
-        // Check if it's a dynamic tool first for proper type narrowing
-        if (toolCall.dynamic) {
-          return;
-        }
-      },
-    });
+  const {
+    messages,
+    sendMessage,
+    status,
+    setMessages,
+    error,
+    addToolResult,
+    stop: abort,
+  } = useChat<MessageType>({
+    transport: new FilteredChatTransport({
+      api: "/api/ai/ai-assistant",
+    }),
+    messages: INITIAL_MESSAGE,
+    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
+    // run client-side tools that are automatically executed:
+    async onToolCall({ toolCall }) {
+      // Check if it's a dynamic tool first for proper type narrowing
+      if (toolCall.dynamic) {
+        return;
+      }
+    },
+  });
 
   const prevStatusRef = useRef<string | undefined>(undefined);
 
@@ -113,7 +120,11 @@ export const Chat = () => {
           onSuggestionClick={handleSuggestionClick}
           status={status}
         />
-        <ChatInput onSubmit={handleMessageSubmit} status={status} />
+        <ChatInput
+          onSubmit={handleMessageSubmit}
+          onCancel={abort}
+          status={status}
+        />
       </div>
     </div>
   );

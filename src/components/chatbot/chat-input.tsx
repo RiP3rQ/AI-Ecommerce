@@ -1,6 +1,6 @@
 "use client";
 
-import { SendIcon } from "lucide-react";
+import { SendIcon, XIcon } from "lucide-react";
 import { type ReactNode, useMemo, useState } from "react";
 import { Button } from "../ui/button";
 import { chatInputSchema } from "../../schemas/chat-input-schema";
@@ -10,12 +10,14 @@ const MAX_CHARS = 1000;
 
 interface ChatInputProps {
   onSubmit: (message: string) => void;
+  onCancel?: () => void;
   disabled?: boolean;
   status: ChatStatus;
 }
 
 export const ChatInput = ({
   onSubmit,
+  onCancel,
   disabled,
   status,
 }: Readonly<ChatInputProps>): ReactNode => {
@@ -25,6 +27,11 @@ export const ChatInput = ({
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     if (disabled) return;
+
+    // Cancel any ongoing request before submitting new message
+    if (status === "streaming" || status === "submitted") {
+      onCancel?.();
+    }
 
     const trimmedText = text.trim();
     const validationResult = chatInputSchema.safeParse({
@@ -93,14 +100,28 @@ export const ChatInput = ({
               {error && <span className="text-red-500">{error}</span>}
             </div>
           </div>
-          <Button
-            variant="secondary"
-            disabled={!text.trim() || isDisabled || !!error}
-            className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed cursor-pointer"
-            type="submit"
-          >
-            <SendIcon size={16} />
-          </Button>
+          <div className="flex gap-2">
+            {(status === "streaming" || status === "submitted") && onCancel ? (
+              <Button
+                variant="secondary"
+                onClick={onCancel}
+                className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-600 text-white hover:bg-red-700 cursor-pointer"
+                type="button"
+                title="Cancel current request"
+              >
+                <XIcon size={16} />
+              </Button>
+            ) : (
+              <Button
+                variant="secondary"
+                disabled={!text.trim() || isDisabled || !!error}
+                className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed cursor-pointer"
+                type="submit"
+              >
+                <SendIcon size={16} />
+              </Button>
+            )}
+          </div>
         </div>
       </form>
     </div>

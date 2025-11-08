@@ -14,14 +14,18 @@ export class AiAssistantService {
   /**
    * Generates a streaming AI response based on the conversation messages.
    * @param dto - Validated request parameters
+   * @param userId - User identifier
+   * @param abortSignal - Abort signal for cancelling the request
    * @returns Streaming response result for AI conversation
    */
   public async generateStreamingResponse({
     dto,
     userId,
+    abortSignal,
   }: {
     dto: AiAssistantDto;
     userId: User["id"];
+    abortSignal?: AbortSignal;
   }) {
     const { messages } = dto;
 
@@ -34,8 +38,13 @@ export class AiAssistantService {
       providerOptions: GOOGLE_PROVIDER_OPTIONS,
       maxOutputTokens: MAX_OUTPUT_TOKENS,
       stopWhen: [stepCountIs(10)],
+      abortSignal,
       experimental_context: {
         userId: userId,
+      },
+      onAbort: (event) => {
+        console.warn("[AI-Assistant] Request aborted");
+        console.dir(event, { depth: null });
       },
       onError: (error) => {
         console.error("[AI-Assistant] AI generation error:", error);

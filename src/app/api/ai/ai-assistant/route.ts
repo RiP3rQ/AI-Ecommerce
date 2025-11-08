@@ -49,6 +49,7 @@ export async function POST(request: NextRequest) {
     const result = await aiAssistantService.generateStreamingResponse({
       dto: validatedDto,
       userId: user.id,
+      abortSignal: request.signal,
     });
 
     // Step 5: Return streaming response with sources and reasoning
