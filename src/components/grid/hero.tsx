@@ -10,10 +10,12 @@ import { swrFetcher } from "@/lib/swr-fetcher";
 import { BASE_URL } from "@/lib/utils";
 
 function HeroGridItem({
+  id,
   item,
   size,
   priority,
 }: {
+  id?: string;
   item: LatestProductsItem;
   size: "full" | "half";
   priority?: boolean;
@@ -25,6 +27,7 @@ function HeroGridItem({
           ? "md:col-span-4 md:row-span-2"
           : "md:col-span-2 md:row-span-1"
       }
+      id={id}
     >
       <Link
         className="relative block aspect-square h-full w-full"
@@ -67,8 +70,16 @@ export function HeroThreeItemGrid(): ReactNode {
   const [firstProduct, secondProduct, thirdProduct] = data.data || [];
 
   return (
-    <section className="mx-auto grid max-w-(--breakpoint-2xl) gap-4 px-4 pb-4 md:grid-cols-6 md:grid-rows-2 lg:max-h-[calc(100vh-200px)]">
-      <HeroGridItem size="full" item={firstProduct} priority={true} />
+    <section
+      className="mx-auto grid max-w-(--breakpoint-2xl) gap-4 px-4 pb-4 md:grid-cols-6 md:grid-rows-2 lg:max-h-[calc(100vh-200px)]"
+      id="onboarding-tour-step-3"
+    >
+      <HeroGridItem
+        size="full"
+        item={firstProduct}
+        priority={true}
+        id="onboarding-tour-step-4"
+      />
       <HeroGridItem size="half" item={secondProduct} priority={true} />
       <HeroGridItem size="half" item={thirdProduct} />
     </section>

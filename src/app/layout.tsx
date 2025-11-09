@@ -9,7 +9,7 @@ import { env } from "@/env";
 import { BASE_URL } from "@/lib/utils";
 import Footer from "@/components/layout/footer";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
-import { AssistantButton } from "@/components/global/assistant-button";
+import { AssistantButton } from "@/components/chatbot/assistant-button";
 import { Onborda, OnbordaProvider } from "onborda";
 
 import "./globals.css";
@@ -63,7 +63,7 @@ export default function RootLayout({
             shadowRgb="55,48,163"
             shadowOpacity="0.8"
             cardComponent={TourCard}
-            cardTransition={{ duration: 2, type: "tween" }}
+            cardTransition={{ duration: 0.5, type: "spring" }}
           >
             <NuqsAdapter>
               <TooltipProvider>

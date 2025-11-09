@@ -145,7 +145,7 @@ export function AddReviewBox({
     formData.content.trim().length >= 10 && formData.rating >= 1;
 
   return (
-    <Card className={cn("w-full", className)}>
+    <Card className={cn("w-full", className)} id="onboarding-tour-step-8">
       <CardHeader>
         <CardTitle className="text-lg">Write a Review</CardTitle>
       </CardHeader>

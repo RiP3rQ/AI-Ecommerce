@@ -3,14 +3,17 @@
 import { type ReactNode, useState } from "react";
 import { Button } from "../ui/button";
 import { BotMessageSquareIcon } from "lucide-react";
-import { ChatSheet } from "../chatbot/chat-sheet";
+import { ChatSheet } from "./chat-sheet";
 
 export function AssistantButton(): ReactNode {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   return (
     <>
-      <div className="fixed bottom-14 right-4 z-[60] bg-background hover:bg-background/80 rounded-lg">
+      <div
+        className="fixed bottom-14 right-4 z-[60] bg-background hover:bg-background/80 rounded-lg"
+        id="onboarding-tour-step-2"
+      >
         <Button
           variant="outline"
           size="icon"
