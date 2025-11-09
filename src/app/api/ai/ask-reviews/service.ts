@@ -1,4 +1,5 @@
-import { generateText, embed } from "ai";
+import { embed } from "ai";
+import { AiSdkHandler } from "@/ai/ai-sdk";
 import { geminiProvider } from "@/ai/gemini-provider";
 import { reviews, products } from "@/database/schema";
 import { cosineDistance, desc, sql, eq, count } from "drizzle-orm";
@@ -91,6 +92,8 @@ export class AskReviewsService {
       relevantReviews,
       totalReviews: relevantReviews.length,
       averageRating,
+      db,
+      productId,
     });
 
     // Step 7: Calculate confidence score
@@ -183,11 +186,15 @@ export class AskReviewsService {
     relevantReviews,
     totalReviews,
     averageRating,
+    db,
+    productId,
   }: Readonly<{
     question: string;
     relevantReviews: RelevantReview[];
     totalReviews: number;
     averageRating: number;
+    db: DrizzleDbClient | TestDatabase;
+    productId: string;
   }>): Promise<string> {
     // Prepare reviews text for AI context
     const reviewsText = relevantReviews
@@ -195,18 +202,24 @@ export class AskReviewsService {
       .join("\n\n");
 
     try {
-      const aiResponse = await generateText({
-        model: geminiProvider("gemini-2.5-flash"),
-        system: AskReviewsPrompts.SYSTEM_PROMPT,
-        prompt: AskReviewsPrompts.USER_PROMPT({
-          question,
-          reviewsText,
-          totalReviews,
-          averageRating,
-        }),
-        temperature: 0.3, // Balanced creativity and consistency
-        maxOutputTokens: MAX_ANSWER_TOKENS,
-      });
+      const aiResponse = await AiSdkHandler.generateText(
+        {
+          system: AskReviewsPrompts.SYSTEM_PROMPT,
+          prompt: AskReviewsPrompts.USER_PROMPT({
+            question,
+            reviewsText,
+            totalReviews,
+            averageRating,
+          }),
+          temperature: 0.3, // Balanced creativity and consistency
+          maxOutputTokens: MAX_ANSWER_TOKENS,
+        },
+        {
+          dbClient: db,
+          operationType: "ask_reviews",
+          operationId: productId,
+        },
+      );
 
       const answer = aiResponse.text?.trim();
 

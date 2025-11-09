@@ -1,9 +1,11 @@
-import { generateText, stepCountIs } from "ai";
-import { geminiProvider } from "@/ai/gemini-provider";
+import { stepCountIs } from "ai";
+import { AiSdkHandler } from "@/ai/ai-sdk";
 import { getSuggestProductsTools } from "@/ai/tools";
 import { SuggestProductsPrompts } from "./prompts";
 import type { CartItemWithDetails } from "../../cart/types";
 import { MAX_SUGGESTIONS } from "./constants";
+import type { DrizzleDbClient } from "@/database";
+import type { TestDatabase } from "@/test/utils/db-helper";
 import { productService } from "../../product/[id]/service";
 import type { ProductData } from "../../product/[id]/types";
 import {
@@ -22,12 +24,17 @@ export class SuggestProductsService {
    * Generates product suggestions using RAG (Retrieval Augmented Generation).
    * The LLM has full control over when to use tools and how to process information.
    *
-   * @param dto - The suggestion request data
-   * @returns Streaming response with AI-generated suggestions
+   * @param cartItems - The cart items to base suggestions on
+   * @param db - Database client for saving AI results
+   * @returns AI-generated suggestions with product data
    */
   public async suggestProducts({
     cartItems,
-  }: Readonly<{ cartItems: CartItemWithDetails[] }>): Promise<
+    db,
+  }: Readonly<{
+    cartItems: CartItemWithDetails[];
+    db: DrizzleDbClient | TestDatabase;
+  }>): Promise<
     Array<{ productId: string; reason: string; productData?: ProductData }>
   > {
     // Step 1: Validate input
@@ -50,18 +57,25 @@ export class SuggestProductsService {
 
     try {
       console.log("Generating text...");
-      const aiResponse = await generateText({
-        model: geminiProvider("gemini-2.5-flash"),
-        system: SuggestProductsPrompts.SYSTEM_PROMPT,
-        prompt: SuggestProductsPrompts.USER_PROMPT({
-          cartItemsText,
-          maxSuggestions: MAX_SUGGESTIONS,
-        }),
-        temperature: 0.3, // Balanced creativity and consistency
-        maxOutputTokens: 4000, // Increased for tool results and analysis
-        stopWhen: [stepCountIs(3)],
-        tools: getSuggestProductsTools(),
-      });
+      const aiResponse = await AiSdkHandler.generateText(
+        {
+          system: SuggestProductsPrompts.SYSTEM_PROMPT,
+          prompt: SuggestProductsPrompts.USER_PROMPT({
+            cartItemsText,
+            maxSuggestions: MAX_SUGGESTIONS,
+          }),
+          temperature: 0.3, // Balanced creativity and consistency
+          maxOutputTokens: 4000, // Increased for tool results and analysis
+          stopWhen: [stepCountIs(3)],
+          tools: getSuggestProductsTools(),
+        },
+        {
+          dbClient: db,
+          operationType: "suggest_products",
+          operationId:
+            cartItems[0]?.productVariant.product.id || "cart_suggestions",
+        },
+      );
       responseText = aiResponse.text || "";
     } catch (error) {
       console.error("AI generation error:", error);

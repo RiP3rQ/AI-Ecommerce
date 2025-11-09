@@ -52,6 +52,7 @@ export async function POST(request: NextRequest): Promise<
     // Step 4: Generate streaming product suggestions using RAG
     const suggestedProducts = await suggestProductsService.suggestProducts({
       cartItems: cartItems.cart.items,
+      db: dbClient,
     });
 
     // Step 5: Return the streaming response directly
