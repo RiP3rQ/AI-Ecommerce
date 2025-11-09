@@ -1,7 +1,7 @@
 "use client";
 
 import type { MessageType } from "@/types/chat";
-import { useEffect, useRef } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { ChatInput } from "./chat-input";
 import { MessageList } from "./message-list";
 import { Suggestions } from "./suggestions";
@@ -14,10 +14,17 @@ import {
 import { toast } from "sonner";
 import { useCart } from "@/providers/cart-provider";
 import { useAuth } from "@/hooks/use-auth";
+import { useChatProvider } from "@/providers/chat-provider";
+import { ResetChatModal } from "./reset-chat-modal";
+import { Button } from "@/components/ui/button";
+import { RotateCcwIcon } from "lucide-react";
 
-export const Chat = () => {
+export function Chat(): ReactNode {
   const { isAuthenticated } = useAuth();
   const { mutate: mutateCart } = useCart();
+  const { shouldResetChat, resetComplete } = useChatProvider();
+  const [isResetModalOpen, setIsResetModalOpen] = useState<boolean>(false);
+
   const {
     messages,
     sendMessage,
@@ -68,6 +75,17 @@ export const Chat = () => {
   });
 
   const prevStatusRef = useRef<string | undefined>(undefined);
+
+  // Handle chat reset
+  useEffect(() => {
+    if (shouldResetChat) {
+      setMessages(INITIAL_MESSAGE);
+      resetComplete();
+      toast.success("Chat session reset", {
+        description: "You can now start a fresh conversation.",
+      });
+    }
+  }, [shouldResetChat, setMessages, resetComplete]);
 
   // Handle loading messages when status changes to "submitted"
   useEffect(() => {
@@ -154,14 +172,50 @@ export const Chat = () => {
     return acc;
   }, [] as MessageType[]);
 
+  const handleResetChat = () => {
+    setIsResetModalOpen(true);
+  };
+
+  const confirmResetChat = () => {
+    setMessages(INITIAL_MESSAGE);
+    toast.success("Chat session reset", {
+      description: "You can now start a fresh conversation.",
+    });
+  };
+
   return (
     <div className="relative flex size-full flex-col divide-y overflow-hidden">
-      <MessageList
-        messages={deduplicatedMessages}
-        status={status}
-        addToolOutput={addToolOutput}
-        isAuthenticated={isAuthenticated}
-      />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex items-center justify-between px-4 pb-1">
+          <span className="text-md text-muted-foreground">
+            {messages.length === 1
+              ? "1 message"
+              : `${messages.length} messages`}
+          </span>
+          {messages.length > 1 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleResetChat}
+              disabled={
+                !isAuthenticated ||
+                status === "streaming" ||
+                status === "submitted"
+              }
+              className="h-8 gap-2 cursor-pointer"
+            >
+              <RotateCcwIcon className="size-3.5" />
+              Reset Chat
+            </Button>
+          )}
+        </div>
+        <MessageList
+          messages={deduplicatedMessages}
+          status={status}
+          addToolOutput={addToolOutput}
+          isAuthenticated={isAuthenticated}
+        />
+      </div>
       <div className="grid shrink-0 gap-4 pt-4">
         <Suggestions
           disabled={!isAuthenticated}
@@ -175,8 +229,14 @@ export const Chat = () => {
           status={status}
         />
       </div>
+
+      <ResetChatModal
+        isOpen={isResetModalOpen}
+        onClose={() => setIsResetModalOpen(false)}
+        onConfirm={confirmResetChat}
+      />
     </div>
   );
-};
+}
 
 export default Chat;

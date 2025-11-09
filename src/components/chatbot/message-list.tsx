@@ -403,7 +403,7 @@ export const MessageList = ({
   isAuthenticated,
 }: MessageListProps) => {
   return (
-    <div className="flex-1 overflow-y-auto p-4">
+    <div className="flex-1 overflow-y-auto px-4">
       <div className="space-y-4">
         {!isAuthenticated && (
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950">
