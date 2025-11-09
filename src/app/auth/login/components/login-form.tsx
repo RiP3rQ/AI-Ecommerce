@@ -16,7 +16,7 @@ import { GoogleIcon } from "../../../../../public/icons";
 import Image from "next/image";
 import { createClientSupabaseClient } from "@/supabase-auth/client";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { Link } from "react-transition-progress/next";
 
 interface LoginFormProps extends ComponentProps<"div"> {}
 

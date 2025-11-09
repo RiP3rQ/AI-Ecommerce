@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "react-transition-progress/next";
 import { Suspense } from "react";
 import { MobileMenu } from "@/components/layout/navbar/mobile-sidebar";
 import { CategoryLink } from "@/components/layout/navbar/category-link";

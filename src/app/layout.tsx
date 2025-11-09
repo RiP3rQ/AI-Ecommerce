@@ -11,11 +11,11 @@ import Footer from "@/components/layout/footer";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { AssistantButton } from "@/components/chatbot/assistant-button";
 import { Onborda, OnbordaProvider } from "onborda";
-
 import "./globals.css";
 import { CartProvider } from "@/providers/cart-provider";
 import { TourCard } from "@/components/tour/tour-card";
 import { onboardingSteps } from "@/components/tour/onboarding-steps";
+import { ProgressBar, ProgressBarProvider } from "react-transition-progress";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -74,14 +74,17 @@ export default function RootLayout({
                   disableTransitionOnChange
                 >
                   <CartProvider>
-                    <main>
-                      {children}
-                      <Toaster closeButton position="top-center" />
-                      <WelcomeToast />
-                      <AssistantButton />
-                      <ModeSwitcher />
-                    </main>
-                    <Footer />
+                    <ProgressBarProvider>
+                      <ProgressBar className="fixed w-full h-1 shadow-lg shadow-sky-500/20 bg-sky-500 top-0" />
+                      <main>
+                        {children}
+                        <Toaster closeButton position="top-center" />
+                        <WelcomeToast />
+                        <AssistantButton />
+                        <ModeSwitcher />
+                      </main>
+                      <Footer />
+                    </ProgressBarProvider>
                   </CartProvider>
                 </ThemeProvider>
               </TooltipProvider>

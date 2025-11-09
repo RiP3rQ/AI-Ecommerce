@@ -20,10 +20,12 @@ import type { ReviewSummaryData } from "@/app/api/ai/summorize-reviews/types";
 import type { AskReviewsResponse } from "@/app/api/ai/ask-reviews/types";
 import { isFeatureEnabled } from "@/lib/feature-flags";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/use-auth";
 
 export function ProductDetails({
   productUuid,
 }: Readonly<{ productUuid: string }>): ReactNode {
+  const { isAuthenticated } = useAuth();
   // State for review summary
   const [summary, setSummary] = useState<ReviewSummaryData | null>(null);
   const [isSummarizing, setIsSummarizing] = useState(false);
@@ -61,7 +63,12 @@ export function ProductDetails({
 
   // Function to generate review summary (only if feature is enabled)
   const handleSummarizeReviews = async () => {
-    if (!isFeatureEnabled("aiSummarizeReviews")) return;
+    if (!isFeatureEnabled("aiSummarizeReviews") || !isAuthenticated) {
+      if (!isAuthenticated) {
+        toast.error("Please log in to use AI features");
+      }
+      return;
+    }
 
     setIsSummarizing(true);
     try {
@@ -113,6 +120,11 @@ export function ProductDetails({
   // Function to ask questions about reviews (only if feature is enabled)
   const handleAskQuestion = async () => {
     if (!isFeatureEnabled("aiAskReviews") || !question.trim()) return;
+
+    if (!isAuthenticated) {
+      toast.error("Please log in to use AI features");
+      return;
+    }
 
     setIsAsking(true);
     try {
@@ -315,6 +327,7 @@ export function ProductDetails({
             isSummarizing={isSummarizing}
             onSummarize={handleSummarizeReviews}
             hasReviews={Boolean(reviewsData?.data?.reviews?.length)}
+            disabled={!isAuthenticated}
           />
         )}
 
@@ -327,6 +340,7 @@ export function ProductDetails({
             onQuestionChange={setQuestion}
             onAskQuestion={handleAskQuestion}
             hasReviews={Boolean(reviewsData?.data?.reviews?.length)}
+            disabled={!isAuthenticated}
           />
         )}
 
@@ -354,11 +368,13 @@ function ReviewSummarySection({
   isSummarizing,
   onSummarize,
   hasReviews,
+  disabled,
 }: Readonly<{
   summary: ReviewSummaryData | null;
   isSummarizing: boolean;
   onSummarize: () => void;
   hasReviews: boolean;
+  disabled: boolean;
 }>): ReactNode {
   if (!hasReviews) {
     return null; // Don't show if no reviews exist
@@ -374,7 +390,7 @@ function ReviewSummarySection({
           </CardTitle>
           <Button
             onClick={onSummarize}
-            disabled={isSummarizing}
+            disabled={isSummarizing || disabled}
             variant="outline"
             size="sm"
             className="flex items-center gap-2"
@@ -437,6 +453,7 @@ function AskReviewsSection({
   onQuestionChange,
   onAskQuestion,
   hasReviews,
+  disabled,
 }: Readonly<{
   question: string;
   answer: {
@@ -454,6 +471,7 @@ function AskReviewsSection({
   onQuestionChange: (question: string) => void;
   onAskQuestion: () => void;
   hasReviews: boolean;
+  disabled: boolean;
 }>): ReactNode {
   if (!hasReviews) {
     return null; // Don't show if no reviews exist
@@ -509,7 +527,7 @@ function AskReviewsSection({
             onChange={(e) => onQuestionChange(e.target.value)}
             onKeyPress={handleKeyPress}
             className="min-h-[80px] resize-none"
-            disabled={isAsking}
+            disabled={isAsking || disabled}
             maxLength={500}
           />
           <div className="flex justify-between items-center">
@@ -518,7 +536,9 @@ function AskReviewsSection({
             </span>
             <Button
               onClick={onAskQuestion}
-              disabled={!question.trim() || isAsking || question.length < 5}
+              disabled={
+                !question.trim() || isAsking || question.length < 5 || disabled
+              }
               size="sm"
             >
               {isAsking ? (

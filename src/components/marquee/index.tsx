@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { Skeleton } from "../ui/skeleton";
-import Link from "next/link";
+import { Link } from "react-transition-progress/next";
 import { GridTileImage } from "../grid/single-tile";
 import type { LatestProductsItem } from "@/app/api/main-page/types";
 import { swrFetcher } from "@/lib/swr-fetcher";

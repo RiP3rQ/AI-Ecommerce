@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { StarRating } from "@/components/ui/star-rating";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/use-auth";
 
 /**
  * Schema for review form validation.
@@ -43,6 +44,7 @@ export function AddReviewBox({
   onReviewSubmitted,
   className,
 }: AddReviewBoxProps): ReactNode {
+  const { isAuthenticated } = useAuth();
   const [formData, setFormData] = useState<ReviewFormData>({
     content: "",
     rating: 0,
@@ -81,6 +83,11 @@ export function AddReviewBox({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!isAuthenticated) {
+      toast.error("Please log in to submit a review");
+      return;
+    }
 
     // Validate entire form
     const result = reviewFormSchema.safeParse(formData);
@@ -150,6 +157,13 @@ export function AddReviewBox({
         <CardTitle className="text-lg">Write a Review</CardTitle>
       </CardHeader>
       <CardContent>
+        {!isAuthenticated && (
+          <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <p className="text-sm text-blue-800 dark:text-blue-200">
+              Please log in to write and submit reviews.
+            </p>
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Rating Section */}
           <div className="space-y-2">
@@ -160,7 +174,7 @@ export function AddReviewBox({
               <StarRating
                 value={formData.rating.toString()}
                 onChange={handleRatingChange}
-                isInteractive
+                isInteractive={isAuthenticated}
                 size="lg"
               />
             </div>
@@ -188,7 +202,7 @@ export function AddReviewBox({
                 "min-h-[120px] resize-none",
                 errors.content && "border-red-500 focus-visible:ring-red-500",
               )}
-              disabled={isSubmitting}
+              disabled={isSubmitting || !isAuthenticated}
               maxLength={1000}
               minLength={10}
             />
@@ -207,7 +221,7 @@ export function AddReviewBox({
           {/* Submit Button */}
           <Button
             type="submit"
-            disabled={!isFormValid || isSubmitting}
+            disabled={!isFormValid || isSubmitting || !isAuthenticated}
             className="w-full sm:w-auto"
           >
             {isSubmitting ? "Submitting..." : "Submit Review"}
