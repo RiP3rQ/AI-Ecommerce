@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@source "./node_modules/onborda/dist/**/*.{js,ts,jsx,tsx}";
+
 @plugin "@tailwindcss/typography";
 @plugin "@tailwindcss/container-queries";
 

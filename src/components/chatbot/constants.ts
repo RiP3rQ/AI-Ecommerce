@@ -33,3 +33,20 @@ export const INITIAL_MESSAGE: MessageType[] = [
     ],
   },
 ];
+export const getInitialMessages = (isAuthenticated: boolean): MessageType[] => {
+  return isAuthenticated
+    ? INITIAL_MESSAGE
+    : [
+        ...INITIAL_MESSAGE,
+        {
+          id: "access-denied-message",
+          role: "assistant",
+          parts: [
+            {
+              type: "text",
+              text: "[ACCESS DENIED] Login in order to get access to all advanced features.",
+            },
+          ],
+        },
+      ];
+};

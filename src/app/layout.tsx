@@ -15,7 +15,7 @@ import { Onborda, OnbordaProvider } from "onborda";
 import "./globals.css";
 import { CartProvider } from "@/providers/cart-provider";
 import { TourCard } from "@/components/tour/tour-card";
-import { Tour } from "onborda/dist/types";
+import { onboardingSteps } from "@/components/tour/onboarding-steps";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,26 +38,6 @@ export const metadata: Metadata = {
   },
 };
 
-const steps: Tour[] = [
-  {
-    tour: "Onboard Tour",
-    steps: [
-      {
-        icon: <>👋</>,
-        title: "Tour 1, Step 1",
-        content: <>First tour, first step</>,
-        selector: "#tour1-step1",
-        side: "top",
-        showControls: true,
-        pointerPadding: 10,
-        pointerRadius: 10,
-        nextRoute: "/",
-        prevRoute: "/",
-      },
-    ],
-  },
-];
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -78,7 +58,7 @@ export default function RootLayout({
       >
         <OnbordaProvider>
           <Onborda
-            steps={steps}
+            steps={onboardingSteps}
             showOnborda={true}
             shadowRgb="55,48,163"
             shadowOpacity="0.8"
