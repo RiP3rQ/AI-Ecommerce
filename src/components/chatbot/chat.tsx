@@ -18,6 +18,7 @@ import { useChatProvider } from "@/providers/chat-provider";
 import { ResetChatModal } from "./reset-chat-modal";
 import { Button } from "@/components/ui/button";
 import { RotateCcwIcon } from "lucide-react";
+import { MessagesCounterAndResetChatButton } from "./messages-counter-and-reset-chat-button";
 
 export function Chat(): ReactNode {
   const { isAuthenticated } = useAuth();
@@ -186,29 +187,12 @@ export function Chat(): ReactNode {
   return (
     <div className="relative flex size-full flex-col divide-y overflow-hidden">
       <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex items-center justify-between px-4 pb-1">
-          <span className="text-md text-muted-foreground">
-            {messages.length === 1
-              ? "1 message"
-              : `${messages.length} messages`}
-          </span>
-          {messages.length > 1 && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleResetChat}
-              disabled={
-                !isAuthenticated ||
-                status === "streaming" ||
-                status === "submitted"
-              }
-              className="h-8 gap-2 cursor-pointer"
-            >
-              <RotateCcwIcon className="size-3.5" />
-              Reset Chat
-            </Button>
-          )}
-        </div>
+        <MessagesCounterAndResetChatButton
+          messages={deduplicatedMessages}
+          isAuthenticated={isAuthenticated}
+          status={status}
+          handleResetChat={handleResetChat}
+        />
         <MessageList
           messages={deduplicatedMessages}
           status={status}

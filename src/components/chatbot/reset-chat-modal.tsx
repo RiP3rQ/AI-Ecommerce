@@ -34,7 +34,9 @@ export function ResetChatModal({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={onClose} className="cursor-pointer">Cancel</AlertDialogCancel>
+          <AlertDialogCancel onClick={onClose} className="cursor-pointer">
+            Cancel
+          </AlertDialogCancel>
           <AlertDialogAction
             onClick={() => {
               onConfirm();
