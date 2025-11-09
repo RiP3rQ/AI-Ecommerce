@@ -26,6 +26,7 @@ import { Loader } from "../ai-elements/loader";
 import { AddToCartModal } from "./add-to-cart-modal";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
+import { ReasoningUIPart, ToolUIPart } from "ai";
 
 interface SelectedProduct {
   productId: string;
@@ -36,7 +37,7 @@ interface SelectedProduct {
 interface MessageListProps {
   messages: MessageType[];
   status?: string;
-  addToolResult: (params: {
+  addToolOutput: (params: {
     tool: string;
     toolCallId: string;
     output: unknown;
@@ -48,7 +49,7 @@ interface MessageBubbleProps {
   message: MessageType;
   status?: string;
   isLastMessage?: boolean;
-  addToolResult: (params: {
+  addToolOutput: (params: {
     tool: string;
     toolCallId: string;
     output: unknown;
@@ -59,7 +60,7 @@ const MessageBubble = ({
   message,
   status,
   isLastMessage,
-  addToolResult,
+  addToolOutput,
 }: MessageBubbleProps) => {
   const { user } = useAuth();
   const isUser = message.role === "user";
@@ -187,18 +188,16 @@ const MessageBubble = ({
                 <Response key={`${message.id}-${i}`}>{part.text}</Response>
               );
             } else if (part.type === "reasoning") {
+              const reasoningPart = part as ReasoningUIPart;
               return (
                 <Reasoning
                   key={`${message.id}-${i}`}
                   className="w-full"
-                  isStreaming={
-                    status === "streaming" &&
-                    isLastMessage &&
-                    i === message.parts.length - 1
-                  }
+                  defaultOpen={reasoningPart.state === "streaming"}
+                  isStreaming={reasoningPart.state === "streaming"}
                 >
                   <ReasoningTrigger />
-                  <ReasoningContent>{part.text}</ReasoningContent>
+                  <ReasoningContent>{reasoningPart.text}</ReasoningContent>
                 </Reasoning>
               );
             } else if (part.type === "step-start") {
@@ -318,14 +317,11 @@ const MessageBubble = ({
 
               return null;
             } else if (part.type.startsWith("tool-")) {
-              const toolPart = part as any; // Type assertion for tool parts
+              const toolPart = part as ToolUIPart;
               return (
                 <Tool
                   key={`${message.id}-${i}`}
-                  defaultOpen={
-                    toolPart.state === "output-available" ||
-                    toolPart.state === "output-error"
-                  }
+                  defaultOpen={toolPart.state === "output-error"}
                   className="mt-4"
                 >
                   <ToolHeader type={toolPart.type} state={toolPart.state} />
@@ -375,7 +371,7 @@ const MessageBubble = ({
 
             // Return the output for the clientSideConfirmationForCartModification tool
             // The AI will then automatically call saveTheFrontendSelectedProductToCart with this data
-            addToolResult({
+            addToolOutput({
               tool: "clientSideConfirmationForCartModification",
               toolCallId: addToCartModal.toolCallId,
               output: {
@@ -399,11 +395,11 @@ const MessageBubble = ({
 export const MessageList = ({
   messages,
   status,
-  addToolResult,
+  addToolOutput,
   isAuthenticated,
 }: MessageListProps) => {
   return (
-    <div className="flex-1 overflow-y-auto p-4">
+    <div className="flex-1 overflow-y-auto px-4">
       <div className="space-y-4">
         {!isAuthenticated && (
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950">
@@ -424,7 +420,7 @@ export const MessageList = ({
             message={message}
             status={status}
             isLastMessage={index === messages.length - 1}
-            addToolResult={addToolResult}
+            addToolOutput={addToolOutput}
           />
         ))}
       </div>

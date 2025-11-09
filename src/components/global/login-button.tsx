@@ -21,7 +21,7 @@ export function LoginButton() {
       <TooltipTrigger asChild>
         <Button
           variant="outline"
-          className="h-11 px-3"
+          className="h-11 px-3 cursor-pointer"
           onClick={goToLogin}
           id="onboarding-tour-step-1"
         >

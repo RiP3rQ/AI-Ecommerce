@@ -30,7 +30,7 @@ export function ChatSheet({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="z-[100] sm:max-w-xl w-xl">
-        <SheetHeader>
+        <SheetHeader className="p-0 px-4 pt-4">
           <SheetTitle>Your own AI assistant</SheetTitle>
           <SheetDescription>
             Ask me anything about the products you are looking for.

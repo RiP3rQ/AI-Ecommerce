@@ -1,7 +1,7 @@
 "use client";
 
 import type { MessageType } from "@/types/chat";
-import { useEffect, useRef } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { ChatInput } from "./chat-input";
 import { MessageList } from "./message-list";
 import { Suggestions } from "./suggestions";
@@ -14,23 +14,29 @@ import {
 import { toast } from "sonner";
 import { useCart } from "@/providers/cart-provider";
 import { useAuth } from "@/hooks/use-auth";
+import { useChatProvider } from "@/providers/chat-provider";
+import { ResetChatModal } from "./reset-chat-modal";
+import { MessagesCounterAndResetChatButton } from "./messages-counter-and-reset-chat-button";
 
-export const Chat = () => {
+export function Chat(): ReactNode {
   const { isAuthenticated } = useAuth();
   const { mutate: mutateCart } = useCart();
+  const { persistedMessages, setPersistedMessages, resetChatSession } =
+    useChatProvider();
+  const [isResetModalOpen, setIsResetModalOpen] = useState<boolean>(false);
+
   const {
     messages,
     sendMessage,
     status,
     setMessages,
     error,
-    addToolResult,
+    addToolOutput,
     stop: abort,
   } = useChat<MessageType>({
     transport: new DefaultChatTransport({
       api: "/api/ai/ai-assistant",
     }),
-    messages: INITIAL_MESSAGE,
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
     // run client-side tools that are automatically executed:
     async onToolCall({ toolCall }) {
@@ -58,7 +64,7 @@ export const Chat = () => {
           });
 
         // Add tool result
-        addToolResult({
+        addToolOutput({
           tool: "revalidateFrontendCart",
           toolCallId: toolCall.toolCallId,
           output: true,
@@ -68,6 +74,22 @@ export const Chat = () => {
   });
 
   const prevStatusRef = useRef<string | undefined>(undefined);
+  const isInitialMount = useRef<boolean>(true);
+
+  // On mount, restore messages from provider
+  useEffect(() => {
+    if (isInitialMount.current && persistedMessages.length > 0) {
+      setMessages(persistedMessages);
+      isInitialMount.current = false;
+    }
+  }, []);
+
+  // Sync messages to provider whenever they change (for persistence across sheet open/close)
+  useEffect(() => {
+    if (!isInitialMount.current) {
+      setPersistedMessages(messages);
+    }
+  }, [messages, setPersistedMessages]);
 
   // Handle loading messages when status changes to "submitted"
   useEffect(() => {
@@ -154,14 +176,35 @@ export const Chat = () => {
     return acc;
   }, [] as MessageType[]);
 
+  const handleResetChat = () => {
+    setIsResetModalOpen(true);
+  };
+
+  const confirmResetChat = () => {
+    // Reset both local and persisted messages
+    setMessages(INITIAL_MESSAGE);
+    resetChatSession();
+    toast.success("Chat session cleared", {
+      description: "You can now start a fresh conversation.",
+    });
+  };
+
   return (
     <div className="relative flex size-full flex-col divide-y overflow-hidden">
-      <MessageList
-        messages={deduplicatedMessages}
-        status={status}
-        addToolResult={addToolResult}
-        isAuthenticated={isAuthenticated}
-      />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <MessagesCounterAndResetChatButton
+          messages={deduplicatedMessages}
+          isAuthenticated={isAuthenticated}
+          status={status}
+          handleResetChat={handleResetChat}
+        />
+        <MessageList
+          messages={deduplicatedMessages}
+          status={status}
+          addToolOutput={addToolOutput}
+          isAuthenticated={isAuthenticated}
+        />
+      </div>
       <div className="grid shrink-0 gap-4 pt-4">
         <Suggestions
           disabled={!isAuthenticated}
@@ -175,8 +218,14 @@ export const Chat = () => {
           status={status}
         />
       </div>
+
+      <ResetChatModal
+        isOpen={isResetModalOpen}
+        onClose={() => setIsResetModalOpen(false)}
+        onConfirm={confirmResetChat}
+      />
     </div>
   );
-};
+}
 
 export default Chat;
