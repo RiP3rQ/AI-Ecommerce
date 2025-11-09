@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Link } from "react-transition-progress/next";
 import { Building, Mail, Phone, Globe, User, MapPin } from "lucide-react";
 
 export const metadata: Metadata = {

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "react-transition-progress/next";
 import { ArrowLeftIcon } from "lucide-react";
 import type { ReactNode } from "react";
 

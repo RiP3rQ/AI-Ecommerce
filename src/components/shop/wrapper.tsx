@@ -46,6 +46,11 @@ export function ShopWrapper({
       filters: filters as ShopFiltersUrlSchema,
     }),
     swrFetcher,
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    },
   );
 
   // ============================= MEMOIZED DATA =============================

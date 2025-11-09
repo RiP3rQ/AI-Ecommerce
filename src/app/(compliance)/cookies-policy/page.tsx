@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Link } from "react-transition-progress/next";
 
 export const metadata: Metadata = {
   title: "Cookies Policy | GDPR Compliant",

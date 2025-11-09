@@ -1,7 +1,7 @@
 "use client";
 
 import { GridTileImage } from "@/components/grid/single-tile";
-import Link from "next/link";
+import { Link } from "react-transition-progress/next";
 import type { LatestProductsItem } from "@/app/api/main-page/types";
 import type { ReactNode } from "react";
 import { Skeleton } from "../ui/skeleton";
@@ -61,6 +61,11 @@ export function HeroThreeItemGrid(): ReactNode {
   const { data, isLoading } = useSWR<SWRResponse<LatestProductsItem[]>>(
     `${BASE_URL}/api/main-page`,
     swrFetcher,
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    },
   );
 
   if (isLoading) return <HeroThreeItemGridSkeleton />;

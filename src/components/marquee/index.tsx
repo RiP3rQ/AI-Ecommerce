@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { Skeleton } from "../ui/skeleton";
-import Link from "next/link";
+import { Link } from "react-transition-progress/next";
 import { GridTileImage } from "../grid/single-tile";
 import type { LatestProductsItem } from "@/app/api/main-page/types";
 import { swrFetcher } from "@/lib/swr-fetcher";
@@ -14,6 +14,11 @@ export function ItemsMarquee(): ReactNode {
   const { data, isLoading } = useSWR<SWRResponse<LatestProductsItem[]>>(
     `${BASE_URL}/api/main-page?limit=20&skipFirstNumberOfProducts=3`,
     swrFetcher,
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    },
   );
 
   // Show skeleton while loading or if we have no products after loading

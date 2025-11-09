@@ -17,7 +17,7 @@ import { GoogleIcon } from "../../../../../public/icons";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClientSupabaseClient } from "@/supabase-auth/client";
-import Link from "next/link";
+import { Link } from "react-transition-progress/next";
 
 interface RegisterFormProps extends ComponentProps<"div"> {}
 

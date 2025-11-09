@@ -30,6 +30,11 @@ export function CheckoutComplete(): ReactNode {
   } = useSWR<SWRResponse<OrderDetails>>(
     orderId ? `${BASE_URL}/api/order/${orderId}` : null,
     swrFetcher,
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    },
   );
 
   const order = useMemo(() => orderResponse?.data, [orderResponse]);

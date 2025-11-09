@@ -9,7 +9,7 @@ import { EditItemQuantityButton } from "./edit-quantity-button";
 import { useAuth } from "@/hooks/use-auth";
 import { useCart } from "@/providers/cart-provider";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "react-transition-progress/next";
 
 export function CartItems(): ReactNode {
   const { isAuthenticated } = useAuth();

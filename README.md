@@ -1,4 +1,4 @@
-# 🤖 AI-Powered E-commerce Platform
+# 🤖 AI-Powered E-commerce Fashion Platform
 
 <div align="center">
 
@@ -8,10 +8,10 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue)](https://www.typescriptlang.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-2.76.1-green)](https://supabase.com/)
 [![Drizzle](https://img.shields.io/badge/Drizzle-ORM-orange)](https://orm.drizzle.team/)
-[![Google Gemini](https://img.shields.io/badge/Google-Gemini-yellow)](https://ai.google.dev/)
+[![Google Gemini](https://img.shields.io/badge/Google-Gemini-2.5--Flash-yellow)](https://ai.google.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.1.15-38B2AC)](https://tailwindcss.com/)
 
-*Revolutionizing online shopping with AI-driven insights and intelligent recommendations*
+*Revolutionizing fashion retail with AI-driven shopping assistance and intelligent product discovery*
 
 [🚀 Live Demo](#) | [📖 Documentation](#features) | [🛠️ Tech Stack](#tech-stack)
 
@@ -21,45 +21,53 @@
 
 ## 🌟 Overview
 
-Welcome to the **AI-Powered E-commerce Platform** - a cutting-edge proof-of-concept that demonstrates how artificial intelligence can transform the online shopping experience. This MVP showcases two groundbreaking AI features: **AI Review Summarization** and **Intelligent Cross-Selling Engine**, designed to solve common e-commerce challenges.
+Welcome to the **AI-Powered E-commerce Fashion Platform** - a modern e-commerce solution that leverages artificial intelligence to enhance the online shopping experience. This platform combines traditional e-commerce functionality with cutting-edge AI features including an intelligent shopping assistant, AI-powered review analysis, and smart product recommendations.
 
-### 🎯 Core Problem Solved
+### 🎯 Core Features
 
-Traditional e-commerce platforms overwhelm shoppers with lengthy product reviews and fail to suggest relevant complementary products. Our AI-powered solution addresses these pain points by providing:
+This platform transforms online fashion shopping by providing:
 
-- **Instant Review Insights**: AI-generated summaries that distill hundreds of reviews into actionable insights
-- **Smart Product Discovery**: Intelligent recommendations based on product embeddings and purchase context
-- **Personalized Shopping Experience**: User feedback loops that continuously improve AI recommendations
+- **AI Shopping Assistant**: A conversational chatbot that helps users discover products, create outfit combinations, and complete purchases
+- **AI Review Intelligence**: Automated review summarization and interactive Q&A about product feedback
+- **Smart Product Recommendations**: Vector-based product similarity matching and cart-aware suggestions
+- **Complete E-commerce Suite**: Product catalog, shopping cart, secure checkout, and user reviews
 
 ---
 
 ## ✨ Features
 
-### 🤖 AI Review Summarization
-- **Instant Summaries**: Process and summarize product reviews using Google Gemini AI
-- **User Feedback**: Like/dislike buttons for continuous model improvement
-- **Feature Flag Control**: Enable/disable AI features without deployment
-- **Bootstrapped Data**: Pre-populated AI-generated reviews for immediate demonstration
+### 🤖 AI Shopping Assistant ("AI-Riper")
+- **Conversational Shopping**: Interactive chatbot powered by Google Gemini 2.5 Flash
+- **Product Discovery**: Natural language search and product recommendations
+- **Outfit Creation**: AI-generated outfit combinations from catalog items
+- **Smart Cart Management**: 4-step guided cart addition with variant selection
+- **Real-time Assistance**: Context-aware help throughout the shopping journey
 
-### 🛒 Intelligent Cross-Selling Engine
-- **Product Embeddings**: Vector-based product similarity matching
-- **Checkout Recommendations**: Smart suggestions during purchase flow
-- **Context-Aware**: Recommendations based on cart contents and user behavior
-- **Performance Tracking**: Click-through and conversion rate analytics
+### 🧠 AI Review Intelligence
+- **Review Summarization**: Automated distillation of customer feedback into key insights
+- **Interactive Q&A**: Ask questions about products based on real customer reviews
+- **Sentiment Analysis**: Balanced overview of product strengths and concerns
+- **User Feedback Loop**: Like/dislike system for improving AI summaries
 
-### 🏪 Standard E-commerce Functionality
-- **Secure Authentication**: Supabase-powered user management with closed beta access
-- **Product Catalog**: 6-8 categories with 10+ products each
-- **Shopping Cart**: Full cart management with persistence
-- **Advanced Filtering**: Multi-criteria product filtering and search
-- **Mock Checkout**: Complete user journey simulation
-- **Responsive Design**: Mobile-first approach with dark/light themes
+### 🎯 Smart Product Recommendations
+- **Vector Embeddings**: Product similarity matching using vector embeddings
+- **Cart-Aware Suggestions**: Context-aware recommendations based on cart contents
+- **Cross-selling Engine**: Intelligent complementary product suggestions
+- **Personalized Discovery**: Usage-based product recommendations
 
-### 🛡️ Security & Compliance
-- **Data Privacy Policy**: Transparent data usage for AI training
-- **Rate Limiting**: Redis-based API rate limiting for cost control
+### 🏪 Complete E-commerce Platform
+- **Secure Authentication**: Supabase-powered user management and session handling
+- **Product Catalog**: Fashion products with variants, images, and categories
+- **Advanced Shopping Cart**: Persistent cart with quantity management
+- **Comprehensive Checkout**: Complete purchase flow with order processing
+- **Product Reviews**: User-generated reviews with ratings and feedback
+- **Search & Filtering**: Multi-criteria product search and category browsing
+
+### 🛡️ Technical Excellence
 - **Type Safety**: Full TypeScript implementation with strict typing
-- **Input Validation**: Zod schemas for all user inputs
+- **Input Validation**: Zod schemas for all API inputs and forms
+- **Database Performance**: Optimized queries with Drizzle ORM and PostgreSQL
+- **AI Cost Management**: Usage tracking and rate limiting for AI features
 
 ---
 
@@ -79,9 +87,10 @@ Traditional e-commerce platforms overwhelm shoppers with lengthy product reviews
 - **[PostgreSQL](https://www.postgresql.org/)** - Primary database with vector extensions
 
 ### AI & Machine Learning
-- **[Vercel AI SDK](https://sdk.vercel.ai/)** - Unified AI interface
-- **[Google Gemini 2.5 Flash](https://ai.google.dev/)** - Advanced multimodal AI model
-- **Custom Embeddings** - Vector-based product similarity matching
+- **[Vercel AI SDK (v6 BETA)](https://sdk.vercel.ai/)** - Streaming AI responses and tool calling
+- **[Google Gemini 2.5 Flash](https://ai.google.dev/)** - Advanced conversational AI model
+- **Vector Embeddings** - Product similarity matching with PostgreSQL vector extension
+- **Custom AI Tools** - Specialized functions for e-commerce operations
 
 ### Development & Testing
 - **[Biome](https://biomejs.dev/)** - Fast linter and formatter
@@ -121,20 +130,21 @@ Traditional e-commerce platforms overwhelm shoppers with lengthy product reviews
    cp .env.example .env
    ```
 
-   Configure your `.env` file:
+   Configure your `.env` file with the following variables:
    ```env
    # Database
    DATABASE_URL="postgresql://user:password@localhost:5432/ai_ecommerce"
 
-   # Supabase
-   NEXT_PUBLIC_SUPABASE_URL="your-supabase-url"
-   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="your-supabase-key"
+   # Supabase Authentication
+   NEXT_PUBLIC_SUPABASE_URL="your-supabase-project-url"
+   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="your-supabase-anon-key"
 
-   # AI
-   GEMINI_API_KEY="your-gemini-api-key"
+   # AI Configuration
+   GEMINI_API_KEY="your-google-gemini-api-key"
 
-   # App
+   # Application Settings
    NEXT_PUBLIC_SITE_NAME="AI Ecommerce"
+   NODE_ENV="development"
    ```
 
 4. **Database Setup**
@@ -189,41 +199,125 @@ pnpm start
 ```
 ai-ecommerce/
 ├── docs/                          # Documentation
-│   ├── ai-sdk.md                  # AI integration guide
-│   ├── checkout.md                # Checkout flow documentation
-│   ├── database.md                # Database schema guide
-│   ├── prd.md                     # Product requirements
-│   └── tech-stack.md              # Technology overview
-├── e2e/                           # End-to-end tests
+├── e2e/                           # End-to-end tests (Playwright)
 │   ├── auth-helpers.ts
 │   ├── login.spec.ts
 │   └── shop.spec.ts
 ├── src/
 │   ├── ai/                        # AI functionality
+│   │   ├── ai-sdk.test.ts         # AI SDK tests
 │   │   ├── ai-sdk.ts              # AI SDK handler
-│   │   ├── gemini-provider.ts     # Gemini AI provider
-│   │   ├── tools.ts               # AI tool definitions
+│   │   ├── constants.ts           # AI configuration
+│   │   ├── gemini-provider.ts     # Google Gemini provider
+│   │   ├── tool-helpers/          # Tool helper functions
+│   │   │   ├── cart-tools.ts
+│   │   │   ├── combo-outfit.ts
+│   │   │   └── product-tools.ts
+│   │   ├── tools/                 # AI tool definitions
+│   │   │   ├── add-to-cart-product-informations.ts
+│   │   │   ├── all-categories.ts
+│   │   │   ├── combo-outfit.ts
+│   │   │   ├── confirm-add-to-cart.ts
+│   │   │   ├── get-cart-details.ts
+│   │   │   ├── most-liked-products.ts
+│   │   │   ├── product-details.ts
+│   │   │   ├── product-reviews.ts
+│   │   │   ├── products-by-category.ts
+│   │   │   ├── revalidate-frontend-cart.ts
+│   │   │   ├── search-by-name.ts
+│   │   │   ├── search-by-tags.ts
+│   │   │   └── suggest-products.ts
+│   │   ├── tools.ts               # Tool exports
 │   │   └── types.ts               # AI type definitions
-│   ├── app/                       # Next.js app directory
+│   ├── app/                       # Next.js 15 app directory
 │   │   ├── api/                   # API routes
 │   │   │   ├── ai/                # AI-powered endpoints
+│   │   │   │   ├── ai-assistant/  # Streaming AI assistant
+│   │   │   │   ├── ask-reviews/   # Review Q&A
+│   │   │   │   ├── suggest-products/ # Product recommendations
+│   │   │   │   └── summorize-reviews/ # Review summarization
 │   │   │   ├── cart/              # Cart management
+│   │   │   ├── categories/        # Category operations
+│   │   │   ├── main-page/         # Homepage data
+│   │   │   ├── order/             # Order management
 │   │   │   ├── product/           # Product operations
-│   │   │   └── review/            # Review handling
+│   │   │   ├── register/          # User registration
+│   │   │   ├── review/            # Review operations
+│   │   │   └── shop/              # Shop filtering/search
 │   │   ├── auth/                  # Authentication pages
-│   │   └── (protected-main)/      # Protected routes
+│   │   │   ├── confirm/           # Email confirmation
+│   │   │   ├── error/             # Auth errors
+│   │   │   ├── forgot-password/   # Password reset
+│   │   │   ├── login/             # Login page
+│   │   │   ├── sign-up/           # Registration
+│   │   │   ├── sign-up-success/   # Registration success
+│   │   │   └── update-password/   # Password update
+│   │   ├── (compliance)/          # Legal pages
+│   │   │   ├── about/
+│   │   │   ├── accessibility/
+│   │   │   ├── contact/
+│   │   │   ├── cookies-policy/
+│   │   │   ├── faq/
+│   │   │   ├── impressum/
+│   │   │   ├── privacy-policy/
+│   │   │   ├── returns-policy/
+│   │   │   ├── shipping/
+│   │   │   └── terms-conditions/
+│   │   ├── (protected-main)/      # Protected routes
+│   │   │   ├── checkout/          # Checkout flow
+│   │   │   │   ├── complete/      # Order completion
+│   │   │   │   └── page.tsx       # Checkout page
+│   │   │   └── layout.tsx        # Protected layout
+│   │   ├── (public-routes)/       # Public routes
+│   │   │   ├── (main-page)/       # Homepage
+│   │   │   ├── [categoryName]/    # Category pages
+│   │   │   ├── layout.tsx         # Public layout
+│   │   │   ├── product/           # Product detail pages
+│   │   │   └── shop/              # Shop browsing
+│   │   ├── error.tsx              # Error boundary
+│   │   ├── favicon.ico
+│   │   ├── globals.css            # Global styles
+│   │   ├── layout.tsx             # Root layout
+│   │   └── not-found.tsx          # 404 page
 │   ├── components/                # React components
-│   │   ├── ai/                    # AI-related components
-│   │   ├── cart/                  # Shopping cart
-│   │   ├── checkout/              # Checkout flow
-│   │   └── ui/                    # Reusable UI components
+│   │   ├── ai-elements/           # AI UI components
+│   │   ├── auth-guard.tsx         # Authentication guard
+│   │   ├── cart/                  # Shopping cart components
+│   │   ├── chatbot/               # AI assistant chat UI
+│   │   ├── checkout/              # Checkout flow components
+│   │   ├── checkout-complete/     # Order completion UI
+│   │   ├── custom-label.tsx       # Custom form labels
+│   │   ├── custom-price.tsx       # Price display component
+│   │   ├── global/                # Global UI components
+│   │   ├── grid/                  # Layout grid components
+│   │   ├── layout/                # Layout components
+│   │   │   ├── footer/            # Site footer
+│   │   │   └── navbar/            # Navigation bar
+│   │   ├── loading-dots.tsx       # Loading animation
+│   │   ├── logo.tsx               # Site logo
+│   │   ├── marquee/               # Scrolling marquee
+│   │   ├── products/              # Product display components
+│   │   ├── shop/                  # Shop browsing components
+│   │   ├── tour/                  # Onboarding tour
+│   │   └── ui/                    # Reusable UI components (Shadcn/ui)
 │   ├── database/                  # Database configuration
-│   │   ├── migrations/            # Database migrations
-│   │   └── schema.ts              # Drizzle schema
+│   │   ├── migrations/            # Drizzle migrations
+│   │   └── schema.ts              # Database schema exports
+│   ├── env.ts                     # Environment configuration
 │   ├── hooks/                     # Custom React hooks
 │   ├── lib/                       # Utility libraries
+│   ├── middleware.ts              # Next.js middleware
 │   ├── providers/                 # React context providers
-│   └── types/                     # TypeScript definitions
+│   ├── schemas/                   # Zod validation schemas
+│   ├── scripts/                   # Utility scripts
+│   │   └── create-embeddings-for-products.ts
+│   ├── supabase-auth/             # Supabase authentication
+│   │   ├── client.ts
+│   │   ├── middleware.ts
+│   │   └── server.ts
+│   ├── test/                      # Test utilities
+│   ├── types/                     # TypeScript definitions
+│   └── utils.ts                   # Utility functions
 ├── .github/workflows/             # CI/CD pipelines
 ├── public/                        # Static assets
 ├── docker-compose.yml             # Docker configuration
@@ -234,22 +328,28 @@ ai-ecommerce/
 
 ## 🔧 API Endpoints
 
-### AI-Powered Endpoints
+### 🤖 AI-Powered Endpoints
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/api/ai/summarize-reviews` | POST | Generate AI review summaries |
-| `/api/ai/suggest-products` | POST | Get intelligent product recommendations |
-| `/api/ai/ask-reviews` | POST | Interactive review Q&A |
+| `/api/ai/ai-assistant` | POST | Streaming AI shopping assistant with product tools |
+| `/api/ai/summorize-reviews` | POST | Generate AI-powered review summaries |
+| `/api/ai/suggest-products` | POST | Get intelligent product recommendations based on cart |
+| `/api/ai/ask-reviews` | POST | Interactive Q&A about product reviews |
 
-### Core E-commerce Endpoints
+### 🛒 E-commerce Endpoints
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/api/product` | GET/POST | Product catalog operations |
+| `/api/product/[id]` | GET | Get detailed product information |
 | `/api/cart` | GET/POST/PUT/DELETE | Shopping cart management |
-| `/api/checkout` | POST | Process checkout (mock) |
+| `/api/cart/checkout` | POST | Process checkout and create orders |
+| `/api/categories` | GET | Get product categories |
+| `/api/main-page` | GET | Get featured products for homepage |
 | `/api/review` | GET/POST | Product review operations |
+| `/api/shop` | GET | Shop products with filtering and search |
+| `/api/register` | POST | User registration |
+| `/api/order/[id]` | GET | Get order details |
 
 ---
 
@@ -269,17 +369,21 @@ ai-ecommerce/
 
 ---
 
-## 📊 Performance & Metrics
+## 📊 Key Features & Capabilities
 
-### AI Feature KPIs
-- **Review Summarization**: Like/dislike ratio tracking
-- **Cross-selling**: Click-through rate and conversion metrics
-- **User Engagement**: Feature usage analytics
+### AI Assistant Capabilities
+- **Product Discovery**: Natural language search across catalog
+- **Outfit Recommendations**: AI-generated style combinations
+- **Cart Assistance**: Guided product addition with variant selection
+- **Review Intelligence**: Summarization and Q&A about customer feedback
+- **Smart Suggestions**: Context-aware product recommendations
 
-### Technical Metrics
-- **Response Time**: <2s for AI operations
-- **Uptime**: 99.9% availability target
-- **Test Coverage**: >80% code coverage
+### Technical Architecture
+- **Streaming AI**: Real-time conversational responses
+- **Vector Search**: Semantic product similarity matching
+- **Type Safety**: Full TypeScript with runtime validation
+- **Scalable Database**: PostgreSQL with optimized queries
+- **Modern Testing**: Unit tests with Vitest, E2E with Playwright
 
 ---
 
@@ -337,10 +441,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- **Google Gemini** for powering our AI features
-- **Supabase** for the robust backend infrastructure
-- **Vercel** for seamless deployment and hosting
-- **The open-source community** for amazing tools and libraries
+- **Google Gemini 2.5 Flash** for powering conversational AI and review intelligence
+- **Supabase** for authentication, database, and backend infrastructure
+- **Vercel AI SDK** for streamlined AI integration and streaming responses
+- **Drizzle ORM** for type-safe database operations
+- **Shadcn/ui & Radix UI** for accessible, beautiful components
+- **The open-source community** for the amazing ecosystem of tools
 
 ---
 
