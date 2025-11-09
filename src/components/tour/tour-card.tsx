@@ -41,14 +41,14 @@ export const TourCard: React.FC<CardComponentProps> = ({
   }
 
   return (
-    <Card className="relative border-0 min-w-[500px] w-max max-w-[500px] z-[999] bg-white border-none">
+    <Card className="relative border-0 min-w-[500px] w-max max-w-[500px] z-[999] bg-white border-none gap-1">
       <CardHeader>
         <div className="flex items-start justify-between w-full space-x-4">
           <div className="flex flex-col space-y-2">
             <CardDescription className="text-black/50">
               {currentStep + 1} of {totalSteps}
             </CardDescription>
-            <CardTitle className="mb-2 text-lg text-black">
+            <CardTitle className="text-lg text-black">
               {step.icon} {step.title}
             </CardTitle>
           </div>

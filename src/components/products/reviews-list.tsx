@@ -62,8 +62,11 @@ export function ReviewsList({
   }
 
   return (
-    <div className={cn("space-y-4", className)} id="onboarding-tour-step-7">
-      <div className="flex items-center justify-between">
+    <div className={cn("space-y-4", className)}>
+      <div
+        className="flex items-center justify-between"
+        id="onboarding-tour-step-6"
+      >
         <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
           Customer Reviews ({reviews.length})
         </h3>

@@ -10,15 +10,13 @@ export function AssistantButton(): ReactNode {
 
   return (
     <>
-      <div
-        className="fixed bottom-14 right-4 z-[60] bg-background hover:bg-background/80 rounded-lg"
-        id="onboarding-tour-step-2"
-      >
+      <div className="fixed bottom-14 right-4 z-[60] bg-background hover:bg-background/80 rounded-lg">
         <Button
           variant="outline"
           size="icon"
           className="cursor-pointer"
           onClick={() => setIsOpen((prev) => !prev)}
+          id="onboarding-tour-step-2"
         >
           <BotMessageSquareIcon className="size-4" />
         </Button>
