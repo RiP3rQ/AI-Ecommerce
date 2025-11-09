@@ -69,7 +69,7 @@ export function formatFullPrice({
 export const BASE_URL =
   process.env.NEXT_PUBLIC_VERCEL_ENV === "production" ||
   process.env.NEXT_PUBLIC_VERCEL_ENV === "preview"
-    ? `https://${process.env.VERCEL_URL}`
+    ? `https://ai-ecommerce-seven.vercel.app`
     : "http://localhost:3000";
 
 /**
