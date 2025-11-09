@@ -36,7 +36,7 @@ interface SelectedProduct {
 interface MessageListProps {
   messages: MessageType[];
   status?: string;
-  addToolResult: (params: {
+  addToolOutput: (params: {
     tool: string;
     toolCallId: string;
     output: unknown;
@@ -48,7 +48,7 @@ interface MessageBubbleProps {
   message: MessageType;
   status?: string;
   isLastMessage?: boolean;
-  addToolResult: (params: {
+  addToolOutput: (params: {
     tool: string;
     toolCallId: string;
     output: unknown;
@@ -59,7 +59,7 @@ const MessageBubble = ({
   message,
   status,
   isLastMessage,
-  addToolResult,
+  addToolOutput,
 }: MessageBubbleProps) => {
   const { user } = useAuth();
   const isUser = message.role === "user";
@@ -375,7 +375,7 @@ const MessageBubble = ({
 
             // Return the output for the clientSideConfirmationForCartModification tool
             // The AI will then automatically call saveTheFrontendSelectedProductToCart with this data
-            addToolResult({
+            addToolOutput({
               tool: "clientSideConfirmationForCartModification",
               toolCallId: addToCartModal.toolCallId,
               output: {
@@ -399,7 +399,7 @@ const MessageBubble = ({
 export const MessageList = ({
   messages,
   status,
-  addToolResult,
+  addToolOutput,
   isAuthenticated,
 }: MessageListProps) => {
   return (
@@ -424,7 +424,7 @@ export const MessageList = ({
             message={message}
             status={status}
             isLastMessage={index === messages.length - 1}
-            addToolResult={addToolResult}
+            addToolOutput={addToolOutput}
           />
         ))}
       </div>

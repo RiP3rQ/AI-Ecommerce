@@ -24,7 +24,7 @@ export const Chat = () => {
     status,
     setMessages,
     error,
-    addToolResult,
+    addToolOutput,
     stop: abort,
   } = useChat<MessageType>({
     transport: new DefaultChatTransport({
@@ -58,7 +58,7 @@ export const Chat = () => {
           });
 
         // Add tool result
-        addToolResult({
+        addToolOutput({
           tool: "revalidateFrontendCart",
           toolCallId: toolCall.toolCallId,
           output: true,
@@ -159,7 +159,7 @@ export const Chat = () => {
       <MessageList
         messages={deduplicatedMessages}
         status={status}
-        addToolResult={addToolResult}
+        addToolOutput={addToolOutput}
         isAuthenticated={isAuthenticated}
       />
       <div className="grid shrink-0 gap-4 pt-4">
