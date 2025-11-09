@@ -16,14 +16,13 @@ import { useCart } from "@/providers/cart-provider";
 import { useAuth } from "@/hooks/use-auth";
 import { useChatProvider } from "@/providers/chat-provider";
 import { ResetChatModal } from "./reset-chat-modal";
-import { Button } from "@/components/ui/button";
-import { RotateCcwIcon } from "lucide-react";
 import { MessagesCounterAndResetChatButton } from "./messages-counter-and-reset-chat-button";
 
 export function Chat(): ReactNode {
   const { isAuthenticated } = useAuth();
   const { mutate: mutateCart } = useCart();
-  const { shouldResetChat, resetComplete } = useChatProvider();
+  const { persistedMessages, setPersistedMessages, resetChatSession } =
+    useChatProvider();
   const [isResetModalOpen, setIsResetModalOpen] = useState<boolean>(false);
 
   const {
@@ -38,7 +37,6 @@ export function Chat(): ReactNode {
     transport: new DefaultChatTransport({
       api: "/api/ai/ai-assistant",
     }),
-    messages: INITIAL_MESSAGE,
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
     // run client-side tools that are automatically executed:
     async onToolCall({ toolCall }) {
@@ -76,17 +74,22 @@ export function Chat(): ReactNode {
   });
 
   const prevStatusRef = useRef<string | undefined>(undefined);
+  const isInitialMount = useRef<boolean>(true);
 
-  // Handle chat reset
+  // On mount, restore messages from provider
   useEffect(() => {
-    if (shouldResetChat) {
-      setMessages(INITIAL_MESSAGE);
-      resetComplete();
-      toast.success("Chat session reset", {
-        description: "You can now start a fresh conversation.",
-      });
+    if (isInitialMount.current && persistedMessages.length > 0) {
+      setMessages(persistedMessages);
+      isInitialMount.current = false;
     }
-  }, [shouldResetChat, setMessages, resetComplete]);
+  }, []);
+
+  // Sync messages to provider whenever they change (for persistence across sheet open/close)
+  useEffect(() => {
+    if (!isInitialMount.current) {
+      setPersistedMessages(messages);
+    }
+  }, [messages, setPersistedMessages]);
 
   // Handle loading messages when status changes to "submitted"
   useEffect(() => {
@@ -178,7 +181,9 @@ export function Chat(): ReactNode {
   };
 
   const confirmResetChat = () => {
+    // Reset both local and persisted messages
     setMessages(INITIAL_MESSAGE);
+    resetChatSession();
     toast.success("Chat session reset", {
       description: "You can now start a fresh conversation.",
     });

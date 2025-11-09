@@ -26,6 +26,7 @@ import { Loader } from "../ai-elements/loader";
 import { AddToCartModal } from "./add-to-cart-modal";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
+import { ReasoningUIPart, ToolUIPart } from "ai";
 
 interface SelectedProduct {
   productId: string;
@@ -187,18 +188,16 @@ const MessageBubble = ({
                 <Response key={`${message.id}-${i}`}>{part.text}</Response>
               );
             } else if (part.type === "reasoning") {
+              const reasoningPart = part as ReasoningUIPart;
               return (
                 <Reasoning
                   key={`${message.id}-${i}`}
                   className="w-full"
-                  isStreaming={
-                    status === "streaming" &&
-                    isLastMessage &&
-                    i === message.parts.length - 1
-                  }
+                  defaultOpen={reasoningPart.state === "streaming"}
+                  isStreaming={reasoningPart.state === "streaming"}
                 >
                   <ReasoningTrigger />
-                  <ReasoningContent>{part.text}</ReasoningContent>
+                  <ReasoningContent>{reasoningPart.text}</ReasoningContent>
                 </Reasoning>
               );
             } else if (part.type === "step-start") {
@@ -318,14 +317,11 @@ const MessageBubble = ({
 
               return null;
             } else if (part.type.startsWith("tool-")) {
-              const toolPart = part as any; // Type assertion for tool parts
+              const toolPart = part as ToolUIPart;
               return (
                 <Tool
                   key={`${message.id}-${i}`}
-                  defaultOpen={
-                    toolPart.state === "output-available" ||
-                    toolPart.state === "output-error"
-                  }
+                  defaultOpen={toolPart.state === "output-error"}
                   className="mt-4"
                 >
                   <ToolHeader type={toolPart.type} state={toolPart.state} />
