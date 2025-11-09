@@ -6,7 +6,7 @@ import { ChatInput } from "./chat-input";
 import { MessageList } from "./message-list";
 import { Suggestions } from "./suggestions";
 import { useChat } from "@ai-sdk/react";
-import { getInitialMessages } from "./constants";
+import { INITIAL_MESSAGE } from "./constants";
 import {
   DefaultChatTransport,
   lastAssistantMessageIsCompleteWithToolCalls,
@@ -30,7 +30,7 @@ export const Chat = () => {
     transport: new DefaultChatTransport({
       api: "/api/ai/ai-assistant",
     }),
-    messages: getInitialMessages(isAuthenticated),
+    messages: INITIAL_MESSAGE,
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
     // run client-side tools that are automatically executed:
     async onToolCall({ toolCall }) {
@@ -160,6 +160,7 @@ export const Chat = () => {
         messages={deduplicatedMessages}
         status={status}
         addToolResult={addToolResult}
+        isAuthenticated={isAuthenticated}
       />
       <div className="grid shrink-0 gap-4 pt-4">
         <Suggestions

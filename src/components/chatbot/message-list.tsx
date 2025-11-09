@@ -41,6 +41,7 @@ interface MessageListProps {
     toolCallId: string;
     output: unknown;
   }) => void;
+  isAuthenticated: boolean;
 }
 
 interface MessageBubbleProps {
@@ -399,10 +400,24 @@ export const MessageList = ({
   messages,
   status,
   addToolResult,
+  isAuthenticated,
 }: MessageListProps) => {
   return (
     <div className="flex-1 overflow-y-auto p-4">
       <div className="space-y-4">
+        {!isAuthenticated && (
+          <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950">
+            <div className="flex items-center gap-2">
+              <div className="text-sm font-medium text-amber-900 dark:text-amber-100">
+                🔐 Authentication Required
+              </div>
+            </div>
+            <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">
+              Please sign in to interact with our AI assistant and add products
+              to your cart.
+            </p>
+          </div>
+        )}
         {messages.map((message, index) => (
           <MessageBubble
             key={message.id}
