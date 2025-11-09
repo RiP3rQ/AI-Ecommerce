@@ -1,7 +1,7 @@
-import { generateText } from "ai";
+import { AiSdkHandler } from "@/ai/ai-sdk";
 import { geminiProvider } from "@/ai/gemini-provider";
 import { reviewSummaries, reviews, products } from "@/database/schema";
-import { eq, desc, sql, count, avg } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { SummarizeReviewsPrompts } from "./prompts";
 import { MAX_REVIEWS_FOR_SUMMARY, MAX_SUMMARY_TOKENS } from "./constants";
 import { ProductNotFoundError } from "@/lib/errors";
@@ -73,6 +73,8 @@ export class SummarizeReviewsService {
       reviewsText,
       averageRating: Math.round(averageRating * 10) / 10, // Round to 1 decimal
       totalReviews,
+      db,
+      productId,
     });
 
     // Step 6: Store or update summary in database
@@ -103,29 +105,41 @@ export class SummarizeReviewsService {
    * @param reviewsText - Concatenated review texts
    * @param averageRating - Average rating across all reviews
    * @param totalReviews - Total number of reviews
+   * @param db - Database client for saving AI results
+   * @param productId - Product ID for operation tracking
    * @returns Generated summary text
    */
   private async generateReviewSummary({
     reviewsText,
     averageRating,
     totalReviews,
+    db,
+    productId,
   }: Readonly<{
     reviewsText: string;
     averageRating: number;
     totalReviews: number;
+    db: DrizzleDbClient | TestDatabase;
+    productId: string;
   }>): Promise<string> {
     try {
-      const aiResponse = await generateText({
-        model: geminiProvider("gemini-2.5-flash"),
-        system: SummarizeReviewsPrompts.SYSTEM_PROMPT,
-        prompt: SummarizeReviewsPrompts.USER_PROMPT({
-          reviewsText,
-          averageRating,
-          totalReviews,
-        }),
-        temperature: 0.3, // Balanced creativity and consistency
-        maxOutputTokens: MAX_SUMMARY_TOKENS,
-      });
+      const aiResponse = await AiSdkHandler.generateText(
+        {
+          system: SummarizeReviewsPrompts.SYSTEM_PROMPT,
+          prompt: SummarizeReviewsPrompts.USER_PROMPT({
+            reviewsText,
+            averageRating,
+            totalReviews,
+          }),
+          temperature: 0.3, // Balanced creativity and consistency
+          maxOutputTokens: MAX_SUMMARY_TOKENS,
+        },
+        {
+          dbClient: db,
+          operationType: "summarize_reviews",
+          operationId: productId,
+        },
+      );
 
       const summary = aiResponse.text?.trim();
 

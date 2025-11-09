@@ -49,3 +49,19 @@ export interface GenerateTextOptions {
   /** Tools available for the AI model to use. */
   tools?: Record<string, Tool>;
 }
+
+/**
+ * Configuration options for streamText operations.
+ */
+export interface StreamTextOptions extends Omit<GenerateTextOptions, "prompt"> {
+  /** Provider options for the AI model. */
+  providerOptions?: Record<string, any>;
+  /** The messages to send to the AI model. */
+  messages: Array<ModelMessage>;
+  /** Abort signal for cancelling the request. */
+  abortSignal?: AbortSignal;
+  /** Callback for when the request is aborted. */
+  onAbort?: (event: { readonly steps: readonly any[] }) => void;
+  /** Callback for when an error occurs. */
+  onError?: (event: { error: unknown }) => void;
+}

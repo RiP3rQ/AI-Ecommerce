@@ -49,6 +49,7 @@ export async function POST(request: NextRequest) {
       body,
       userId: user.id,
       abortSignal: request.signal,
+      db: dbClient,
     });
 
     // Step 5: Return streaming response with sources and reasoning
