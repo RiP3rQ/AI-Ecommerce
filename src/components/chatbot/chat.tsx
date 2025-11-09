@@ -140,10 +140,23 @@ export const Chat = () => {
     await sendMessage();
   };
 
+  // Deduplicate messages by ID - keep only the last occurrence of each ID
+  // This fixes the issue where client-side tools cause message duplication
+  const deduplicatedMessages = messages.reduce((acc, message) => {
+    const existingIndex = acc.findIndex((m) => m.id === message.id);
+    if (existingIndex !== -1) {
+      // Replace existing message with the newer one (which has more parts)
+      acc[existingIndex] = message;
+    } else {
+      acc.push(message);
+    }
+    return acc;
+  }, [] as MessageType[]);
+
   return (
     <div className="relative flex size-full flex-col divide-y overflow-hidden">
       <MessageList
-        messages={messages}
+        messages={deduplicatedMessages}
         status={status}
         addToolResult={addToolResult}
       />

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { type MessageType } from "@/types/chat";
 import Image from "next/image";
 import {
@@ -106,7 +106,39 @@ const MessageBubble = ({
     }>;
   }> | null>(null);
 
-  console.log("message", message);
+  // Extract products from Step 1 tool output when message updates
+  useEffect(() => {
+    const addToCartPart = message.parts.find(
+      (part: any) =>
+        part.type === "tool-addToCartProductInformations" &&
+        part.state === "output-available",
+    );
+
+    if (addToCartPart) {
+      const toolPart = addToCartPart as any;
+      const productsData = toolPart.output?.products;
+
+      if (productsData && productsData.length > 0 && !productsFromStep1) {
+        const transformedProducts = productsData.map((product: any) => ({
+          id: product.id,
+          title: product.title,
+          description: product.description,
+          tags: product.tags,
+          variants: product.variants.map((variant: any) => ({
+            id: variant.id,
+            title: variant.title,
+            price: variant.price,
+            currencyCode: variant.currencyCode,
+            availableForSale: variant.availableForSale,
+            selectedOptions: variant.selectedOptions,
+            inventoryQuantity: variant.inventoryQuantity,
+          })),
+        }));
+
+        setProductsFromStep1(transformedProducts);
+      }
+    }
+  }, [message, productsFromStep1]);
 
   return (
     <div className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"}`}>
@@ -139,7 +171,10 @@ const MessageBubble = ({
           {message.parts.map((part, i) => {
             if (part.type === "text" && message.id.startsWith("loading-")) {
               return (
-                <div className="flex items-center gap-4">
+                <div
+                  className="flex items-center gap-4"
+                  key={`${message.id}-${i}`}
+                >
                   <Loader className="size-4" />
                   <Response key={`${message.id}-${i}`}>{part.text}</Response>
                 </div>
@@ -170,35 +205,9 @@ const MessageBubble = ({
               part.type === "tool-addToCartProductInformations" &&
               part.state === "output-available"
             ) {
-              // STEP 1: Store product data from addToCartProductInformations output
+              // STEP 1: Display product data from addToCartProductInformations output
+              // Product data is extracted via useEffect and stored in productsFromStep1 state
               const toolPart = part as any;
-              const productsData = toolPart.output?.products;
-
-              // Store products in state for Step 2 to use
-              if (productsData && productsData.length > 0) {
-                const transformedProducts = productsData.map(
-                  (product: any) => ({
-                    id: product.id,
-                    title: product.title,
-                    description: product.description,
-                    tags: product.tags,
-                    variants: product.variants.map((variant: any) => ({
-                      id: variant.id,
-                      title: variant.title,
-                      price: variant.price,
-                      currencyCode: variant.currencyCode,
-                      availableForSale: variant.availableForSale,
-                      selectedOptions: variant.selectedOptions,
-                      inventoryQuantity: variant.inventoryQuantity,
-                    })),
-                  }),
-                );
-
-                // Store in state for Step 2
-                if (!productsFromStep1) {
-                  setProductsFromStep1(transformedProducts);
-                }
-              }
 
               // Display the tool result
               return (
@@ -221,9 +230,6 @@ const MessageBubble = ({
               part.type === "tool-clientSideConfirmationForCartModification"
             ) {
               const toolPart = part as any;
-
-              console.log("toolPart", toolPart);
-              console.log("productsFromStep1", productsFromStep1);
 
               // STEP 2: Handle client-side confirmation tool for cart modification
               if (toolPart.state === "input-available") {

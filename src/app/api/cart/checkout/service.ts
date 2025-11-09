@@ -46,6 +46,7 @@ export class CheckoutService {
           userId,
           totalPrice: cartSummary.totalPrice,
           status: "completed", // MVP: immediately mark as completed
+          updatedAt: new Date(),
         })
         .returning();
 
@@ -59,6 +60,7 @@ export class CheckoutService {
         productVariantId: item.productVariantId,
         quantity: item.quantity,
         priceAtPurchase: item.productVariant.price,
+        updatedAt: new Date(),
       }));
 
       await tx.insert(orderItems).values(orderItemsData);

@@ -45,7 +45,10 @@ export class CartService {
       return existingCart.id;
     }
 
-    const [newCart] = await db.insert(carts).values({ userId }).returning();
+    const [newCart] = await db
+      .insert(carts)
+      .values({ userId, updatedAt: new Date() })
+      .returning();
 
     if (!newCart) {
       throw new Error("Failed to create cart");
@@ -182,6 +185,7 @@ export class CartService {
         cartId,
         productVariantId: dto.productVariantId,
         quantity: dto.quantity,
+        updatedAt: new Date(),
       });
     }
 
