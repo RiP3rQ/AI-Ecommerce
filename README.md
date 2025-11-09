@@ -150,13 +150,10 @@ This platform transforms online fashion shopping by providing:
 4. **Database Setup**
    ```bash
    # Push schema to database
-   pnpm drizzle-kit push
+   pnpm drizzle-kit migrate
 
    # Generate embeddings for products
    pnpm embeddings:generate
-
-   # Seed database (if available)
-   pnpm db:seed
    ```
 
 5. **Development Server**
@@ -393,24 +390,6 @@ ai-ecommerce/
 1. Connect your GitHub repository to Vercel
 2. Configure environment variables
 3. Deploy automatically on push to main
-
-### Docker Deployment
-```bash
-# Build Docker image
-docker build -t ai-ecommerce .
-
-# Run with Docker Compose
-docker-compose up -d
-```
-
-### Manual Deployment
-```bash
-# Build for production
-pnpm build
-
-# Start production server
-pnpm start
-```
 
 ---
 
