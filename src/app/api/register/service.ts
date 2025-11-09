@@ -29,6 +29,7 @@ export class RegisterService {
         id: dto.userId,
         email: dto.email,
         acceptedDataPolicy: true,
+        updatedAt: new Date(),
       })
       .returning();
 

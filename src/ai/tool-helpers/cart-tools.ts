@@ -129,6 +129,7 @@ export async function addToCart(
         .insert(carts)
         .values({
           userId,
+          updatedAt: new Date(),
         })
         .returning({ id: carts.id });
 
@@ -155,7 +156,7 @@ export async function addToCart(
       const newQuantity = existingCartItem[0].quantity + quantity;
       await db
         .update(cartItems)
-        .set({ quantity: newQuantity })
+        .set({ quantity: newQuantity, updatedAt: new Date() })
         .where(eq(cartItems.id, existingCartItem[0].id));
 
       return {
@@ -172,6 +173,7 @@ export async function addToCart(
           cartId,
           productVariantId,
           quantity,
+          updatedAt: new Date(),
         })
         .returning({ id: cartItems.id });
 
