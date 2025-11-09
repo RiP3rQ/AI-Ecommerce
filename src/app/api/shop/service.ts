@@ -173,19 +173,24 @@ export class ShopService {
       conditions.push(eq(products.availableForSale, availableForSale));
     }
 
-    // Filter by price range - check if product has at least one variant in price range
+    // Filter by price range - check if product's minimum variant price is in range
     if (priceMin !== undefined || priceMax !== undefined) {
-      let existsQuery: ReturnType<typeof sql>;
+      const minPriceSubquery = sql`(
+        SELECT MIN(price) 
+        FROM product_variants 
+        WHERE product_variants.product_id = products.id 
+        AND product_variants.available_for_sale = true
+      )`;
 
       if (priceMin !== undefined && priceMax !== undefined) {
-        existsQuery = sql`EXISTS (SELECT 1 FROM product_variants WHERE product_variants.product_id = products.id AND product_variants.available_for_sale = true AND product_variants.price >= ${priceMin} AND product_variants.price <= ${priceMax})`;
+        conditions.push(
+          sql`${minPriceSubquery} >= ${priceMin} AND ${minPriceSubquery} <= ${priceMax}`,
+        );
       } else if (priceMin !== undefined) {
-        existsQuery = sql`EXISTS (SELECT 1 FROM product_variants WHERE product_variants.product_id = products.id AND product_variants.available_for_sale = true AND product_variants.price >= ${priceMin})`;
+        conditions.push(sql`${minPriceSubquery} >= ${priceMin}`);
       } else if (priceMax !== undefined) {
-        existsQuery = sql`EXISTS (SELECT 1 FROM product_variants WHERE product_variants.product_id = products.id AND product_variants.available_for_sale = true AND product_variants.price <= ${priceMax})`;
+        conditions.push(sql`${minPriceSubquery} <= ${priceMax}`);
       }
-
-      conditions.push(existsQuery!);
     }
 
     return conditions;
@@ -212,9 +217,15 @@ export class ShopService {
         return [direction(products.updatedAt)];
       case "availableForSale":
         return [direction(products.availableForSale)];
-      // Price sorting handled after query due to aggregation
       case "price":
-        return [direction(products.createdAt)]; // Default to createdAt for now
+        // Sort by minimum variant price (cheapest variant)
+        const minPriceSubquery = sql<number>`(
+          SELECT COALESCE(MIN(price), 0) 
+          FROM product_variants 
+          WHERE product_variants.product_id = products.id 
+          AND product_variants.available_for_sale = true
+        )`;
+        return [direction(minPriceSubquery)];
       default:
         throw new InvalidSortFieldError(
           `Sort field "${sortField}" is not supported.`,

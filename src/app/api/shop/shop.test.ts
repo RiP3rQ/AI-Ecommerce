@@ -547,7 +547,7 @@ describe("/api/shop", () => {
         });
       });
 
-      it("filters products with multiple variants correctly", async () => {
+      it("filters products with multiple variants by minimum price", async () => {
         await createTestableUnit(async (db) => {
           // Arrange: Create test data
           const categoryId = faker.string.uuid();
@@ -559,18 +559,180 @@ describe("/api/shop", () => {
             },
           });
 
-          // Create product with multiple variants
-          const product = await createProductFixture({
+          // Create product with multiple variants where min price is in range
+          const productInRange = await createProductFixture({
             db,
-            overrides: { title: "Multi-Variant Product", categoryId },
+            overrides: { title: "Product In Range", categoryId },
           });
 
-          // Create variants with different prices
+          // Create variants with different prices - min price is 1200 (in range)
+          await createProductVariantFixture({
+            db,
+            overrides: {
+              productId: productInRange.id,
+              price: 1200, // $12.00 - minimum (in range)
+              currencyCode: "USD",
+            },
+          });
+          await createProductVariantFixture({
+            db,
+            overrides: {
+              productId: productInRange.id,
+              price: 1500, // $15.00
+              currencyCode: "USD",
+            },
+          });
+          await createProductVariantFixture({
+            db,
+            overrides: {
+              productId: productInRange.id,
+              price: 2500, // $25.00
+              currencyCode: "USD",
+            },
+          });
+
+          // Create product where min price is below range
+          const productBelowRange = await createProductFixture({
+            db,
+            overrides: { title: "Product Below Range", categoryId },
+          });
+
+          await createProductVariantFixture({
+            db,
+            overrides: {
+              productId: productBelowRange.id,
+              price: 500, // $5.00 - minimum (below range)
+              currencyCode: "USD",
+            },
+          });
+          await createProductVariantFixture({
+            db,
+            overrides: {
+              productId: productBelowRange.id,
+              price: 1500, // $15.00 (in range, but min is below)
+              currencyCode: "USD",
+            },
+          });
+
+          // Act: Filter by price range $10 - $20
+          const result = await shopService.getProducts({
+            dto: {
+              page: 1,
+              limit: 10,
+              sortDirection: "asc",
+              sortField: "createdAt",
+              priceMin: 1000, // $10.00
+              priceMax: 2000, // $20.00
+            },
+            db,
+          });
+
+          // Assert: Only product with min price in range should be included
+          expect(result.products).toHaveLength(1);
+          expect(result.products[0].title).toBe("Product In Range");
+          expect(result.products[0].minPrice).toBe(1200);
+          expect(result.products[0].maxPrice).toBe(2500);
+        });
+      });
+
+      it("excludes products where minimum price is outside range", async () => {
+        await createTestableUnit(async (db) => {
+          // Arrange: Create test data
+          const categoryId = faker.string.uuid();
+          const category = await createCategoryFixture({
+            db,
+            overrides: {
+              name: `Test Category ${faker.string.uuid()}`,
+              id: categoryId,
+            },
+          });
+
+          // Create product with multiple variants - minimum price below range
+          const productBelowRange = await createProductFixture({
+            db,
+            overrides: { title: "Product Below Range", categoryId },
+          });
+
+          await createProductVariantFixture({
+            db,
+            overrides: {
+              productId: productBelowRange.id,
+              price: 500, // $5.00 - minimum (below range)
+              currencyCode: "USD",
+            },
+          });
+          await createProductVariantFixture({
+            db,
+            overrides: {
+              productId: productBelowRange.id,
+              price: 3000, // $30.00 - above range
+              currencyCode: "USD",
+            },
+          });
+
+          // Create product with minimum price above range
+          const productAboveRange = await createProductFixture({
+            db,
+            overrides: { title: "Product Above Range", categoryId },
+          });
+
+          await createProductVariantFixture({
+            db,
+            overrides: {
+              productId: productAboveRange.id,
+              price: 2500, // $25.00 - minimum (above range)
+              currencyCode: "USD",
+            },
+          });
+          await createProductVariantFixture({
+            db,
+            overrides: {
+              productId: productAboveRange.id,
+              price: 3000, // $30.00
+              currencyCode: "USD",
+            },
+          });
+
+          // Act: Filter by price range $10 - $20
+          const result = await shopService.getProducts({
+            dto: {
+              page: 1,
+              limit: 10,
+              sortDirection: "asc",
+              sortField: "createdAt",
+              priceMin: 1000, // $10.00
+              priceMax: 2000, // $20.00
+            },
+            db,
+          });
+
+          // Assert: Both products should be excluded (min prices are outside range)
+          expect(result.products).toHaveLength(0);
+        });
+      });
+
+      it("filters correctly with priceMin at exact minimum variant price", async () => {
+        await createTestableUnit(async (db) => {
+          // Arrange: Create test data
+          const categoryId = faker.string.uuid();
+          const category = await createCategoryFixture({
+            db,
+            overrides: {
+              name: `Test Category ${faker.string.uuid()}`,
+              id: categoryId,
+            },
+          });
+
+          const product = await createProductFixture({
+            db,
+            overrides: { title: "Edge Case Product", categoryId },
+          });
+
           await createProductVariantFixture({
             db,
             overrides: {
               productId: product.id,
-              price: 500, // $5.00
+              price: 1000, // $10.00 - exactly at priceMin
               currencyCode: "USD",
             },
           });
@@ -582,37 +744,27 @@ describe("/api/shop", () => {
               currencyCode: "USD",
             },
           });
-          await createProductVariantFixture({
-            db,
-            overrides: {
-              productId: product.id,
-              price: 2500, // $25.00
-              currencyCode: "USD",
-            },
-          });
 
-          // Act: Filter by price range $10 - $20
+          // Act: Filter with priceMin exactly at minimum price
           const result = await shopService.getProducts({
             dto: {
               page: 1,
               limit: 10,
               sortDirection: "asc",
               sortField: "createdAt",
-              priceMin: 1000, // $10.00
-              priceMax: 2000, // $20.00
+              priceMin: 1000, // $10.00 - exact match
             },
             db,
           });
 
-          // Assert: Product should be included because it has variants in range ($15)
+          // Assert: Product should be included
           expect(result.products).toHaveLength(1);
-          expect(result.products[0].title).toBe("Multi-Variant Product");
-          expect(result.products[0].minPrice).toBe(500);
-          expect(result.products[0].maxPrice).toBe(2500);
+          expect(result.products[0].title).toBe("Edge Case Product");
+          expect(result.products[0].minPrice).toBe(1000);
         });
       });
 
-      it("excludes products with no variants in price range", async () => {
+      it("filters correctly with priceMax at exact minimum variant price", async () => {
         await createTestableUnit(async (db) => {
           // Arrange: Create test data
           const categoryId = faker.string.uuid();
@@ -624,17 +776,16 @@ describe("/api/shop", () => {
             },
           });
 
-          // Create product with multiple variants all outside range
           const product = await createProductFixture({
             db,
-            overrides: { title: "Out of Range Product", categoryId },
+            overrides: { title: "Edge Case Product", categoryId },
           });
 
           await createProductVariantFixture({
             db,
             overrides: {
               productId: product.id,
-              price: 500, // $5.00 - below range
+              price: 1000, // $10.00 - exactly at priceMax
               currencyCode: "USD",
             },
           });
@@ -642,26 +793,27 @@ describe("/api/shop", () => {
             db,
             overrides: {
               productId: product.id,
-              price: 3000, // $30.00 - above range
+              price: 1500, // $15.00
               currencyCode: "USD",
             },
           });
 
-          // Act: Filter by price range $10 - $20
+          // Act: Filter with priceMax exactly at minimum price
           const result = await shopService.getProducts({
             dto: {
               page: 1,
               limit: 10,
               sortDirection: "asc",
               sortField: "createdAt",
-              priceMin: 1000, // $10.00
-              priceMax: 2000, // $20.00
+              priceMax: 1000, // $10.00 - exact match
             },
             db,
           });
 
-          // Assert: Product should be excluded because no variants are in range
-          expect(result.products).toHaveLength(0);
+          // Assert: Product should be included
+          expect(result.products).toHaveLength(1);
+          expect(result.products[0].title).toBe("Edge Case Product");
+          expect(result.products[0].minPrice).toBe(1000);
         });
       });
 
@@ -828,6 +980,261 @@ describe("/api/shop", () => {
           // Assert
           expect(result.products[0].title).toBe("Z Product");
           expect(result.products[1].title).toBe("A Product");
+        });
+      });
+
+      it("sorts products by price ascending (by minimum variant price)", async () => {
+        await createTestableUnit(async (db) => {
+          // Arrange: Create test data
+          const categoryId = faker.string.uuid();
+          const category = await createCategoryFixture({
+            db,
+            overrides: {
+              name: `Test Category ${faker.string.uuid()}`,
+              id: categoryId,
+            },
+          });
+
+          // Create products with different minimum prices
+          const expensiveProduct = await createProductFixture({
+            db,
+            overrides: { title: "Expensive Product", categoryId },
+          });
+          const cheapProduct = await createProductFixture({
+            db,
+            overrides: { title: "Cheap Product", categoryId },
+          });
+          const mediumProduct = await createProductFixture({
+            db,
+            overrides: { title: "Medium Product", categoryId },
+          });
+
+          // Expensive product: min price 3000, max price 5000
+          await createProductVariantFixture({
+            db,
+            overrides: {
+              productId: expensiveProduct.id,
+              price: 3000, // $30.00 - minimum
+              currencyCode: "USD",
+            },
+          });
+          await createProductVariantFixture({
+            db,
+            overrides: {
+              productId: expensiveProduct.id,
+              price: 5000, // $50.00
+              currencyCode: "USD",
+            },
+          });
+
+          // Cheap product: min price 500, max price 1000
+          await createProductVariantFixture({
+            db,
+            overrides: {
+              productId: cheapProduct.id,
+              price: 500, // $5.00 - minimum
+              currencyCode: "USD",
+            },
+          });
+          await createProductVariantFixture({
+            db,
+            overrides: {
+              productId: cheapProduct.id,
+              price: 1000, // $10.00
+              currencyCode: "USD",
+            },
+          });
+
+          // Medium product: min price 1500, max price 2000
+          await createProductVariantFixture({
+            db,
+            overrides: {
+              productId: mediumProduct.id,
+              price: 1500, // $15.00 - minimum
+              currencyCode: "USD",
+            },
+          });
+          await createProductVariantFixture({
+            db,
+            overrides: {
+              productId: mediumProduct.id,
+              price: 2000, // $20.00
+              currencyCode: "USD",
+            },
+          });
+
+          // Act: Sort by price ascending
+          const result = await shopService.getProducts({
+            dto: {
+              page: 1,
+              limit: 10,
+              sortDirection: "asc",
+              sortField: "price",
+            },
+            db,
+          });
+
+          // Assert: Products should be sorted by minimum price (cheapest first)
+          expect(result.products).toHaveLength(3);
+          expect(result.products[0].title).toBe("Cheap Product");
+          expect(result.products[0].minPrice).toBe(500);
+          expect(result.products[1].title).toBe("Medium Product");
+          expect(result.products[1].minPrice).toBe(1500);
+          expect(result.products[2].title).toBe("Expensive Product");
+          expect(result.products[2].minPrice).toBe(3000);
+        });
+      });
+
+      it("sorts products by price descending (by minimum variant price)", async () => {
+        await createTestableUnit(async (db) => {
+          // Arrange: Create test data
+          const categoryId = faker.string.uuid();
+          const category = await createCategoryFixture({
+            db,
+            overrides: {
+              name: `Test Category ${faker.string.uuid()}`,
+              id: categoryId,
+            },
+          });
+
+          // Create products with different minimum prices
+          const expensiveProduct = await createProductFixture({
+            db,
+            overrides: { title: "Expensive Product", categoryId },
+          });
+          const cheapProduct = await createProductFixture({
+            db,
+            overrides: { title: "Cheap Product", categoryId },
+          });
+          const mediumProduct = await createProductFixture({
+            db,
+            overrides: { title: "Medium Product", categoryId },
+          });
+
+          // Expensive product: min price 3000
+          await createProductVariantFixture({
+            db,
+            overrides: {
+              productId: expensiveProduct.id,
+              price: 3000, // $30.00 - minimum
+              currencyCode: "USD",
+            },
+          });
+          await createProductVariantFixture({
+            db,
+            overrides: {
+              productId: expensiveProduct.id,
+              price: 5000, // $50.00
+              currencyCode: "USD",
+            },
+          });
+
+          // Cheap product: min price 500
+          await createProductVariantFixture({
+            db,
+            overrides: {
+              productId: cheapProduct.id,
+              price: 500, // $5.00 - minimum
+              currencyCode: "USD",
+            },
+          });
+          await createProductVariantFixture({
+            db,
+            overrides: {
+              productId: cheapProduct.id,
+              price: 1000, // $10.00
+              currencyCode: "USD",
+            },
+          });
+
+          // Medium product: min price 1500
+          await createProductVariantFixture({
+            db,
+            overrides: {
+              productId: mediumProduct.id,
+              price: 1500, // $15.00 - minimum
+              currencyCode: "USD",
+            },
+          });
+          await createProductVariantFixture({
+            db,
+            overrides: {
+              productId: mediumProduct.id,
+              price: 2000, // $20.00
+              currencyCode: "USD",
+            },
+          });
+
+          // Act: Sort by price descending
+          const result = await shopService.getProducts({
+            dto: {
+              page: 1,
+              limit: 10,
+              sortDirection: "desc",
+              sortField: "price",
+            },
+            db,
+          });
+
+          // Assert: Products should be sorted by minimum price (most expensive first)
+          expect(result.products).toHaveLength(3);
+          expect(result.products[0].title).toBe("Expensive Product");
+          expect(result.products[0].minPrice).toBe(3000);
+          expect(result.products[1].title).toBe("Medium Product");
+          expect(result.products[1].minPrice).toBe(1500);
+          expect(result.products[2].title).toBe("Cheap Product");
+          expect(result.products[2].minPrice).toBe(500);
+        });
+      });
+
+      it("handles products without variants when sorting by price", async () => {
+        await createTestableUnit(async (db) => {
+          // Arrange: Create test data
+          const categoryId = faker.string.uuid();
+          const category = await createCategoryFixture({
+            db,
+            overrides: {
+              name: `Test Category ${faker.string.uuid()}`,
+              id: categoryId,
+            },
+          });
+
+          // Create products - one with variants, one without
+          const productWithVariants = await createProductFixture({
+            db,
+            overrides: { title: "Product With Variants", categoryId },
+          });
+          const productWithoutVariants = await createProductFixture({
+            db,
+            overrides: { title: "Product Without Variants", categoryId },
+          });
+
+          await createProductVariantFixture({
+            db,
+            overrides: {
+              productId: productWithVariants.id,
+              price: 1000, // $10.00
+              currencyCode: "USD",
+            },
+          });
+
+          // Act: Sort by price ascending
+          const result = await shopService.getProducts({
+            dto: {
+              page: 1,
+              limit: 10,
+              sortDirection: "asc",
+              sortField: "price",
+            },
+            db,
+          });
+
+          // Assert: Product without variants should be first (price 0)
+          expect(result.products).toHaveLength(2);
+          expect(result.products[0].title).toBe("Product Without Variants");
+          expect(result.products[0].minPrice).toBe(0);
+          expect(result.products[1].title).toBe("Product With Variants");
+          expect(result.products[1].minPrice).toBe(1000);
         });
       });
 
