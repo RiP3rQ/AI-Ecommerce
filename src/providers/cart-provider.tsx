@@ -67,7 +67,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     error,
     isLoading,
     mutate,
-  } = useSWR<CartResponse>(isAuthenticated ? cartUrl : null, swrFetcher);
+  } = useSWR<CartResponse>(isAuthenticated ? cartUrl : null, swrFetcher, {
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+  });
 
   // Local cart state that gets updated when we make changes
   const [cart, setCart] = useState<FrontendCart | undefined>(

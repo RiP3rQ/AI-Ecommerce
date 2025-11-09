@@ -61,6 +61,11 @@ export function HeroThreeItemGrid(): ReactNode {
   const { data, isLoading } = useSWR<SWRResponse<LatestProductsItem[]>>(
     `${BASE_URL}/api/main-page`,
     swrFetcher,
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    },
   );
 
   if (isLoading) return <HeroThreeItemGridSkeleton />;

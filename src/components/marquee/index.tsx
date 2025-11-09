@@ -14,6 +14,11 @@ export function ItemsMarquee(): ReactNode {
   const { data, isLoading } = useSWR<SWRResponse<LatestProductsItem[]>>(
     `${BASE_URL}/api/main-page?limit=20&skipFirstNumberOfProducts=3`,
     swrFetcher,
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    },
   );
 
   // Show skeleton while loading or if we have no products after loading

@@ -49,6 +49,11 @@ export function ProductDetails({
   const { data, isLoading, error } = useSWR<SWRResponse<ProductData>>(
     `${BASE_URL}/api/product/${productUuid}`,
     swrFetcher,
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    },
   );
 
   // Fetch reviews for this product
@@ -59,6 +64,11 @@ export function ProductDetails({
   } = useSWR<ReviewsResponse>(
     productUuid ? `${BASE_URL}/api/review?productId=${productUuid}` : null,
     swrFetcher,
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    },
   );
 
   // Function to generate review summary (only if feature is enabled)

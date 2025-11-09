@@ -37,9 +37,14 @@ export function Filters({
   );
 
   // ============================= SWR DATA =============================
-  const { data, isLoading, error } = useSWR<SWRResponse<SelectCategory[]>>(
+  const { data } = useSWR<SWRResponse<SelectCategory[]>>(
     `${BASE_URL}/api/categories`,
     swrFetcher,
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    },
   );
 
   useEffect(() => {
