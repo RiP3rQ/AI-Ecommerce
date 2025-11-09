@@ -1,9 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
+import { ReactNode, useEffect } from "react";
 import { toast } from "sonner";
+import { useOnborda } from "onborda";
+import { ONBOARDING_TOUR_NAME } from "./tour/onboarding-steps";
 
-export function WelcomeToast() {
+export function WelcomeToast(): ReactNode {
+  const { startOnborda } = useOnborda();
+
   useEffect(() => {
     // ignore if screen height is too small
     if (window.innerHeight < 650) return;
@@ -23,6 +27,13 @@ export function WelcomeToast() {
             AI-driven design.
           </>
         ),
+        action: {
+          label: "Start Tour",
+          onClick: () => {
+            startOnborda(ONBOARDING_TOUR_NAME);
+            // TODO: ALSO DISMISS THE TOAST AFTER TESTING
+          },
+        },
       });
     }
   }, []);

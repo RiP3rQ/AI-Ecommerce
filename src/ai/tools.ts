@@ -44,14 +44,6 @@ const allToolsObject = {
 
 export function getSuggestProductsTools(): ToolSet {
   return {
-    // GENERAL HELPER PRODUCTS TOOLS
-    getMostLikedProducts: getMostLikedProductsTool,
-    getProductsByCategory: getProductsByCategoryTool,
-    getAllCategories: getAllCategoriesTool,
-    searchProductsByTags: searchProductsByTagsTool,
-    getProductDetails: getProductDetailsTool,
-    getProductReviews: getProductReviewsTool,
-    searchProductsByName: searchProductsByNameTool,
     // THE ACTUAL SUGGEST PRODUCTS TOOL BASED ON THE CART ITEMS - RAG
     suggestProducts: suggestProductsTool,
   };

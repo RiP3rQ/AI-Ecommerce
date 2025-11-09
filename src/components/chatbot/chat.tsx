@@ -6,16 +6,17 @@ import { ChatInput } from "./chat-input";
 import { MessageList } from "./message-list";
 import { Suggestions } from "./suggestions";
 import { useChat } from "@ai-sdk/react";
-import { INITIAL_MESSAGE } from "./constants";
+import { getInitialMessages } from "./constants";
 import {
   DefaultChatTransport,
   lastAssistantMessageIsCompleteWithToolCalls,
-  tool,
 } from "ai";
 import { toast } from "sonner";
 import { useCart } from "@/providers/cart-provider";
+import { useAuth } from "@/hooks/use-auth";
 
 export const Chat = () => {
+  const { isAuthenticated } = useAuth();
   const { mutate: mutateCart } = useCart();
   const {
     messages,
@@ -29,7 +30,7 @@ export const Chat = () => {
     transport: new DefaultChatTransport({
       api: "/api/ai/ai-assistant",
     }),
-    messages: INITIAL_MESSAGE,
+    messages: getInitialMessages(isAuthenticated),
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
     // run client-side tools that are automatically executed:
     async onToolCall({ toolCall }) {
@@ -162,10 +163,12 @@ export const Chat = () => {
       />
       <div className="grid shrink-0 gap-4 pt-4">
         <Suggestions
+          disabled={!isAuthenticated}
           onSuggestionClick={handleSuggestionClick}
           status={status}
         />
         <ChatInput
+          disabled={!isAuthenticated}
           onSubmit={handleMessageSubmit}
           onCancel={abort}
           status={status}

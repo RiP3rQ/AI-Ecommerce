@@ -266,7 +266,10 @@ export function ProductDetails({
 
   return (
     <div className="mx-auto max-w-(--breakpoint-2xl) px-4">
-      <div className="flex flex-col rounded-lg border border-neutral-200 bg-white p-8 md:p-12 lg:flex-row lg:gap-8 dark:border-neutral-800 dark:bg-black">
+      <div
+        className="flex flex-col rounded-lg border border-neutral-200 bg-white p-8 md:p-12 lg:flex-row lg:gap-8 dark:border-neutral-800 dark:bg-black"
+        id="onboarding-tour-step-4"
+      >
         <div className="h-full w-full basis-full lg:basis-4/6">
           <Suspense
             fallback={
@@ -284,7 +287,7 @@ export function ProductDetails({
           </Suspense>
         </div>
 
-        <div className="basis-full lg:basis-2/6">
+        <div className="basis-full lg:basis-2/6" id="onboarding-tour-step-5">
           <Suspense fallback={null}>
             <ProductDescription product={productData} />
           </Suspense>
@@ -362,7 +365,7 @@ function ReviewSummarySection({
   }
 
   return (
-    <Card className="w-full">
+    <Card className="w-full" id="onboarding-tour-step-9">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg flex items-center gap-2">
@@ -486,7 +489,7 @@ function AskReviewsSection({
   };
 
   return (
-    <Card className="w-full">
+    <Card className="w-full" id="onboarding-tour-step-8">
       <CardHeader className="pb-3">
         <CardTitle className="text-lg flex items-center gap-2">
           <MessageCircle className="h-5 w-5" />

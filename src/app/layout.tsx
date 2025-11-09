@@ -9,10 +9,13 @@ import { env } from "@/env";
 import { BASE_URL } from "@/lib/utils";
 import Footer from "@/components/layout/footer";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
-import { AssistantButton } from "@/components/global/assistant-button";
+import { AssistantButton } from "@/components/chatbot/assistant-button";
+import { Onborda, OnbordaProvider } from "onborda";
 
 import "./globals.css";
 import { CartProvider } from "@/providers/cart-provider";
+import { TourCard } from "@/components/tour/tour-card";
+import { onboardingSteps } from "@/components/tour/onboarding-steps";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -53,27 +56,38 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased relative min-h-screen`}
       >
-        <NuqsAdapter>
-          <TooltipProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="dark"
-              enableSystem
-              disableTransitionOnChange
-            >
-              <CartProvider>
-                <main>
-                  {children}
-                  <Toaster closeButton position="top-center" />
-                  <WelcomeToast />
-                  <AssistantButton />
-                  <ModeSwitcher />
-                </main>
-                <Footer />
-              </CartProvider>
-            </ThemeProvider>
-          </TooltipProvider>
-        </NuqsAdapter>
+        <OnbordaProvider>
+          <Onborda
+            steps={onboardingSteps}
+            showOnborda={true}
+            shadowRgb="55,48,163"
+            shadowOpacity="0.8"
+            cardComponent={TourCard}
+            cardTransition={{ duration: 0.5, type: "spring" }}
+          >
+            <NuqsAdapter>
+              <TooltipProvider>
+                <ThemeProvider
+                  attribute="class"
+                  defaultTheme="dark"
+                  enableSystem
+                  disableTransitionOnChange
+                >
+                  <CartProvider>
+                    <main>
+                      {children}
+                      <Toaster closeButton position="top-center" />
+                      <WelcomeToast />
+                      <AssistantButton />
+                      <ModeSwitcher />
+                    </main>
+                    <Footer />
+                  </CartProvider>
+                </ThemeProvider>
+              </TooltipProvider>
+            </NuqsAdapter>
+          </Onborda>
+        </OnbordaProvider>
       </body>
     </html>
   );

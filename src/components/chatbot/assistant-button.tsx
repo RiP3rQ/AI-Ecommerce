@@ -3,7 +3,7 @@
 import { type ReactNode, useState } from "react";
 import { Button } from "../ui/button";
 import { BotMessageSquareIcon } from "lucide-react";
-import { ChatSheet } from "../chatbot/chat-sheet";
+import { ChatSheet } from "./chat-sheet";
 
 export function AssistantButton(): ReactNode {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -16,6 +16,7 @@ export function AssistantButton(): ReactNode {
           size="icon"
           className="cursor-pointer"
           onClick={() => setIsOpen((prev) => !prev)}
+          id="onboarding-tour-step-2"
         >
           <BotMessageSquareIcon className="size-4" />
         </Button>

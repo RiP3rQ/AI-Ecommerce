@@ -62,7 +62,9 @@ const MessageBubble = ({
 }: MessageBubbleProps) => {
   const { user } = useAuth();
   const isUser = message.role === "user";
-  const isErrorMessage = message.id.startsWith("error-");
+  const isErrorMessage =
+    message.id.startsWith("error-") ||
+    message.id.startsWith("access-denied-message");
   const isLoadingMessage = message.id.startsWith("loading-");
 
   // State for add-to-cart modal
