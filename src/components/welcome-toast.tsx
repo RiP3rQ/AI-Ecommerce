@@ -4,8 +4,11 @@ import { ReactNode, useEffect } from "react";
 import { toast } from "sonner";
 import { useOnborda } from "onborda";
 import { ONBOARDING_TOUR_NAME } from "./tour/onboarding-steps";
+import { usePathname, useRouter } from "next/navigation";
 
 export function WelcomeToast(): ReactNode {
+  const pathname = usePathname()
+  const router = useRouter();
   const { startOnborda } = useOnborda();
 
   useEffect(() => {
@@ -30,13 +33,17 @@ export function WelcomeToast(): ReactNode {
         action: {
           label: "Start Tour",
           onClick: () => {
+            if (pathname !== "/") {
+              router.push("/");
+            }
             startOnborda(ONBOARDING_TOUR_NAME);
             toast.dismiss("welcome-toast");
           },
         },
+        
       });
     }
-  }, [startOnborda]);
+  }, [startOnborda, pathname, router]);
 
   return null;
 }
