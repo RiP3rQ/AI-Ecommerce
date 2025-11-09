@@ -46,12 +46,38 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* REACT SCAN */}
         {process.env.NODE_ENV === "development" && (
           <script
             crossOrigin="anonymous"
             src="//unpkg.com/react-scan/dist/auto.global.js"
           />
         )}
+        {/* PRE-FETCH MOST IMPORTANT API ROUTES FOR SWR */}
+        <link
+          rel="preload"
+          href="/api/main-page"
+          as="fetch"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/api/main-page?limit=20&skipFirstNumberOfProducts=3"
+          as="fetch"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/api/shop?page=1&limit=12&sortDirection=asc&sortField=createdAt&priceMin=0&priceMax=100000"
+          as="fetch"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/api/categories"
+          as="fetch"
+          crossOrigin="anonymous"
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased relative min-h-screen`}
