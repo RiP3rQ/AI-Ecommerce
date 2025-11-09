@@ -184,7 +184,7 @@ export function Chat(): ReactNode {
     // Reset both local and persisted messages
     setMessages(INITIAL_MESSAGE);
     resetChatSession();
-    toast.success("Chat session reset", {
+    toast.success("Chat session cleared", {
       description: "You can now start a fresh conversation.",
     });
   };
