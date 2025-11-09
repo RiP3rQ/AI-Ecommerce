@@ -105,9 +105,6 @@ const MessageBubble = ({
       inventoryQuantity?: number | null;
     }>;
   }> | null>(null);
-
-  console.log("message", message);
-
   return (
     <div className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"}`}>
       {!isUser && (
@@ -221,9 +218,6 @@ const MessageBubble = ({
               part.type === "tool-clientSideConfirmationForCartModification"
             ) {
               const toolPart = part as any;
-
-              console.log("toolPart", toolPart);
-              console.log("productsFromStep1", productsFromStep1);
 
               // STEP 2: Handle client-side confirmation tool for cart modification
               if (toolPart.state === "input-available") {
