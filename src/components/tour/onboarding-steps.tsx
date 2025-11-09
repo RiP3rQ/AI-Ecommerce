@@ -20,8 +20,6 @@ export const onboardingSteps: Tour[] = [
         showControls: true,
         pointerPadding: 10,
         pointerRadius: 10,
-        nextRoute: "/",
-        prevRoute: "/",
       },
       {
         icon: <>💬</>,
@@ -38,8 +36,6 @@ export const onboardingSteps: Tour[] = [
         showControls: true,
         pointerPadding: 10,
         pointerRadius: 10,
-        nextRoute: "/",
-        prevRoute: "/",
       },
       {
         icon: <>👕</>,
@@ -56,7 +52,6 @@ export const onboardingSteps: Tour[] = [
         pointerPadding: 10,
         pointerRadius: 10,
         nextRoute: "/product/44444444-4444-4444-4444-444444444444",
-        prevRoute: "/",
       },
       {
         icon: <>📇</>,
@@ -72,7 +67,6 @@ export const onboardingSteps: Tour[] = [
         showControls: true,
         pointerPadding: 10,
         pointerRadius: 10,
-        nextRoute: "/product/44444444-4444-4444-4444-444444444444",
         prevRoute: "/",
       },
       {
@@ -89,8 +83,6 @@ export const onboardingSteps: Tour[] = [
         showControls: true,
         pointerPadding: 10,
         pointerRadius: 10,
-        nextRoute: "/product/44444444-4444-4444-4444-444444444444",
-        prevRoute: "/product/44444444-4444-4444-4444-444444444444",
       },
       {
         icon: <>⭐</>,
@@ -101,8 +93,6 @@ export const onboardingSteps: Tour[] = [
         showControls: true,
         pointerPadding: 10,
         pointerRadius: 10,
-        nextRoute: "/product/44444444-4444-4444-4444-444444444444",
-        prevRoute: "/product/44444444-4444-4444-4444-444444444444",
       },
       {
         icon: <>✍️</>,
@@ -113,8 +103,6 @@ export const onboardingSteps: Tour[] = [
         showControls: true,
         pointerPadding: 10,
         pointerRadius: 10,
-        nextRoute: "/product/44444444-4444-4444-4444-444444444444",
-        prevRoute: "/product/44444444-4444-4444-4444-444444444444",
       },
       {
         icon: <>❔</>,
@@ -127,8 +115,6 @@ export const onboardingSteps: Tour[] = [
         showControls: true,
         pointerPadding: 10,
         pointerRadius: 10,
-        nextRoute: "/product/44444444-4444-4444-4444-444444444444",
-        prevRoute: "/product/44444444-4444-4444-4444-444444444444",
       },
       {
         icon: <>📓</>,
@@ -139,8 +125,6 @@ export const onboardingSteps: Tour[] = [
         showControls: true,
         pointerPadding: 10,
         pointerRadius: 10,
-        nextRoute: "/product/44444444-4444-4444-4444-444444444444",
-        prevRoute: "/product/44444444-4444-4444-4444-444444444444",
       },
     ],
   },

@@ -31,12 +31,12 @@ export function WelcomeToast(): ReactNode {
           label: "Start Tour",
           onClick: () => {
             startOnborda(ONBOARDING_TOUR_NAME);
-            // TODO: ALSO DISMISS THE TOAST AFTER TESTING
+            toast.dismiss("welcome-toast");
           },
         },
       });
     }
-  }, []);
+  }, [startOnborda]);
 
   return null;
 }

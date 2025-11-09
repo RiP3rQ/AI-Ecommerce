@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { ReactNode } from "react";
 import type { CardComponentProps } from "onborda";
 import { useOnborda } from "onborda";
 
@@ -15,29 +15,50 @@ import {
 } from "@/components/ui/card";
 
 // Icons
-import { X } from "lucide-react";
+import { XIcon } from "lucide-react";
 
 // Confetti
 import confetti from "canvas-confetti";
 
-export const TourCard: React.FC<CardComponentProps> = ({
+export function TourCard({
   step,
   currentStep,
   totalSteps,
   nextStep,
   prevStep,
   arrow,
-}) => {
+}: Readonly<CardComponentProps>): ReactNode {
   // Onborda hooks
   const { closeOnborda } = useOnborda();
 
-  function handleConfetti() {
+  const handleConfetti = () => {
     closeOnborda();
     confetti({
       particleCount: 100,
       spread: 70,
       origin: { y: 0.6 },
     });
+  };
+
+  const handleClose = () => {
+    closeOnborda();
+  };
+
+  const handlePrevious = () => {
+    prevStep();
+  };
+
+  const handleNext = () => {
+    nextStep();
+  };
+
+  const handleFinish = () => {
+    handleConfetti();
+  };
+
+  // Guard clause: return null if step is undefined
+  if (!step) {
+    return null;
   }
 
   return (
@@ -56,9 +77,9 @@ export const TourCard: React.FC<CardComponentProps> = ({
             variant="ghost"
             className="text-black/50 absolute top-4 right-2 hover:bg-transparent hover:text-black/80"
             size="icon"
-            onClick={() => closeOnborda()}
+            onClick={handleClose}
           >
-            <X size={16} />
+            <XIcon size={16} />
           </Button>
         </div>
       </CardHeader>
@@ -67,7 +88,7 @@ export const TourCard: React.FC<CardComponentProps> = ({
         <div className="flex justify-between w-full gap-4">
           {currentStep !== 0 && (
             <Button
-              onClick={() => prevStep()}
+              onClick={handlePrevious}
               className="bg-zinc-900 hover:bg-zinc-800 text-white hover:text-white"
             >
               Previous
@@ -75,7 +96,7 @@ export const TourCard: React.FC<CardComponentProps> = ({
           )}
           {currentStep + 1 !== totalSteps && (
             <Button
-              onClick={() => nextStep()}
+              onClick={handleNext}
               className="bg-zinc-900 hover:bg-zinc-800 text-white hover:text-white ml-auto"
             >
               Next
@@ -84,7 +105,7 @@ export const TourCard: React.FC<CardComponentProps> = ({
           {currentStep + 1 === totalSteps && (
             <Button
               className="bg-zinc-900 hover:bg-zinc-800 text-white hover:text-white ml-auto"
-              onClick={handleConfetti}
+              onClick={handleFinish}
             >
               🎉 Finish!
             </Button>
@@ -94,4 +115,4 @@ export const TourCard: React.FC<CardComponentProps> = ({
       <span className="text-white">{arrow}</span>
     </Card>
   );
-};
+}
