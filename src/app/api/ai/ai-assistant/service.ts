@@ -2,7 +2,7 @@ import { streamText, convertToModelMessages, stepCountIs } from "ai";
 import { AiAssistantPrompts } from "./prompts";
 import { GOOGLE_PROVIDER_OPTIONS, MAX_OUTPUT_TOKENS } from "./constants";
 import { geminiProvider } from "@/ai/gemini-provider";
-import { getToolsWithoutSuggestProducts } from "@/ai/tools";
+import { getAiTools } from "@/ai/tools";
 import { User } from "@supabase/supabase-js";
 import { BodyType } from "./types";
 
@@ -34,7 +34,7 @@ export class AiAssistantService {
       model: geminiProvider("gemini-2.5-flash"),
       messages: convertToModelMessages(messages),
       system: AiAssistantPrompts.getDefaultSystemPrompt(),
-      tools: getToolsWithoutSuggestProducts(),
+      tools: getAiTools(),
       providerOptions: GOOGLE_PROVIDER_OPTIONS,
       maxOutputTokens: MAX_OUTPUT_TOKENS,
       stopWhen: [stepCountIs(10)],

@@ -1,6 +1,6 @@
 import { generateText, stepCountIs } from "ai";
 import { geminiProvider } from "@/ai/gemini-provider";
-import { getAiTools } from "@/ai/tools";
+import { getSuggestProductsTools } from "@/ai/tools";
 import { SuggestProductsPrompts } from "./prompts";
 import type { CartItemWithDetails } from "../../cart/types";
 import { MAX_SUGGESTIONS } from "./constants";
@@ -60,7 +60,7 @@ export class SuggestProductsService {
         temperature: 0.3, // Balanced creativity and consistency
         maxOutputTokens: 4000, // Increased for tool results and analysis
         stopWhen: [stepCountIs(3)],
-        tools: getAiTools(), // Include all available tools, including suggestProducts
+        tools: getSuggestProductsTools(),
       });
       responseText = aiResponse.text || "";
     } catch (error) {

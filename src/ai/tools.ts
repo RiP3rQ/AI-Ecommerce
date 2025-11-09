@@ -14,7 +14,7 @@ import { clientSideConfirmationForCartModificationTool } from "./tools/return-in
 import { saveTheFrontendSelectedProductToCartTool } from "./tools/confirm-add-to-cart";
 import { revalidateFrontendCartTool } from "./tools/revalidate-frontend-cart";
 
-const toolsWithoutSuggestProducts = {
+const allToolsObject = {
   // GENERAL PRODUCTS TOOLS
   getMostLikedProducts: getMostLikedProductsTool,
   getProductsByCategory: getProductsByCategoryTool,
@@ -27,6 +27,8 @@ const toolsWithoutSuggestProducts = {
   getCartDetails: getCartDetailsTool,
   // COMBO TOOL FOR GENERATING OUTFIT COMBINATIONS
   comboOutfit: comboOutfitTool,
+  // SUGGEST PRODUCTS TOOL BASED ON THE CART ITEMS - RAG
+  suggestProducts: suggestProductsTool,
   // ADD-TO-CART FLOW (4 STEPS):
   // Step 1: [SERVER] Get product details with all available variants
   addToCartProductInformations: addToCartProductInformationsTool,
@@ -40,16 +42,21 @@ const toolsWithoutSuggestProducts = {
   revalidateFrontendCart: revalidateFrontendCartTool,
 };
 
-export function getToolsWithoutSuggestProducts(): ToolSet {
-  return toolsWithoutSuggestProducts;
+export function getSuggestProductsTools(): ToolSet {
+  return {
+    // GENERAL HELPER PRODUCTS TOOLS
+    getMostLikedProducts: getMostLikedProductsTool,
+    getProductsByCategory: getProductsByCategoryTool,
+    getAllCategories: getAllCategoriesTool,
+    searchProductsByTags: searchProductsByTagsTool,
+    getProductDetails: getProductDetailsTool,
+    getProductReviews: getProductReviewsTool,
+    searchProductsByName: searchProductsByNameTool,
+    // THE ACTUAL SUGGEST PRODUCTS TOOL BASED ON THE CART ITEMS - RAG
+    suggestProducts: suggestProductsTool,
+  };
 }
 
-const allTools = {
-  ...{ ...getToolsWithoutSuggestProducts() },
-  // SUGGEST PRODUCTS TOOL BASED ON THE CART ITEMS - RAG
-  suggestProducts: suggestProductsTool,
-};
-
 export function getAiTools(): ToolSet {
-  return allTools;
+  return allToolsObject;
 }
