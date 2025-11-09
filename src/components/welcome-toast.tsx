@@ -7,7 +7,7 @@ import { ONBOARDING_TOUR_NAME } from "./tour/onboarding-steps";
 import { usePathname, useRouter } from "next/navigation";
 
 export function WelcomeToast(): ReactNode {
-  const pathname = usePathname()
+  const pathname = usePathname();
   const router = useRouter();
   const { startOnborda } = useOnborda();
 
@@ -40,7 +40,6 @@ export function WelcomeToast(): ReactNode {
             toast.dismiss("welcome-toast");
           },
         },
-        
       });
     }
   }, [startOnborda, pathname, router]);
