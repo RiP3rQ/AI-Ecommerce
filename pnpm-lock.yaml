@@ -110,6 +110,9 @@ importers:
       embla-carousel-react:
         specifier: ^8.6.0
         version: 8.6.0(react@19.1.0)
+      framer-motion:
+        specifier: ^12.23.24
+        version: 12.23.24(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       hast:
         specifier: ^1.0.0
         version: 1.0.0
@@ -155,6 +158,9 @@ importers:
       react-hook-form:
         specifier: ^7.65.0
         version: 7.65.0(react@19.1.0)
+      react-transition-progress:
+        specifier: ^0.0.4
+        version: 0.0.4(framer-motion@12.23.24(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(next@15.5.4(@babel/core@7.28.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)
       shiki:
         specifier: ^3.14.0
         version: 3.14.0
@@ -3574,6 +3580,16 @@ packages:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     peerDependenciesMeta:
       '@types/react':
+        optional: true
+
+  react-transition-progress@0.0.4:
+    resolution: {integrity: sha512-ESnG9ccV48EhQ4iZuuH8QQfImgtC+iOfqZzEyWCMEHDOb7LtfNIh2DQnLo2CuwQqC+zf8Ka7a9Hkv8TVU6F+Ag==}
+    peerDependencies:
+      framer-motion: '*'
+      next: '*'
+      react: '*'
+    peerDependenciesMeta:
+      next:
         optional: true
 
   react@19.1.0:
@@ -7552,6 +7568,13 @@ snapshots:
       tslib: 2.8.1
     optionalDependencies:
       '@types/react': 19.2.2
+
+  react-transition-progress@0.0.4(framer-motion@12.23.24(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(next@15.5.4(@babel/core@7.28.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0):
+    dependencies:
+      framer-motion: 12.23.24(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      react: 19.1.0
+    optionalDependencies:
+      next: 15.5.4(@babel/core@7.28.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
 
   react@19.1.0: {}
 
