@@ -1,7 +1,13 @@
 import type { DrizzleDbClient } from "@/database/index";
-import { products } from "@/database/schemas/products";
-import { categories } from "@/database/schemas/categories";
-import { productVariants } from "@/database/schemas/product-variants";
+import {
+  products,
+  type SelectProductWithoutEmbedding,
+} from "@/database/schemas/products";
+import { categories, SelectCategory } from "@/database/schemas/categories";
+import {
+  productVariants,
+  SelectProductVariant,
+} from "@/database/schemas/product-variants";
 import { eq, and, or, ilike, desc, asc, sql, count } from "drizzle-orm";
 import {
   InvalidPriceRangeError,
@@ -94,6 +100,17 @@ export class ShopService {
 
     // Query products with relations
     const productsResult = await db.query.products.findMany({
+      columns: {
+        id: true,
+        availableForSale: true,
+        title: true,
+        description: true,
+        descriptionHtml: true,
+        tags: true,
+        categoryId: true,
+        createdAt: true,
+        updatedAt: true,
+      },
       where: conditions.length > 0 ? and(...conditions) : undefined,
       with: {
         category: true,
@@ -236,7 +253,13 @@ export class ShopService {
   /**
    * Transforms a product with relations into ProductWithDetails.
    */
-  private transformProductWithDetails(product: any): ProductWithDetails {
+  private transformProductWithDetails(
+    product: SelectProductWithoutEmbedding & {
+      variants: SelectProductVariant[];
+      images: SelectProductImage[];
+      category: SelectCategory | null;
+    },
+  ): ProductWithDetails {
     const variants = product.variants || [];
     const images = product.images || [];
 
@@ -257,7 +280,6 @@ export class ShopService {
       tags: product.tags,
       categoryId: product.categoryId,
       availableForSale: product.availableForSale,
-      embedding: product.embedding,
       createdAt: product.createdAt,
       updatedAt: product.updatedAt,
       category: product.category || null,

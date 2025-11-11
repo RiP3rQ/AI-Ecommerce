@@ -1,4 +1,4 @@
-import type { SelectProduct } from "@/database/schemas/products";
+import type { SelectProductWithoutEmbedding } from "@/database/schemas/products";
 import type { SelectProductVariant } from "@/database/schemas/product-variants";
 import type { SelectProductImage } from "@/database/schemas/product-images";
 import type { SelectCategory } from "@/database/schemas/categories";
@@ -6,7 +6,7 @@ import type { SelectCategory } from "@/database/schemas/categories";
 /**
  * Product with its minimum price variant and featured image.
  */
-export interface ProductWithDetails extends SelectProduct {
+export interface ProductWithDetails extends SelectProductWithoutEmbedding {
   category: SelectCategory | null;
   featuredImage: SelectProductImage | null;
   minPrice: number;

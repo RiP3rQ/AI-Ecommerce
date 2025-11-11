@@ -25,7 +25,7 @@ A server action that fetches the 3 most recently created products along with the
 
 ```typescript
 type Latest3ProductsReturnType = {
-  products: SelectProduct;
+  products: SelectProductWithoutEmbedding;
   product_images: SelectProductImage | null;
   product_variants: SelectProductVariant | null;
 };

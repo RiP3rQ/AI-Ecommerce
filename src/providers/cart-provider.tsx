@@ -1,7 +1,10 @@
 "use client";
 
 import type { CartResponse } from "@/app/api/cart/types";
-import type { SelectProduct, SelectProductVariant } from "@/database/schema";
+import type {
+  SelectProductWithoutEmbedding,
+  SelectProductVariant,
+} from "@/database/schema";
 import { swrFetcher } from "@/lib/swr-fetcher";
 import { BASE_URL } from "@/lib/utils";
 import type { FrontendCart, SelectCartItem } from "@/types/cart";
@@ -35,7 +38,7 @@ type CartContextType = {
   mutate: () => Promise<CartResponse | undefined>;
   addItem: (
     variant: SelectProductVariant,
-    product: SelectProduct,
+    product: SelectProductWithoutEmbedding,
     featuredImage?: {
       url: string;
       altText?: string;
@@ -91,7 +94,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const addItem = async (
     variant: SelectProductVariant,
-    product: SelectProduct,
+    product: SelectProductWithoutEmbedding,
     featuredImage?: {
       url: string;
       altText?: string;

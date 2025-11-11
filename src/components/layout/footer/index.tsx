@@ -42,7 +42,11 @@ export default function Footer() {
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 border-t border-neutral-200 px-6 py-12 text-sm md:flex-row md:gap-12 md:px-4 min-[1320px]:px-0 dark:border-neutral-700">
         {/* Logo Section */}
         <div className="flex-shrink-0">
-          <Link className="text-black md:pt-1 dark:text-white" href="/">
+          <Link
+            className="text-black md:pt-1 dark:text-white"
+            href="/"
+            prefetch={true}
+          >
             <LogoSquare size="md" />
             <span className="sr-only">{SITE_NAME}</span>
           </Link>
@@ -61,6 +65,7 @@ export default function Footer() {
                     <Link
                       href={link.href}
                       className="text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100 transition-colors duration-200 underline-offset-4 hover:underline"
+                      prefetch={true}
                     >
                       {link.title}
                     </Link>

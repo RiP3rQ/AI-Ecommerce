@@ -4,7 +4,7 @@ import {
   productOptions,
   products,
   productVariants,
-  type SelectProduct,
+  type SelectProductWithoutEmbedding,
   type SelectProductImage,
   type SelectProductOption,
   type SelectProductVariant,
@@ -38,7 +38,22 @@ export class ProductService {
 
     // Step 1: Get product data with joins
     const productData = await db
-      .select()
+      .select({
+        products: {
+          id: products.id,
+          title: products.title,
+          description: products.description,
+          descriptionHtml: products.descriptionHtml,
+          tags: products.tags,
+          categoryId: products.categoryId,
+          availableForSale: products.availableForSale,
+          createdAt: products.createdAt,
+          updatedAt: products.updatedAt,
+        },
+        product_variants: productVariants,
+        product_images: productImages,
+        product_options: productOptions,
+      })
       .from(products)
       .where(eq(products.id, id))
       .leftJoin(productVariants, eq(products.id, productVariants.productId))
@@ -148,7 +163,7 @@ export class ProductService {
     const productsMap = new Map<
       string,
       {
-        product: SelectProduct;
+        product: SelectProductWithoutEmbedding;
         variants: SelectProductVariant[];
         images: SelectProductImage[];
         options: SelectProductOption[];
@@ -162,7 +177,6 @@ export class ProductService {
         productsMap.set(productId, {
           product: {
             ...row.products,
-            embedding: null,
           },
           variants: [],
           images: [],
