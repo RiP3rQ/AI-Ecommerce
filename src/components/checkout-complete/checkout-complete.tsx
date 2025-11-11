@@ -7,16 +7,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { CheckCircle, Package, Truck, CreditCard } from "lucide-react";
-import LoadingDots from "@/components/loading-dots";
 import { Price } from "@/components/custom-price";
 import { BASE_URL } from "@/lib/utils";
-import {
-  type OrderDetails,
-  OrderDetailsResponse,
-} from "@/app/api/order/[id]/dto";
+import { type OrderDetails } from "@/app/api/order/[id]/dto";
 import type { SWRResponse } from "@/types/swr";
 import { swrFetcher } from "@/lib/swr-fetcher";
 import { useCart } from "@/providers/cart-provider";
+import { CheckoutCompleteSkeleton } from "./checkout-complete-skeleton";
 
 export function CheckoutComplete(): ReactNode {
   const searchParams = useSearchParams();
@@ -46,13 +43,7 @@ export function CheckoutComplete(): ReactNode {
   }, [order]);
 
   if (isLoading || !order) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-center items-center min-h-[400px]">
-          <LoadingDots className="bg-muted-foreground" />
-        </div>
-      </div>
-    );
+    return <CheckoutCompleteSkeleton />;
   }
 
   if (error || !orderResponse?.success) {
@@ -138,7 +129,7 @@ export function CheckoutComplete(): ReactNode {
             {order.items.map((item) => (
               <div key={item.id} className="flex gap-4 p-4 border rounded-lg">
                 {/* Product Image */}
-                <div className="flex-shrink-0">
+                <div className="shrink-0">
                   {item.featuredImage ? (
                     <img
                       src={item.featuredImage.url}
@@ -242,7 +233,7 @@ export function CheckoutComplete(): ReactNode {
         <CardContent>
           <div className="space-y-4">
             <div className="flex gap-3">
-              <div className="flex-shrink-0">
+              <div className="shrink-0">
                 <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
                   <CreditCard className="h-4 w-4 text-primary" />
                 </div>
@@ -257,7 +248,7 @@ export function CheckoutComplete(): ReactNode {
             </div>
 
             <div className="flex gap-3">
-              <div className="flex-shrink-0">
+              <div className="shrink-0">
                 <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
                   <Package className="h-4 w-4 text-primary" />
                 </div>
@@ -272,7 +263,7 @@ export function CheckoutComplete(): ReactNode {
             </div>
 
             <div className="flex gap-3">
-              <div className="flex-shrink-0">
+              <div className="shrink-0">
                 <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
                   <Truck className="h-4 w-4 text-primary" />
                 </div>

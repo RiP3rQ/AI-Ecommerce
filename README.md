@@ -116,7 +116,7 @@ This platform transforms online fashion shopping by providing:
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/your-username/ai-ecommerce.git
+   git clone https://github.com/rip3rq/ai-ecommerce.git
    cd ai-ecommerce
    ```
 
@@ -429,18 +429,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 📞 Support
-
-- **Issues**: [GitHub Issues](https://github.com/your-username/ai-ecommerce/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/your-username/ai-ecommerce/discussions)
-- **Documentation**: [Project Docs](/docs)
-
----
-
 <div align="center">
 
 **Made with ❤️ and AI-powered innovation**
 
-[⭐ Star us on GitHub](https://github.com/your-username/ai-ecommerce) • [🐛 Report a bug](https://github.com/your-username/ai-ecommerce/issues) • [💡 Request a feature](https://github.com/your-username/ai-ecommerce/issues)
+[⭐ Star us on GitHub](https://github.com/rip3rq/ai-ecommerce) • [🐛 Report a bug](https://github.com/rip3rq/ai-ecommerce/issues) • [💡 Request a feature](https://github.com/rip3rq/ai-ecommerce/issues)
 
 </div>

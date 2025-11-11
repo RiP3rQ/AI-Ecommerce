@@ -88,7 +88,7 @@ export default function Footer() {
           <hr className="mx-4 hidden h-4 w-[1px] border-l border-neutral-400 md:inline-block" />
           <p className="md:ml-auto">
             <a
-              href="https://riperq.pro/"
+              href="https://github.com/RiP3rQ"
               className="text-black hover:text-neutral-600 dark:text-white dark:hover:text-neutral-300 transition-colors duration-200"
               target="_blank"
               rel="noopener noreferrer"
