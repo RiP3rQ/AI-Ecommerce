@@ -51,12 +51,86 @@ export class AiAssistantService {
       experimental_context: {
         userId: userId,
       },
-      onAbort: (event) => {
+      onAbort: async (event) => {
         console.warn("[AI-Assistant] Request aborted");
         console.dir(event, { depth: null });
+        // Save aborted request to database
+        const userLatestMessage = convertToModelMessages(messages)
+          .filter((message) => message.role === "user")
+          .at(-1);
+        let userPrompt = "EMPTY";
+        if (userLatestMessage) {
+          userPrompt = Array.isArray(userLatestMessage.content)
+            ? userLatestMessage.content
+                .map((part) => (part as TextPart).text ?? "")
+                .join("")
+            : userLatestMessage.content.toString();
+        }
+        try {
+          await AiSdkHandler.saveAiResultToDatabase({
+            result: {
+              text: "REQUEST ABORTED",
+              usage: undefined as any, // We don't have usage data for aborted requests
+              reasoning: [],
+              toolCalls: [],
+              toolResults: [],
+              providerMetadata: undefined,
+            },
+            dbClient: db,
+            operationType: "ai-assistant",
+            operationId: userId,
+            systemPrompt: AiAssistantPrompts.getDefaultSystemPrompt(),
+            userPrompt: userPrompt,
+            modelName: GEMINI_MODEL_NAME,
+            temperature: 0.1,
+            processingTimeMs: Date.now() - startTime,
+          });
+        } catch (saveError) {
+          console.error(
+            "[AI-Assistant] Failed to save aborted request:",
+            saveError,
+          );
+        }
       },
-      onError: (error) => {
+      onError: async (error) => {
         console.error("[AI-Assistant] AI generation error:", error);
+        // Save failed request to database
+        const userLatestMessage = convertToModelMessages(messages)
+          .filter((message) => message.role === "user")
+          .at(-1);
+        let userPrompt = "EMPTY";
+        if (userLatestMessage) {
+          userPrompt = Array.isArray(userLatestMessage.content)
+            ? userLatestMessage.content
+                .map((part) => (part as TextPart).text ?? "")
+                .join("")
+            : userLatestMessage.content.toString();
+        }
+        try {
+          await AiSdkHandler.saveAiResultToDatabase({
+            result: {
+              text: "FAILED TO GENERATE TEXT",
+              usage: undefined as any, // We don't have usage data for failed requests
+              reasoning: [],
+              toolCalls: [],
+              toolResults: [],
+              providerMetadata: undefined,
+            },
+            dbClient: db,
+            operationType: "ai-assistant",
+            operationId: userId,
+            systemPrompt: AiAssistantPrompts.getDefaultSystemPrompt(),
+            userPrompt: userPrompt,
+            modelName: GEMINI_MODEL_NAME,
+            temperature: 0.1,
+            processingTimeMs: Date.now() - startTime,
+          });
+        } catch (saveError) {
+          console.error(
+            "[AI-Assistant] Failed to save error request:",
+            saveError,
+          );
+        }
       },
       onFinish: async (event) => {
         console.log("[AI-Assistant] Request finished");

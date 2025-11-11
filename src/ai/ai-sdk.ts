@@ -149,7 +149,8 @@ export class AiSdkHandler {
         totalTokens: usage?.totalTokens,
         reasoning: reasoning && reasoning.length > 0 ? reasoning : undefined,
         toolCalls: toolCalls && toolCalls.length > 0 ? toolCalls : undefined,
-        toolResults: toolResults && toolResults.length > 0 ? toolResults : undefined,
+        toolResults:
+          toolResults && toolResults.length > 0 ? toolResults : undefined,
         providerMetadata,
         processingTimeMs,
         success: isSuccess,
