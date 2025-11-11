@@ -247,7 +247,7 @@ test.describe("Login Page", () => {
       await expect(loginPage.passwordInput).toBeVisible();
 
       // Check screen reader only text
-      await expect(page.getByText("Login with Google").first()).toHaveClass(
+      await expect(page.getByText("Continue with Google").first()).toHaveClass(
         /sr-only/,
       );
     });
