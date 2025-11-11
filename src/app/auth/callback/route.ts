@@ -4,6 +4,8 @@ import { createServerSupabaseClient } from "@/supabase-auth/server";
 import { registerUserSchema } from "@/app/api/register/dto";
 import { registerService } from "@/app/api/register/service";
 import { drizzleDbClient } from "@/database";
+import { profiles } from "@/database/schema";
+import { eq } from "drizzle-orm";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -25,18 +27,25 @@ export async function GET(request: Request) {
       };
       const validatedDto = registerUserSchema.parse(dto);
 
-      // Step 2: Create profile in database
-      const profile = await registerService.createProfile({
-        dto: validatedDto,
-        db: drizzleDbClient(),
+      // Step 2: Check if user already exists
+      const user = await drizzleDbClient().query.profiles.findFirst({
+        where: eq(profiles.email, validatedDto.email),
       });
-      if (!profile) {
-        return NextResponse.redirect(
-          `${origin}/auth/error?error=Failed to create profile`,
-        );
+
+      // Step 3 (Optional): Create profile in database, only if user does not exist
+      if (!user) {
+        const profile = await registerService.createProfile({
+          dto: validatedDto,
+          db: drizzleDbClient(),
+        });
+        if (!profile) {
+          return NextResponse.redirect(
+            `${origin}/auth/error?error=Failed to create profile`,
+          );
+        }
       }
 
-      // Step 3: Redirect to the next page
+      // Step 4: Redirect to the next page
       const forwardedHost = request.headers.get("x-forwarded-host"); // original origin before load balancer
       const isLocalEnv = process.env.NODE_ENV === "development";
       if (isLocalEnv) {
