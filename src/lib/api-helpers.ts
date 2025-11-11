@@ -54,8 +54,10 @@ export async function checkAndSaveAiUsage({
 
   // Check if we need to reset the usage count
   if (now >= profile.aiUsageResetAt) {
-    // Reset count and move reset_at to 30 days from now
-    const nextResetAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days
+    // Reset count and move reset_at to next UTC midnight (00:00 UTC)
+    const nextResetAt = new Date(now);
+    nextResetAt.setUTCDate(nextResetAt.getUTCDate() + 1);
+    nextResetAt.setUTCHours(0, 0, 0, 0);
     await dbClient
       .update(profiles)
       .set({
@@ -71,7 +73,7 @@ export async function checkAndSaveAiUsage({
   // Check if limit would be exceeded before incrementing
   if (profile.aiUsageCount >= profile.aiUsageLimit) {
     throw new AiUsageLimitExceededError(
-      `You've reached your AI usage limit. Please try again later.`,
+      `You've reached your AI usage limit. The usage will reset at 00:00 UTC tomorrow.`,
     );
   }
 
