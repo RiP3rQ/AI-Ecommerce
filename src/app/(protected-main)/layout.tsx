@@ -1,3 +1,4 @@
+import Footer from "@/components/layout/footer";
 import { Navbar } from "@/components/layout/navbar";
 import { createServerSupabaseClient } from "@/supabase-auth/server";
 import { redirect } from "next/navigation";
@@ -20,6 +21,7 @@ export default async function RootLayout({
     <>
       <Navbar />
       <main>{children}</main>
+      <Footer />
     </>
   );
 }

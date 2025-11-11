@@ -1,5 +1,5 @@
 import { Link } from "react-transition-progress/next";
-import { Suspense } from "react";
+import { ReactNode, Suspense } from "react";
 import { MobileMenu } from "@/components/layout/navbar/mobile-sidebar";
 import { CategoryLink } from "@/components/layout/navbar/category-link";
 import { env } from "@/env";
@@ -14,9 +14,15 @@ const menuItems = [
   { title: "Shop", path: "/shop/all" },
 ];
 
-export async function Navbar() {
+export function Navbar({
+  hideAuthButtons = false,
+  hideCartDrawer = false,
+}: Readonly<{
+  hideAuthButtons?: boolean;
+  hideCartDrawer?: boolean;
+}>): ReactNode {
   return (
-    <nav className="relative flex items-center justify-between p-4 lg:px-6">
+    <nav className="relative flex items-center justify-between p-4 lg:px-6 h-[72px]">
       <div className="block flex-none md:hidden">
         <Suspense fallback={null}>
           <MobileMenu menu={menuItems} />
@@ -44,8 +50,8 @@ export async function Navbar() {
         </div>
         <div className="flex justify-end md:w-1/3">
           <div className="flex items-center gap-2">
-            <AuthButton />
-            <CartDrawerWithTrigger />
+            {!hideAuthButtons && <AuthButton />}
+            {!hideCartDrawer && <CartDrawerWithTrigger />}
           </div>
         </div>
       </div>

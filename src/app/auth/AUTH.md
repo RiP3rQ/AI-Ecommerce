@@ -127,7 +127,7 @@ A server component that renders the login form:
 ```typescript
 export default function LoginPage(): ReactNode {
   return (
-    <div className="bg-muted flex min-h-svh flex-col items-center justify-center p-6 md:p-10">
+    <div className="bg-muted flex min-h-[calc(100vh-72px)] flex-col items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-sm md:max-w-4xl">
         <LoginForm />
       </div>
@@ -159,7 +159,7 @@ export function LoginForm({ className, ...props }: LoginFormProps): ReactNode {
 ```typescript
 export default function SignUpPage(): ReactNode {
   return (
-    <div className="bg-muted flex min-h-svh flex-col items-center justify-center p-6 md:p-10">
+    <div className="bg-muted flex min-h-[calc(100vh-72px)] flex-col items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-sm md:max-w-4xl">
         <RegisterForm />
       </div>
@@ -209,7 +209,7 @@ export default function Page(): ReactNode {
 ```typescript
 export default function Page(): ReactNode {
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+    <div className="flex min-h-[calc(100vh-72px)] w-full items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-sm">
         <ForgotPasswordForm />
       </div>
@@ -241,7 +241,7 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
 ```typescript
 export default function Page(): ReactNode {
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+    <div className="flex min-h-[calc(100vh-72px)] w-full items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-sm">
         <UpdatePasswordForm />
       </div>
