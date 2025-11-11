@@ -35,6 +35,7 @@ export function Chat(): ReactNode {
     status,
     setMessages,
     error,
+    clearError,
     addToolOutput,
     stop: abort,
     addToolApprovalResponse,
@@ -238,7 +239,10 @@ export function Chat(): ReactNode {
 
       <ResetChatModal
         isOpen={isResetModalOpen}
-        onClose={() => setIsResetModalOpen(false)}
+        onClose={() => {
+          setIsResetModalOpen(false);
+          clearError();
+        }}
         onConfirm={confirmResetChat}
       />
 
