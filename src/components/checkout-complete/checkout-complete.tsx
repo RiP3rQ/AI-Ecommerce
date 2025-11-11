@@ -9,9 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { CheckCircle, Package, Truck, CreditCard } from "lucide-react";
 import { Price } from "@/components/custom-price";
 import { BASE_URL } from "@/lib/utils";
-import {
-  type OrderDetails,
-} from "@/app/api/order/[id]/dto";
+import { type OrderDetails } from "@/app/api/order/[id]/dto";
 import type { SWRResponse } from "@/types/swr";
 import { swrFetcher } from "@/lib/swr-fetcher";
 import { useCart } from "@/providers/cart-provider";
