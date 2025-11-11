@@ -1,6 +1,7 @@
 import { drizzleDbClient } from "@/database";
 import { carts, cartItems, productVariants, products } from "@/database/schema";
 import { eq, and } from "drizzle-orm";
+import { cartService } from "@/app/api/cart/service";
 
 /**
  * Gets detailed cart information for a user including all cart items with product details.
@@ -213,6 +214,8 @@ export async function removeFromCart(
   }>;
   message: string;
 }> {
+  const db = drizzleDbClient();
+
   // Get current cart details
   const cartDetails = await getCartDetails(userId);
 
@@ -250,12 +253,25 @@ export async function removeFromCart(
     const cartItem = matchingItems[0];
     const currentQuantity = cartItem.quantity;
 
-    itemsToRemove.push({
-      cartItemId: cartItem.id,
-      productId,
-      quantity: Math.min(requestedQuantity, currentQuantity), // Don't remove more than available
-      currentQuantity,
-    });
+    // If requested quantity is less than current, we need to update quantity
+    // If requested quantity equals or exceeds current, we remove the item entirely
+    if (requestedQuantity < currentQuantity) {
+      // Update quantity instead of removing
+      itemsToRemove.push({
+        cartItemId: cartItem.id,
+        productId,
+        quantity: requestedQuantity,
+        currentQuantity,
+      });
+    } else {
+      // Remove the entire item
+      itemsToRemove.push({
+        cartItemId: cartItem.id,
+        productId,
+        quantity: currentQuantity, // Remove all available
+        currentQuantity,
+      });
+    }
   }
 
   if (itemsToRemove.length === 0) {
@@ -266,30 +282,37 @@ export async function removeFromCart(
   const results = [];
   for (const item of itemsToRemove) {
     try {
-      const response = await fetch("/api/cart", {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          cartItemId: item.cartItemId,
-        }),
-      });
+      if (item.quantity < item.currentQuantity) {
+        // Update quantity instead of removing
+        await db
+          .update(cartItems)
+          .set({
+            quantity: item.currentQuantity - item.quantity,
+            updatedAt: new Date(),
+          })
+          .where(eq(cartItems.id, item.cartItemId));
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          `Failed to remove item: ${errorData.message || response.statusText}`,
-        );
+        results.push({
+          productId: item.productId,
+          removedQuantity: item.quantity,
+          success: true,
+          message: `Reduced quantity by ${item.quantity}`,
+        });
+      } else {
+        // Remove the entire cart item
+        await cartService.removeCartItem({
+          userId,
+          dto: { cartItemId: item.cartItemId },
+          db,
+        });
+
+        results.push({
+          productId: item.productId,
+          removedQuantity: item.quantity,
+          success: true,
+          message: "Item removed from cart",
+        });
       }
-
-      const result = await response.json();
-      results.push({
-        productId: item.productId,
-        removedQuantity: item.quantity,
-        success: true,
-        message: result.message,
-      });
     } catch (error) {
       results.push({
         productId: item.productId,
