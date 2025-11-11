@@ -112,7 +112,7 @@ export function LoginForm({ className, ...props }: LoginFormProps): ReactNode {
                 )}
                 <Button
                   type="submit"
-                  className="w-full"
+                  className="w-full cursor-pointer"
                   disabled={isLoading}
                   data-testid="login-button"
                 >
@@ -123,7 +123,11 @@ export function LoginForm({ className, ...props }: LoginFormProps): ReactNode {
                 Or continue with
               </FieldSeparator>
               <Field className="grid grid-cols-1 gap-4">
-                <Button variant="outline" type="button">
+                <Button
+                  variant="outline"
+                  type="button"
+                  className="cursor-pointer"
+                >
                   <GoogleIcon />
                   <span>Continue with Google</span>
                   <span className="sr-only">Login with Google</span>

@@ -155,7 +155,7 @@ export function RegisterForm({
                 {error && <p className="text-sm text-red-500">{error}</p>}
                 <Button
                   type="submit"
-                  className="w-full"
+                  className="w-full cursor-pointer"
                   disabled={isLoading || !agreedToTerms}
                 >
                   {isLoading ? "Creating an account..." : "Sign up"}
@@ -169,6 +169,7 @@ export function RegisterForm({
                   variant="outline"
                   type="button"
                   disabled={isLoading || !agreedToTerms}
+                  className="cursor-pointer"
                 >
                   <GoogleIcon />
                   <span>Continue with Google</span>
