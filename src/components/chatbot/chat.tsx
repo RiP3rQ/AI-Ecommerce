@@ -39,7 +39,9 @@ export function Chat(): ReactNode {
     transport: new DefaultChatTransport({
       api: "/api/ai/ai-assistant",
     }),
-    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithApprovalResponses,
+    sendAutomaticallyWhen:
+      lastAssistantMessageIsCompleteWithToolCalls ||
+      lastAssistantMessageIsCompleteWithApprovalResponses,
     // run client-side tools that are automatically executed:
     async onToolCall({ toolCall }) {
       // Check if it's a dynamic tool first for proper type narrowing
