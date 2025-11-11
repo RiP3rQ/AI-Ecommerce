@@ -207,6 +207,7 @@ export function Chat(): ReactNode {
           handleResetChat={handleResetChat}
         />
         <MessageList
+          status={status}
           messages={deduplicatedMessages}
           addToolOutput={addToolOutput}
           addToolApprovalResponse={addToolApprovalResponse}

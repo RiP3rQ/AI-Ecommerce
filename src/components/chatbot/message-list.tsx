@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { type MessageType } from "@/types/chat";
 import Image from "next/image";
 import {
@@ -508,13 +508,36 @@ const MessageBubble = ({
 
 export const MessageList = ({
   messages,
+  status,
   addToolOutput,
   addToolApprovalResponse,
   isAuthenticated,
 }: MessageListProps) => {
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to bottom when messages change or streaming is in progress
+  useEffect(() => {
+    const scrollToBottom = () => {
+      messagesEndRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
+    };
+
+    // Scroll immediately for new messages
+    scrollToBottom();
+
+    // If streaming, keep scrolling during the stream
+    if (status === "in_progress" || status === "streaming") {
+      const intervalId = setInterval(scrollToBottom, 100);
+      return () => clearInterval(intervalId);
+    }
+  }, [messages, status]);
+
   return (
-    <div className="flex-1 overflow-y-auto px-4">
-      <div className="space-y-4">
+    <div ref={containerRef} className="flex-1 overflow-y-auto px-4">
+      <div className="space-y-4 pb-10">
         {!isAuthenticated && (
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950">
             <div className="flex items-center gap-2">
@@ -536,6 +559,7 @@ export const MessageList = ({
             addToolApprovalResponse={addToolApprovalResponse}
           />
         ))}
+        <div ref={messagesEndRef} />
       </div>
     </div>
   );
