@@ -83,6 +83,7 @@ export function SearchbarAndSorts({
           onChange={handleSearchInputChange}
           className="pl-10 h-10"
           aria-label="Search products"
+          data-testid="search-input"
         />
       </div>
 
@@ -92,7 +93,7 @@ export function SearchbarAndSorts({
           Sort by:
         </span>
         <Select value={currentSortValue} onValueChange={handleSortChange}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-[180px]" data-testid="sort-select">
             <SelectValue placeholder="Select sort option" />
           </SelectTrigger>
           <SelectContent>

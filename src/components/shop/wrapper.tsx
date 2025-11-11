@@ -146,7 +146,7 @@ export function ShopWrapper({
         {isLoading ? (
           <div
             className="sticky top-0 h-screen border-r border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-black"
-            data-testid="loading-skeleton"
+            data-testid="filters-loading-skeleton"
           >
             <Skeleton className="h-8 w-32 mb-6" />
             <Skeleton className="h-px w-full mb-6" />

@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/lib/utils";
+import { BASE_URL, cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -15,7 +15,7 @@ import { type ComponentProps, type ReactNode, useState } from "react";
 import { GoogleIcon } from "../../../../../public/icons";
 import Image from "next/image";
 import { createClientSupabaseClient } from "@/supabase-auth/client";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { Link } from "react-transition-progress/next";
 
 interface LoginFormProps extends ComponentProps<"div"> {}
@@ -45,6 +45,39 @@ export function LoginForm({ className, ...props }: LoginFormProps): ReactNode {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const supabaseClient = createClientSupabaseClient();
+    setIsLoading(true);
+    setError(null);
+    let url: string | null = null;
+
+    try {
+      const { data, error } = await supabaseClient.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${BASE_URL}/auth/callback`,
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data) {
+        url = data.url;
+      }
+    } catch (error: unknown) {
+      setError(error instanceof Error ? error.message : "An error occurred");
+    } finally {
+      setIsLoading(false);
+    }
+
+    if (url) {
+      redirect(url); // use the redirect API for your server framework
     }
   };
 
@@ -112,21 +145,31 @@ export function LoginForm({ className, ...props }: LoginFormProps): ReactNode {
                 )}
                 <Button
                   type="submit"
-                  className="w-full"
+                  className="w-full cursor-pointer"
                   disabled={isLoading}
                   data-testid="login-button"
                 >
                   {isLoading ? "Logging in..." : "Login"}
+                  <span className="sr-only">Login</span>
                 </Button>
               </Field>
               <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
                 Or continue with
               </FieldSeparator>
               <Field className="grid grid-cols-1 gap-4">
-                <Button variant="outline" type="button">
+                <Button
+                  variant="outline"
+                  type="button"
+                  className="cursor-pointer"
+                  onClick={handleGoogleLogin}
+                  disabled={isLoading}
+                  data-testid="google-login-button"
+                >
                   <GoogleIcon />
-                  <span>Continue with Google</span>
-                  <span className="sr-only">Login with Google</span>
+                  {isLoading
+                    ? "Logging in with Google..."
+                    : "Continue with Google"}
+                  <span className="sr-only">Continue with Google</span>
                 </Button>
               </Field>
               <FieldDescription className="mt-4 text-center text-sm">

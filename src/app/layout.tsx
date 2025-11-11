@@ -113,7 +113,6 @@ export default function RootLayout({
                           <AssistantButton />
                           <ModeSwitcher />
                         </main>
-                        <Footer />
                       </ProgressBarProvider>
                     </ChatProvider>
                   </CartProvider>

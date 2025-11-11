@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/lib/utils";
+import { BASE_URL, cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { type ComponentProps, type ReactNode, useState } from "react";
 import { GoogleIcon } from "../../../../../public/icons";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { createClientSupabaseClient } from "@/supabase-auth/client";
 import { Link } from "react-transition-progress/next";
 
@@ -76,6 +76,37 @@ export function RegisterForm({
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const supabaseClient = createClientSupabaseClient();
+    setIsLoading(true);
+    setError(null);
+    let url: string | null = null;
+
+    try {
+      const { data, error } = await supabaseClient.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${BASE_URL}/auth/callback`,
+        },
+      });
+      if (error) {
+        throw error;
+      }
+      if (data) {
+        url = data.url;
+      }
+    } catch (error: unknown) {
+      setError(error instanceof Error ? error.message : "An error occurred");
+    } finally {
+      setIsLoading(false);
+    }
+
+    if (url) {
+      redirect(url); // use the redirect API for your server framework
     }
   };
 
@@ -155,10 +186,11 @@ export function RegisterForm({
                 {error && <p className="text-sm text-red-500">{error}</p>}
                 <Button
                   type="submit"
-                  className="w-full"
+                  className="w-full cursor-pointer"
                   disabled={isLoading || !agreedToTerms}
                 >
                   {isLoading ? "Creating an account..." : "Sign up"}
+                  <span className="sr-only">Sign up</span>
                 </Button>
               </Field>
               <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
@@ -169,9 +201,14 @@ export function RegisterForm({
                   variant="outline"
                   type="button"
                   disabled={isLoading || !agreedToTerms}
+                  className="cursor-pointer"
+                  onClick={handleGoogleSignUp}
+                  data-testid="google-sign-up-button"
                 >
                   <GoogleIcon />
-                  <span>Continue with Google</span>
+                  {isLoading
+                    ? "Signing up with Google..."
+                    : "Continue with Google"}
                   <span className="sr-only">Sign up with Google</span>
                 </Button>
               </Field>

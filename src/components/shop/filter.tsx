@@ -72,11 +72,17 @@ export function Filters({
   const categories = useMemo(() => data?.data || [], [data]);
 
   return (
-    <aside className="sticky top-0 h-screen w-full overflow-y-auto border-r border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-black">
+    <aside
+      className="sticky top-0 h-screen w-full overflow-y-auto border-r border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-black"
+      data-testid="filters-sidebar"
+    >
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <FilterIcon className="size-5 text-neutral-700 dark:text-neutral-300" />
-          <h2 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100">
+          <h2
+            className="text-xl font-semibold text-neutral-900 dark:text-neutral-100"
+            data-testid="filters-heading"
+          >
             Filters
           </h2>
         </div>
@@ -86,6 +92,7 @@ export function Filters({
             size="sm"
             onClick={onResetFilters}
             className="h-8 px-2 text-xs"
+            data-testid="reset-filters-button"
           >
             <XIcon className="size-3 mr-1" />
             Reset
@@ -96,8 +103,11 @@ export function Filters({
       <Separator className="mb-6" />
 
       {/* Categories Filter */}
-      <div className="mb-8">
-        <Label className="mb-3 text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+      <div className="mb-8" data-testid="categories-section">
+        <Label
+          className="mb-3 text-sm font-semibold text-neutral-900 dark:text-neutral-100"
+          data-testid="categories-heading"
+        >
           Categories
         </Label>
         <div className="space-y-2 mt-3">
@@ -108,6 +118,7 @@ export function Filters({
                 key={category.id}
                 type="button"
                 onClick={() => onCategoryChange(category.id)}
+                data-testid={`category-button-${category.id}`}
                 className={cn(
                   "flex w-full items-center justify-between rounded-lg border px-4 py-2.5 text-sm transition-all",
                   isSelected
@@ -128,8 +139,11 @@ export function Filters({
       <Separator className="mb-6" />
 
       {/* Price Range Filter */}
-      <div className="mb-6">
-        <Label className="mb-3 text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+      <div className="mb-6" data-testid="price-range-section">
+        <Label
+          className="mb-3 text-sm font-semibold text-neutral-900 dark:text-neutral-100"
+          data-testid="price-range-heading"
+        >
           Price Range
         </Label>
         <div className="space-y-4 mt-3">
@@ -148,6 +162,7 @@ export function Filters({
                 value={localMinPrice}
                 onChange={(event) => setLocalMinPrice(event.target.value)}
                 className="h-9"
+                data-testid="min-price-input"
               />
             </div>
             <div className="flex-1">
@@ -164,10 +179,16 @@ export function Filters({
                 value={localMaxPrice}
                 onChange={(event) => setLocalMaxPrice(event.target.value)}
                 className="h-9"
+                data-testid="max-price-input"
               />
             </div>
           </div>
-          <Button onClick={handleApplyPriceRange} className="w-full" size="sm">
+          <Button
+            onClick={handleApplyPriceRange}
+            className="w-full"
+            size="sm"
+            data-testid="apply-price-range-button"
+          >
             Apply Price Range
           </Button>
         </div>
