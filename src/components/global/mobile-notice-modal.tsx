@@ -1,7 +1,11 @@
 "use client";
 
 import { ReactNode, useEffect, useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Smartphone, Monitor } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -34,6 +38,8 @@ export function MobileNoticeModal(): ReactNode {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTitle className="sr-only">Desktop Experience Only</DialogTitle>
+      {/* <DialogTitle>Desktop Experience Only</DialogTitle> */}
       <DialogContent className="sm:max-w-[425px] border-0 bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900/20 shadow-2xl">
         <div className="flex flex-col items-center text-center space-y-6 p-8">
           {/* Icon Section */}
