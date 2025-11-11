@@ -44,14 +44,12 @@ test.describe("Shop Page", () => {
       const shopPage = new ShopPage(page);
       await shopPage.goto();
 
-      await expect(
-        shopPage.productsGrid.or(shopPage.emptyState),
-      ).toBeVisible({ timeout: 10000 });
+      await expect(shopPage.productsGrid.or(shopPage.emptyState)).toBeVisible({
+        timeout: 10000,
+      });
 
       await shopPage.searchProducts("laptop");
-      await expect(
-        shopPage.productsGrid.or(shopPage.emptyState),
-      ).toBeVisible();
+      await expect(shopPage.productsGrid.or(shopPage.emptyState)).toBeVisible();
     });
 
     test("should clear search when input is cleared", async ({ page }) => {
@@ -61,9 +59,7 @@ test.describe("Shop Page", () => {
       await shopPage.searchProducts("laptop");
       await shopPage.clearSearch();
 
-      await expect(
-        shopPage.productsGrid.or(shopPage.emptyState),
-      ).toBeVisible();
+      await expect(shopPage.productsGrid.or(shopPage.emptyState)).toBeVisible();
     });
   });
 
@@ -74,18 +70,24 @@ test.describe("Shop Page", () => {
 
       await shopPage.sortSelect.click();
 
-      await expect(page.getByText("Newest First", { exact: true })).toBeVisible();
-      await expect(page.getByText("Price: Low to High", { exact: true })).toBeVisible();
-      await expect(page.getByText("Price: High to Low", { exact: true })).toBeVisible();
+      await expect(
+        page.getByText("Newest First", { exact: true }),
+      ).toBeVisible();
+      await expect(
+        page.getByText("Price: Low to High", { exact: true }),
+      ).toBeVisible();
+      await expect(
+        page.getByText("Price: High to Low", { exact: true }),
+      ).toBeVisible();
     });
 
     test("should change sort order", async ({ page }) => {
       const shopPage = new ShopPage(page);
       await shopPage.goto();
 
-      await expect(
-        shopPage.productsGrid.or(shopPage.emptyState),
-      ).toBeVisible({ timeout: 10000 });
+      await expect(shopPage.productsGrid.or(shopPage.emptyState)).toBeVisible({
+        timeout: 10000,
+      });
 
       await shopPage.selectSortOption("Price: Low to High");
 
@@ -157,11 +159,13 @@ test.describe("Shop Page", () => {
       const shopPage = new ShopPage(page);
       await shopPage.goto();
 
-      await expect(
-        shopPage.productsGrid.or(shopPage.emptyState),
-      ).toBeVisible({ timeout: 10000 });
+      await expect(shopPage.productsGrid.or(shopPage.emptyState)).toBeVisible({
+        timeout: 10000,
+      });
 
-      const hasProducts = await shopPage.productsGrid.isVisible().catch(() => false);
+      const hasProducts = await shopPage.productsGrid
+        .isVisible()
+        .catch(() => false);
 
       if (hasProducts) {
         await expect(shopPage.productCards.first()).toBeVisible();
@@ -173,7 +177,9 @@ test.describe("Shop Page", () => {
       const shopPage = new ShopPage(page);
       await shopPage.goto();
 
-      const hasProducts = await shopPage.productsGrid.isVisible({ timeout: 10000 }).catch(() => false);
+      const hasProducts = await shopPage.productsGrid
+        .isVisible({ timeout: 10000 })
+        .catch(() => false);
 
       if (hasProducts) {
         await shopPage.clickFirstProduct();
@@ -187,7 +193,9 @@ test.describe("Shop Page", () => {
       const shopPage = new ShopPage(page);
       await shopPage.goto();
 
-      const hasProducts = await shopPage.productsGrid.isVisible({ timeout: 10000 }).catch(() => false);
+      const hasProducts = await shopPage.productsGrid
+        .isVisible({ timeout: 10000 })
+        .catch(() => false);
 
       if (hasProducts && (await shopPage.productPrices.count()) > 0) {
         await expect(shopPage.productPrices.first()).toBeVisible();
@@ -202,11 +210,15 @@ test.describe("Shop Page", () => {
       const shopPage = new ShopPage(page);
       await shopPage.goto();
 
-      const hasProducts = await shopPage.productsGrid.isVisible({ timeout: 10000 }).catch(() => false);
+      const hasProducts = await shopPage.productsGrid
+        .isVisible({ timeout: 10000 })
+        .catch(() => false);
 
       if (hasProducts) {
-        const hasPagination = await shopPage.pagination.isVisible().catch(() => false);
-        
+        const hasPagination = await shopPage.pagination
+          .isVisible()
+          .catch(() => false);
+
         if (hasPagination) {
           await expect(shopPage.previousPageButton).toBeVisible();
           await expect(shopPage.nextPageButton).toBeVisible();
@@ -220,7 +232,9 @@ test.describe("Shop Page", () => {
       const shopPage = new ShopPage(page);
       await shopPage.goto();
 
-      const hasProducts = await shopPage.productsGrid.isVisible({ timeout: 10000 }).catch(() => false);
+      const hasProducts = await shopPage.productsGrid
+        .isVisible({ timeout: 10000 })
+        .catch(() => false);
 
       if (hasProducts) {
         await expect(shopPage.productsCount).toBeVisible();
@@ -238,7 +252,9 @@ test.describe("Shop Page", () => {
       await shopPage.searchInput.fill("nonexistentproduct123456");
       await page.waitForTimeout(600);
 
-      const hasEmptyState = await shopPage.emptyState.isVisible({ timeout: 5000 }).catch(() => false);
+      const hasEmptyState = await shopPage.emptyState
+        .isVisible({ timeout: 5000 })
+        .catch(() => false);
 
       if (hasEmptyState) {
         await expect(shopPage.emptyState).toBeVisible();
@@ -259,7 +275,9 @@ test.describe("Shop Page", () => {
 
       await page.waitForTimeout(300);
 
-      const hasResetButton = await shopPage.resetButton.isVisible().catch(() => false);
+      const hasResetButton = await shopPage.resetButton
+        .isVisible()
+        .catch(() => false);
 
       if (hasResetButton) {
         await shopPage.resetFilters();
@@ -296,9 +314,9 @@ test.describe("Shop Page", () => {
       const shopPage = new ShopPage(page);
       await shopPage.goto();
 
-      await expect(
-        shopPage.productsGrid.or(shopPage.emptyState),
-      ).toBeVisible({ timeout: 10000 });
+      await expect(shopPage.productsGrid.or(shopPage.emptyState)).toBeVisible({
+        timeout: 10000,
+      });
     });
   });
 
