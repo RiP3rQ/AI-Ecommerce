@@ -56,6 +56,7 @@ export function ItemsMarquee(): ReactNode {
               prefetch={true}
             >
               <GridTileImage
+                productUuid={product.products.id}
                 alt={product.product_images?.altText ?? product.products.title}
                 label={{
                   title: product.products.title,
