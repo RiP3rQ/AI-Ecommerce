@@ -1,7 +1,7 @@
-import { type NextRequest, NextResponse } from 'next/server';
-import { handleApiError } from '@/lib/errors';
-import { aiToolsService } from './service';
-import type { GetAiToolsResponseDto } from './dto';
+import { type NextRequest, NextResponse } from "next/server";
+import { handleApiError } from "@/lib/errors";
+import { aiToolsService } from "./service";
+import type { GetAiToolsResponseDto } from "./dto";
 
 /**
  * GET /api/ai/ai-tools
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     const tools = aiToolsService.getAllTools();
 
     const response: GetAiToolsResponseDto = {
-      tools
+      tools,
     };
 
     return NextResponse.json(response, { status: 200 });
