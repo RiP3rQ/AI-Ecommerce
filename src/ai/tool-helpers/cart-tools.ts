@@ -238,7 +238,7 @@ export async function removeFromCart(
 
     // Find cart items with this product ID
     const matchingItems = cartDetails.items.filter(
-      (item) => item.productVariant.product.id === productId
+      (item) => item.productVariant.product.id === productId,
     );
 
     if (matchingItems.length === 0) {
@@ -278,7 +278,9 @@ export async function removeFromCart(
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(`Failed to remove item: ${errorData.message || response.statusText}`);
+        throw new Error(
+          `Failed to remove item: ${errorData.message || response.statusText}`,
+        );
       }
 
       const result = await response.json();
@@ -299,7 +301,7 @@ export async function removeFromCart(
   }
 
   return {
-    success: results.some(r => r.success),
+    success: results.some((r) => r.success),
     itemsProcessed: itemsToRemove.length,
     results,
     message: `Attempted to remove ${itemsToRemove.length} item(s) from cart`,
