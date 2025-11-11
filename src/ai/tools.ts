@@ -13,6 +13,7 @@ import { addToCartProductInformationsTool } from "./tools/add-to-cart-product-in
 import { clientSideConfirmationForCartModificationTool } from "./tools/return-information-for-confirming-cart-modification";
 import { saveTheFrontendSelectedProductToCartTool } from "./tools/confirm-add-to-cart";
 import { revalidateFrontendCartTool } from "./tools/revalidate-frontend-cart";
+import { removeFromCartTool } from "./tools/remove-from-cart";
 
 const allToolsObject = {
   // GENERAL PRODUCTS TOOLS
@@ -25,6 +26,7 @@ const allToolsObject = {
   searchProductsByName: searchProductsByNameTool,
   // CART TOOLS
   getCartDetails: getCartDetailsTool,
+  removeFromCart: removeFromCartTool,
   // COMBO TOOL FOR GENERATING OUTFIT COMBINATIONS
   comboOutfit: comboOutfitTool,
   // SUGGEST PRODUCTS TOOL BASED ON THE CART ITEMS - RAG
