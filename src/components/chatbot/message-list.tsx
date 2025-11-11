@@ -26,7 +26,14 @@ import { Loader } from "../ai-elements/loader";
 import { AddToCartModal } from "./add-to-cart-modal";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
-import { ReasoningUIPart, ToolUIPart } from "ai";
+import {
+  ChatAddToolApproveResponseFunction,
+  ReasoningUIPart,
+  ToolApprovalRequest,
+  ToolUIPart,
+} from "ai";
+import { Price } from "../custom-price";
+import { Card } from "../ui/card";
 
 interface SelectedProduct {
   productId: string;
@@ -42,6 +49,7 @@ interface MessageListProps {
     toolCallId: string;
     output: unknown;
   }) => void;
+  addToolApprovalResponse: ChatAddToolApproveResponseFunction;
   isAuthenticated: boolean;
 }
 
@@ -54,13 +62,13 @@ interface MessageBubbleProps {
     toolCallId: string;
     output: unknown;
   }) => void;
+  addToolApprovalResponse: ChatAddToolApproveResponseFunction;
 }
 
 const MessageBubble = ({
   message,
-  status,
-  isLastMessage,
   addToolOutput,
+  addToolApprovalResponse,
 }: MessageBubbleProps) => {
   const { user } = useAuth();
   const isUser = message.role === "user";
@@ -316,6 +324,112 @@ const MessageBubble = ({
               }
 
               return null;
+            } else if (
+              part.type === "tool-removeFromCart" &&
+              part.state === "approval-requested"
+            ) {
+              // Handle removeFromCart approval request
+              const invocation = part.input as {
+                items: Array<{
+                  productId: string;
+                  productTitle: string;
+                  quantity: number;
+                  variantCurrencyCode: string;
+                  variantPrice: number;
+                  variantTitle: string;
+                }>;
+              };
+
+              return (
+                <div key={`${message.id}-${i}`} className="mt-4">
+                  <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950">
+                    <div className="text-sm font-medium text-amber-900 dark:text-amber-100 mb-2">
+                      🗑️ Confirm Cart Removal
+                    </div>
+                    <p className="text-xs text-amber-700 dark:text-amber-300 mb-3">
+                      I need your approval to remove the following items from
+                      your cart. This action cannot be undone.
+                    </p>
+                    <Card className="space-y-3 py-0 mt-0 mb-4">
+                      {invocation.items.map((item, index) => (
+                        <div
+                          key={`${item.productId}-${index}`}
+                          className="flex flex-col gap-2 rounded-xl border border-amber-300 bg-white px-4 py-3 shadow-sm transition hover:border-amber-400 dark:border-amber-700 dark:bg-gray-900"
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-base font-semibold text-gray-900 dark:text-amber-100">
+                              {item.productTitle}
+                            </span>
+                            <span className="rounded-md bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900 dark:text-amber-200">
+                              x{item.quantity}
+                            </span>
+                          </div>
+                          <div className="flex flex-row gap-4 text-xs text-gray-700 dark:text-gray-300">
+                            <div className="flex items-center gap-1">
+                              <span className="font-medium">Variant:</span>
+                              <span>{item.variantTitle}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <span className="font-medium">Price:</span>
+                              <Price
+                                amount={item.variantPrice.toString()}
+                                currencyCode={item.variantCurrencyCode}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </Card>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() =>
+                          addToolApprovalResponse({
+                            id: part.approval.id,
+                            approved: false,
+                          })
+                        }
+                      >
+                        Reject Removal
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() =>
+                          addToolApprovalResponse({
+                            id: part.approval.id,
+                            approved: true,
+                          })
+                        }
+                      >
+                        Confirm Removal
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              );
+            } else if (
+              part.type === "tool-removeFromCart" &&
+              part.state === "output-available"
+            ) {
+              // Handle removeFromCart output
+              const toolPart = part as any;
+              return (
+                <Tool
+                  key={`${message.id}-${i}`}
+                  defaultOpen={false}
+                  className="mt-4"
+                >
+                  <ToolHeader type={toolPart.type} state={toolPart.state} />
+                  <ToolContent>
+                    <ToolInput input={toolPart.input} />
+                    <ToolOutput
+                      output={toolPart.output}
+                      errorText={toolPart.errorText}
+                    />
+                  </ToolContent>
+                </Tool>
+              );
             } else if (part.type.startsWith("tool-")) {
               const toolPart = part as ToolUIPart;
               return (
@@ -396,6 +510,7 @@ export const MessageList = ({
   messages,
   status,
   addToolOutput,
+  addToolApprovalResponse,
   isAuthenticated,
 }: MessageListProps) => {
   return (
@@ -414,13 +529,12 @@ export const MessageList = ({
             </p>
           </div>
         )}
-        {messages.map((message, index) => (
+        {messages.map((message) => (
           <MessageBubble
             key={message.id}
             message={message}
-            status={status}
-            isLastMessage={index === messages.length - 1}
             addToolOutput={addToolOutput}
+            addToolApprovalResponse={addToolApprovalResponse}
           />
         ))}
       </div>
