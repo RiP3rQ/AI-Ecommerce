@@ -1,15 +1,11 @@
-import { generateText, streamText } from "ai";
+import { generateText } from "ai";
 import { geminiProvider } from "./gemini-provider";
 import {
   GEMINI_MODEL_NAME,
   GEMINI_MODEL_TEMPERATURE,
   GEMINI_MODEL_MAX_OUTPUT_TOKENS,
 } from "./constants";
-import type {
-  GenerateTextOptions,
-  GenerateTextResultType,
-  StreamTextOptions,
-} from "./types";
+import type { GenerateTextOptions, GenerateTextResultType } from "./types";
 import { getAiTools } from "./tools";
 import type { DrizzleDbClient } from "@/database";
 import type { TestDatabase } from "@/test/utils/db-helper";
@@ -132,8 +128,12 @@ export class AiSdkHandler {
         providerMetadata,
       } = result;
 
-      if (!text || !usage) {
-        throw new Error("text and usage are required");
+      // For successful requests, we require text and usage
+      // For failed/aborted requests, we allow saving with partial data
+      const isSuccess = !!(text && usage);
+
+      if (isSuccess && (!text || !usage)) {
+        throw new Error("text and usage are required for successful requests");
       }
 
       await dbClient.insert(aiData).values({
@@ -143,16 +143,17 @@ export class AiSdkHandler {
         userPrompt,
         modelName,
         temperature: temperature ? Math.round(temperature * 100) : undefined, // Store as integer
-        generatedText: text,
-        promptTokens: usage.inputTokens,
-        completionTokens: usage.outputTokens,
-        totalTokens: usage.totalTokens,
-        reasoning: reasoning.length > 0 ? reasoning : undefined,
-        toolCalls: toolCalls.length > 0 ? toolCalls : undefined,
-        toolResults: toolResults.length > 0 ? toolResults : undefined,
+        generatedText: text || "",
+        promptTokens: usage?.inputTokens,
+        completionTokens: usage?.outputTokens,
+        totalTokens: usage?.totalTokens,
+        reasoning: reasoning && reasoning.length > 0 ? reasoning : undefined,
+        toolCalls: toolCalls && toolCalls.length > 0 ? toolCalls : undefined,
+        toolResults:
+          toolResults && toolResults.length > 0 ? toolResults : undefined,
         providerMetadata,
         processingTimeMs,
-        success: true,
+        success: isSuccess,
       });
     } catch (error) {
       // Try to save error information if the main save failed
