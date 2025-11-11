@@ -9,6 +9,7 @@ import { useChat } from "@ai-sdk/react";
 import { INITIAL_MESSAGE } from "./constants";
 import {
   DefaultChatTransport,
+  lastAssistantMessageIsCompleteWithApprovalResponses,
   lastAssistantMessageIsCompleteWithToolCalls,
 } from "ai";
 import { toast } from "sonner";
@@ -33,11 +34,14 @@ export function Chat(): ReactNode {
     error,
     addToolOutput,
     stop: abort,
+    addToolApprovalResponse,
   } = useChat<MessageType>({
     transport: new DefaultChatTransport({
       api: "/api/ai/ai-assistant",
     }),
-    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
+    sendAutomaticallyWhen: (messages) =>
+      lastAssistantMessageIsCompleteWithToolCalls(messages) ||
+      lastAssistantMessageIsCompleteWithApprovalResponses(messages),
     // run client-side tools that are automatically executed:
     async onToolCall({ toolCall }) {
       // Check if it's a dynamic tool first for proper type narrowing
@@ -70,6 +74,10 @@ export function Chat(): ReactNode {
           output: true,
         });
       }
+    },
+    onError: (error) => {
+      console.error("Error:", error);
+      toast.error("An error occurred. Please try again.");
     },
   });
 
@@ -199,9 +207,10 @@ export function Chat(): ReactNode {
           handleResetChat={handleResetChat}
         />
         <MessageList
-          messages={deduplicatedMessages}
           status={status}
+          messages={deduplicatedMessages}
           addToolOutput={addToolOutput}
+          addToolApprovalResponse={addToolApprovalResponse}
           isAuthenticated={isAuthenticated}
         />
       </div>

@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.23",
-    "@ai-sdk/react": "3.0.0-beta.94",
+    "@ai-sdk/react": "3.0.0-beta.98",
     "@heroicons/react": "^2.2.0",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-accordion": "^1.2.12",
@@ -47,7 +47,7 @@
     "@supabase/supabase-js": "^2.76.1",
     "@t3-oss/env-core": "^0.13.8",
     "@xyflow/react": "^12.9.2",
-    "ai": "6.0.0-beta.94",
+    "ai": "6.0.0-beta.98",
     "canvas-confetti": "^1.9.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

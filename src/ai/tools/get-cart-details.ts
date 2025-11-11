@@ -7,16 +7,24 @@ export const getCartDetailsTool = tool({
   description:
     "Get detailed information about the user's shopping cart including all items, quantities, and product details",
   inputSchema: zodSchema(
-    z.object({
-      userId: uuidSchema,
-    }),
+    z
+      .object({
+        userId: z
+          .string()
+          .optional()
+          .describe(
+            "(Optional) The user's ID. If not provided, it will be provided by the experimental_context.",
+          ),
+      })
+      .optional(),
   ),
   execute: async (args, options) => {
-    const userId =
+    const userIdFromArgs = args?.userId;
+    const userIdFromContext =
       (options.experimental_context as { userId: string })?.userId ??
-      args.userId;
+      userIdFromArgs;
 
-    if (!userId) {
+    if (!userIdFromContext) {
       return {
         cart: null,
         found: false,
@@ -24,7 +32,7 @@ export const getCartDetailsTool = tool({
       };
     }
 
-    const cart = await getCartDetails(userId);
+    const cart = await getCartDetails(userIdFromContext);
 
     if (!cart) {
       return {

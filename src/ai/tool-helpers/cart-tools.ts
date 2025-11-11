@@ -1,6 +1,7 @@
 import { drizzleDbClient } from "@/database";
 import { carts, cartItems, productVariants, products } from "@/database/schema";
 import { eq, and } from "drizzle-orm";
+import { cartService } from "@/app/api/cart/service";
 
 /**
  * Gets detailed cart information for a user including all cart items with product details.
@@ -193,4 +194,139 @@ export async function addToCart(
       message: "Failed to add item to cart",
     };
   }
+}
+
+/**
+ * Removes items from the user's cart by product IDs and quantities.
+ */
+export async function removeFromCart(
+  userId: string,
+  productIds: string[],
+  quantities: number[],
+): Promise<{
+  success: boolean;
+  itemsProcessed: number;
+  results: Array<{
+    productId: string;
+    removedQuantity: number;
+    success: boolean;
+    message: string;
+  }>;
+  message: string;
+}> {
+  const db = drizzleDbClient();
+
+  // Get current cart details
+  const cartDetails = await getCartDetails(userId);
+
+  if (!cartDetails) {
+    throw new Error("No cart found for this user");
+  }
+
+  if (!cartDetails.items || cartDetails.items.length === 0) {
+    throw new Error("Cart is empty");
+  }
+
+  // Find cart items that match the product IDs
+  const itemsToRemove: Array<{
+    cartItemId: string;
+    productId: string;
+    quantity: number;
+    currentQuantity: number;
+  }> = [];
+
+  for (let i = 0; i < productIds.length; i++) {
+    const productId = productIds[i];
+    const requestedQuantity = quantities[i] || 1;
+
+    // Find cart items with this product ID
+    const matchingItems = cartDetails.items.filter(
+      (item) => item.productVariant.product.id === productId,
+    );
+
+    if (matchingItems.length === 0) {
+      continue; // Skip if product not found in cart
+    }
+
+    // For simplicity, we'll remove from the first matching item
+    // In a real scenario, you might want to handle multiple variants
+    const cartItem = matchingItems[0];
+    const currentQuantity = cartItem.quantity;
+
+    // If requested quantity is less than current, we need to update quantity
+    // If requested quantity equals or exceeds current, we remove the item entirely
+    if (requestedQuantity < currentQuantity) {
+      // Update quantity instead of removing
+      itemsToRemove.push({
+        cartItemId: cartItem.id,
+        productId,
+        quantity: requestedQuantity,
+        currentQuantity,
+      });
+    } else {
+      // Remove the entire item
+      itemsToRemove.push({
+        cartItemId: cartItem.id,
+        productId,
+        quantity: currentQuantity, // Remove all available
+        currentQuantity,
+      });
+    }
+  }
+
+  if (itemsToRemove.length === 0) {
+    throw new Error("No matching products found in cart");
+  }
+
+  // Remove items from cart
+  const results = [];
+  for (const item of itemsToRemove) {
+    try {
+      if (item.quantity < item.currentQuantity) {
+        // Update quantity instead of removing
+        await db
+          .update(cartItems)
+          .set({
+            quantity: item.currentQuantity - item.quantity,
+            updatedAt: new Date(),
+          })
+          .where(eq(cartItems.id, item.cartItemId));
+
+        results.push({
+          productId: item.productId,
+          removedQuantity: item.quantity,
+          success: true,
+          message: `Reduced quantity by ${item.quantity}`,
+        });
+      } else {
+        // Remove the entire cart item
+        await cartService.removeCartItem({
+          userId,
+          dto: { cartItemId: item.cartItemId },
+          db,
+        });
+
+        results.push({
+          productId: item.productId,
+          removedQuantity: item.quantity,
+          success: true,
+          message: "Item removed from cart",
+        });
+      }
+    } catch (error) {
+      results.push({
+        productId: item.productId,
+        removedQuantity: 0,
+        success: false,
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  }
+
+  return {
+    success: results.some((r) => r.success),
+    itemsProcessed: itemsToRemove.length,
+    results,
+    message: `Attempted to remove ${itemsToRemove.length} item(s) from cart`,
+  };
 }
