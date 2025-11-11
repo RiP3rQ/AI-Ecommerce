@@ -1,11 +1,7 @@
 "use client";
 
 import { ReactNode, useEffect, useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Smartphone, Monitor } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
