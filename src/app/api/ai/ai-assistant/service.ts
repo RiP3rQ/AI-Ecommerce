@@ -1,6 +1,9 @@
 import { convertToModelMessages, stepCountIs, streamText, TextPart } from "ai";
 import { AiAssistantPrompts } from "./prompts";
-import { GOOGLE_PROVIDER_OPTIONS, MAX_OUTPUT_TOKENS } from "./constants";
+import {
+  GOOGLE_PROVIDER_OPTIONS,
+  MAX_ASSISTANT_OUTPUT_TOKENS,
+} from "./constants";
 import { getAiTools } from "@/ai/tools";
 import { User } from "@supabase/supabase-js";
 import { BodyType } from "./types";
@@ -45,7 +48,7 @@ export class AiAssistantService {
       system: AiAssistantPrompts.getDefaultSystemPrompt(),
       tools: getAiTools(),
       providerOptions: GOOGLE_PROVIDER_OPTIONS,
-      maxOutputTokens: MAX_OUTPUT_TOKENS,
+      maxOutputTokens: MAX_ASSISTANT_OUTPUT_TOKENS,
       stopWhen: [stepCountIs(10)],
       abortSignal,
       experimental_context: {
