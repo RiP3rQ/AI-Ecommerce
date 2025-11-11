@@ -18,6 +18,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useChatProvider } from "@/providers/chat-provider";
 import { ResetChatModal } from "./reset-chat-modal";
 import { MessagesCounterAndResetChatButton } from "./messages-counter-and-reset-chat-button";
+import { AiCapabilitiesModal } from "./ai-capabilities-modal";
 
 export function Chat(): ReactNode {
   const { isAuthenticated } = useAuth();
@@ -25,6 +26,8 @@ export function Chat(): ReactNode {
   const { persistedMessages, setPersistedMessages, resetChatSession } =
     useChatProvider();
   const [isResetModalOpen, setIsResetModalOpen] = useState<boolean>(false);
+  const [isCapabilitiesModalOpen, setIsCapabilitiesModalOpen] =
+    useState<boolean>(false);
 
   const {
     messages,
@@ -188,6 +191,10 @@ export function Chat(): ReactNode {
     setIsResetModalOpen(true);
   };
 
+  const handleShowCapabilities = () => {
+    setIsCapabilitiesModalOpen(true);
+  };
+
   const confirmResetChat = () => {
     // Reset both local and persisted messages
     setMessages(INITIAL_MESSAGE);
@@ -205,6 +212,7 @@ export function Chat(): ReactNode {
           isAuthenticated={isAuthenticated}
           status={status}
           handleResetChat={handleResetChat}
+          handleShowCapabilities={handleShowCapabilities}
         />
         <MessageList
           status={status}
@@ -232,6 +240,11 @@ export function Chat(): ReactNode {
         isOpen={isResetModalOpen}
         onClose={() => setIsResetModalOpen(false)}
         onConfirm={confirmResetChat}
+      />
+
+      <AiCapabilitiesModal
+        isOpen={isCapabilitiesModalOpen}
+        onClose={() => setIsCapabilitiesModalOpen(false)}
       />
     </div>
   );
