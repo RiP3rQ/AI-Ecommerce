@@ -30,8 +30,13 @@ export const removeFromCartTool = tool({
               .describe("The display title of the variant to remove"),
             variantPrice: z
               .int()
-              .min(1, "Variant price is required. It must be a positive integer." )
-              .describe("The price of the variant to remove. It must be a positive integer in cents, as it is stored in the database."),
+              .min(
+                1,
+                "Variant price is required. It must be a positive integer.",
+              )
+              .describe(
+                "The price of the variant to remove. It must be a positive integer in cents, as it is stored in the database.",
+              ),
             variantCurrencyCode: z
               .string()
               .min(1, "Variant currency code is required")
