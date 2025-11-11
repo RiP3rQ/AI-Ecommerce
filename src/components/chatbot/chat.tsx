@@ -208,7 +208,6 @@ export function Chat(): ReactNode {
         />
         <MessageList
           messages={deduplicatedMessages}
-          status={status}
           addToolOutput={addToolOutput}
           addToolApprovalResponse={addToolApprovalResponse}
           isAuthenticated={isAuthenticated}

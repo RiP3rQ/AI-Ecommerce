@@ -508,7 +508,6 @@ const MessageBubble = ({
 
 export const MessageList = ({
   messages,
-  status,
   addToolOutput,
   addToolApprovalResponse,
   isAuthenticated,
