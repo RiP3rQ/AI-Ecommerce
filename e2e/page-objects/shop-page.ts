@@ -31,30 +31,24 @@ export class ShopPage {
     // Initialize locators
     this.mainContent = page.getByRole("main").filter({ hasText: /^$/ });
     this.productsGrid = page.getByTestId("products-grid");
-    this.loadingSkeleton = page.getByTestId("loading-skeleton").first();
-    this.searchInput = page.getByPlaceholder("Search products...");
-    this.sortSelect = page.getByRole("combobox");
-    this.filtersText = page.getByText("Filters");
-    this.categoriesText = page
-      .locator('[data-slot="label"]')
-      .filter({ hasText: "Categories" });
-    this.priceRangeText = page
-      .locator('[data-slot="label"]')
-      .filter({ hasText: "Price Range" });
-    this.categoryButtons = page
-      .locator("button")
-      .filter({ hasText: /^[A-Za-z]/ });
-    this.minPriceInput = page.getByLabel("Min Price");
-    this.maxPriceInput = page.getByLabel("Max Price");
-    this.applyPriceRangeButton = page.getByText("Apply Price Range");
+    this.loadingSkeleton = page.getByTestId("products-loading-skeleton");
+    this.searchInput = page.getByTestId("search-input");
+    this.sortSelect = page.getByTestId("sort-select");
+    this.filtersText = page.getByTestId("filters-heading");
+    this.categoriesText = page.getByTestId("categories-heading");
+    this.priceRangeText = page.getByTestId("price-range-heading");
+    this.categoryButtons = page.locator('[data-testid^="category-button-"]');
+    this.minPriceInput = page.getByTestId("min-price-input");
+    this.maxPriceInput = page.getByTestId("max-price-input");
+    this.applyPriceRangeButton = page.getByTestId("apply-price-range-button");
     this.productCards = page.getByTestId("product-card");
     this.productPrices = page.getByTestId("product-price");
-    this.pagination = page.getByTestId("pagination");
-    this.previousPageButton = page.getByLabel("Previous page");
-    this.nextPageButton = page.getByLabel("Next page");
-    this.productsCount = page.getByText(/Showing \d+ of \d+ products/);
-    this.emptyState = page.getByText("No products found");
-    this.resetButton = page.getByText("Reset");
+    this.pagination = page.getByTestId("pagination-component");
+    this.previousPageButton = page.getByTestId("previous-page-button");
+    this.nextPageButton = page.getByTestId("next-page-button");
+    this.productsCount = page.getByTestId("products-count");
+    this.emptyState = page.getByTestId("empty-state");
+    this.resetButton = page.getByTestId("reset-filters-button");
   }
 
   /**
@@ -66,12 +60,40 @@ export class ShopPage {
   }
 
   /**
-   * Wait for products to load
+   * Wait for filters to load (categories must be fetched)
    */
-  async waitForProductsLoad(timeout: number = 10000): Promise<void> {
-    await this.page.waitForSelector('[data-testid="products-grid"]', {
+  async waitForFiltersLoad(timeout: number = 10000): Promise<void> {
+    await this.page.waitForSelector('[data-testid="filters-sidebar"]', {
       timeout,
     });
+  }
+
+  /**
+   * Wait for products area to load (either products, empty state, or loading to finish)
+   */
+  async waitForProductsLoad(timeout: number = 10000): Promise<void> {
+    await this.page.waitForFunction(
+      () => {
+        // Check if products grid exists (products loaded)
+        const productsGrid = document.querySelector(
+          '[data-testid="products-grid"]',
+        );
+        if (productsGrid) return true;
+
+        // Check if empty state exists (no products)
+        const emptyState = document.querySelector(
+          '[data-testid="empty-state"]',
+        );
+        if (emptyState) return true;
+
+        // Check if loading skeleton still exists (still loading)
+        const loadingSkeleton = document.querySelector(
+          '[data-testid="products-loading-skeleton"]',
+        );
+        return !loadingSkeleton; // If no loading skeleton, we're done loading
+      },
+      { timeout },
+    );
   }
 
   /**

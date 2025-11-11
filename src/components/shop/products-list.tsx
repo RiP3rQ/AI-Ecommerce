@@ -49,7 +49,7 @@ export function ProductsList({
   if (isLoading) {
     return (
       <>
-        <div className="mb-6" data-testid="loading-skeleton">
+        <div className="mb-6" data-testid="products-loading-skeleton">
           <Skeleton className="h-10 w-full max-w-md mb-4" />
         </div>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -67,7 +67,10 @@ export function ProductsList({
 
   if (products.length === 0) {
     return (
-      <div className="flex min-h-[400px] items-center justify-center">
+      <div
+        className="flex min-h-[400px] items-center justify-center"
+        data-testid="empty-state"
+      >
         <Empty>
           <EmptyHeader>
             <PackageSearchIcon className="size-10 text-neutral-400 dark:text-neutral-600 mb-4" />
@@ -121,7 +124,10 @@ export function ProductsList({
   return (
     <div className="flex flex-col">
       {/* Products Count */}
-      <div className="mb-4 text-sm text-neutral-600 dark:text-neutral-400">
+      <div
+        className="mb-4 text-sm text-neutral-600 dark:text-neutral-400"
+        data-testid="products-count"
+      >
         Showing <span className="font-semibold">{products.length}</span> of{" "}
         <span className="font-semibold">{totalProducts}</span> products
       </div>
@@ -142,7 +148,7 @@ export function ProductsList({
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <Pagination className="mt-auto" data-testid="pagination">
+        <Pagination className="mt-auto" data-testid="pagination-component">
           <PaginationContent>
             <PaginationItem>
               <PaginationPrevious
@@ -150,6 +156,7 @@ export function ProductsList({
                 className={
                   currentPage === 1 ? "pointer-events-none opacity-50" : ""
                 }
+                data-testid="previous-page-button"
               />
             </PaginationItem>
 
@@ -176,6 +183,7 @@ export function ProductsList({
                     ? "pointer-events-none opacity-50"
                     : ""
                 }
+                data-testid="next-page-button"
               />
             </PaginationItem>
           </PaginationContent>
