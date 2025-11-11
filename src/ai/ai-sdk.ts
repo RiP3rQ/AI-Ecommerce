@@ -1,4 +1,4 @@
-import { generateText, streamText } from "ai";
+import { generateText } from "ai";
 import { geminiProvider } from "./gemini-provider";
 import {
   GEMINI_MODEL_NAME,
@@ -8,7 +8,6 @@ import {
 import type {
   GenerateTextOptions,
   GenerateTextResultType,
-  StreamTextOptions,
 } from "./types";
 import { getAiTools } from "./tools";
 import type { DrizzleDbClient } from "@/database";

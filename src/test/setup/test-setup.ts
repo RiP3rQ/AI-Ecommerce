@@ -72,6 +72,7 @@ vi.mock("../../lib/api-helpers", () => ({
 const mockEmbed = vi.fn();
 vi.mock("ai", () => ({
   generateText: vi.fn(),
+  streamText: vi.fn(),
   tool: vi.fn(),
   embed: mockEmbed,
 }));
