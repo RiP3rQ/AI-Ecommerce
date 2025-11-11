@@ -1,0 +1,1 @@
+ALTER TABLE "profiles" ALTER COLUMN "ai_usage_limit" SET DEFAULT 30;

@@ -78,6 +78,13 @@
       "when": 1762103668044,
       "tag": "0010_furry_synch",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1762900135561,
+      "tag": "0011_peaceful_brother_voodoo",
+      "breakpoints": true
     }
   ]
 }

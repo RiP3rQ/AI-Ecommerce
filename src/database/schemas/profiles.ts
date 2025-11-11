@@ -18,7 +18,7 @@ export const profiles = pgTable("profiles", {
   email: text("email").notNull().default(""),
   acceptedDataPolicy: boolean("accepted_data_policy").notNull().default(true),
   aiUsageCount: integer("ai_usage_count").notNull().default(0),
-  aiUsageLimit: integer("ai_usage_limit").notNull().default(20),
+  aiUsageLimit: integer("ai_usage_limit").notNull().default(30),
   aiUsageResetAt: timestamp("ai_usage_reset_at").notNull().defaultNow(),
   ...DEFAULT_DATE_TABLES,
 });
