@@ -53,8 +53,9 @@ export function MobileNoticeModal(): ReactNode {
             </div>
 
             <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-              This is a Minimum Viable Product (MVP) designed exclusively for desktop experiences.
-              For the best browsing experience, please visit us on a device with a screen width of at least 650px.
+              This is a Minimum Viable Product (MVP) designed exclusively for
+              desktop experiences. For the best browsing experience, please
+              visit us on a device with a screen width of at least 650px.
             </p>
 
             <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/50 dark:to-purple-950/50 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
