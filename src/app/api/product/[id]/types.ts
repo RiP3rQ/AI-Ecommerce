@@ -1,5 +1,5 @@
 import type {
-  SelectProduct,
+  SelectProductWithoutEmbedding,
   SelectProductVariant,
   SelectProductImage,
   SelectProductOption,
@@ -9,7 +9,7 @@ import type { PriceRange } from "@/types/products";
 /**
  * Single product response data structure.
  */
-export interface ProductData extends SelectProduct {
+export interface ProductData extends SelectProductWithoutEmbedding {
   product_variants: SelectProductVariant[];
   product_images: SelectProductImage[];
   product_options: SelectProductOption[];

@@ -53,8 +53,10 @@ export function ItemsMarquee(): ReactNode {
             <Link
               href={`/product/${product.products.id}`}
               className="relative h-full w-full"
+              prefetch={true}
             >
               <GridTileImage
+                productUuid={product.products.id}
                 alt={product.product_images?.altText ?? product.products.title}
                 label={{
                   title: product.products.title,

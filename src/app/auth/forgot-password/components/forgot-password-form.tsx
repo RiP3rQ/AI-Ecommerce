@@ -92,6 +92,7 @@ export function ForgotPasswordForm({
                 <Link
                   href="/auth/login"
                   className="underline underline-offset-4"
+                  prefetch={true}
                 >
                   Login
                 </Link>

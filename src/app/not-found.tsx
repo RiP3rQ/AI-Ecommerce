@@ -19,6 +19,7 @@ export default function NotFoundPage(): ReactNode {
               "flex items-center justify-center px-4 py-2 bg-muted text-muted-foreground rounded-md hover:bg-primary/80 transition-colors border border-muted-foreground"
             }
             href={"/"}
+            prefetch={true}
           >
             <ArrowLeftIcon className={"size-4 mr-2"} />
             Go back to the home page

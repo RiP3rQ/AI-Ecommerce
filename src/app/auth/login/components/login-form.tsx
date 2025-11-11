@@ -83,6 +83,7 @@ export function LoginForm({ className, ...props }: LoginFormProps): ReactNode {
                   <Link
                     href="/auth/forgot-password"
                     className="ml-auto text-sm underline-offset-2 hover:underline"
+                    prefetch={true}
                   >
                     Forgot your password?
                   </Link>
@@ -133,6 +134,7 @@ export function LoginForm({ className, ...props }: LoginFormProps): ReactNode {
                 <Link
                   href="/auth/sign-up"
                   className="underline underline-offset-4"
+                  prefetch={true}
                 >
                   Sign up
                 </Link>

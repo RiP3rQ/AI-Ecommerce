@@ -35,6 +35,7 @@ function HeroGridItem({
         prefetch={true}
       >
         <GridTileImage
+          productUuid={item.products.id}
           src={item.product_images?.url ?? ""}
           fill
           sizes={

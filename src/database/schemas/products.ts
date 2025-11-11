@@ -57,3 +57,6 @@ export const productsRelations = relations(products, ({ one, many }) => ({
 // Type exports for Drizzle
 export type SelectProduct = typeof products.$inferSelect;
 export type InsertProduct = typeof products.$inferInsert;
+
+// Custom type without embedding
+export type SelectProductWithoutEmbedding = Omit<SelectProduct, "embedding">;

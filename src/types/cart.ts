@@ -1,7 +1,7 @@
 import type {
   SelectCart as DbSelectCart,
   SelectCartItem as DbSelectCartItem,
-  SelectProduct,
+  SelectProductWithoutEmbedding,
   SelectProductVariant,
 } from "@/database/schema";
 
@@ -78,7 +78,7 @@ export interface FrontendCart {
 export type DbCartWithItems = DbSelectCart & {
   items: (DbSelectCartItem & {
     productVariant: SelectProductVariant & {
-      product: SelectProduct & {
+      product: SelectProductWithoutEmbedding & {
         images: Array<{
           url: string;
           altText?: string;

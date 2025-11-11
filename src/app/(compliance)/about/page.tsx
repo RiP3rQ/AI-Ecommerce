@@ -364,12 +364,14 @@ export default function AboutPage() {
             <Link
               href="/"
               className="inline-flex items-center justify-center rounded-md bg-white px-6 py-3 text-blue-600 hover:bg-blue-50"
+              prefetch={true}
             >
               Shop Now
             </Link>
             <Link
               href="/contact"
               className="inline-flex items-center justify-center rounded-md border border-white bg-transparent px-6 py-3 text-white hover:bg-white hover:text-blue-600"
+              prefetch={true}
             >
               Get in Touch
             </Link>

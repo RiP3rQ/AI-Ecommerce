@@ -2,7 +2,7 @@ import { faker } from "@faker-js/faker";
 import {
   products,
   type InsertProduct,
-  type SelectProduct,
+  type SelectProductWithoutEmbedding,
 } from "../../database/schemas/products";
 import {
   productVariants,
@@ -25,7 +25,7 @@ export async function createProductFixture({
 }: {
   db: TestDatabase;
   overrides: Partial<InsertProduct>;
-}): Promise<SelectProduct> {
+}): Promise<SelectProductWithoutEmbedding> {
   // Get the base fixture data
   const productData = {
     title: overrides.title ?? faker.commerce.productName(),

@@ -1,11 +1,18 @@
 import clsx from "clsx";
 import Image from "next/image";
 import { CustomLabel } from "@/components/custom-label";
+import { preload } from "swr";
+import { swrFetcher } from "@/lib/swr-fetcher";
+import { BASE_URL } from "@/lib/utils";
+import { useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { PrefetchKind } from "next/dist/client/components/router-reducer/router-reducer-types";
 
 export function GridTileImage({
   isInteractive = true,
   active,
   label,
+  productUuid,
   ...props
 }: {
   isInteractive?: boolean;
@@ -16,7 +23,18 @@ export function GridTileImage({
     currencyCode?: string;
     position?: "bottom" | "center";
   };
+  productUuid?: string;
 } & React.ComponentProps<typeof Image>) {
+  const router = useRouter();
+
+  const onHoverHandler = useCallback(() => {
+    if (productUuid) {
+      router.prefetch(`/product/${productUuid}`, { kind: PrefetchKind.FULL });
+      preload(`${BASE_URL}/api/product/${productUuid}`, swrFetcher);
+      preload(`${BASE_URL}/api/review?productId=${productUuid}`, swrFetcher);
+    }
+  }, [productUuid]);
+
   return (
     <div
       className={clsx(
@@ -27,6 +45,7 @@ export function GridTileImage({
           "border-neutral-200 dark:border-neutral-800": !active,
         },
       )}
+      onMouseEnter={onHoverHandler}
     >
       {props.src ? (
         <Image

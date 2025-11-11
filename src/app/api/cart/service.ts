@@ -1,7 +1,7 @@
 import { type DrizzleDbClient, drizzleDbClient } from "@/database/index";
 import { carts, cartItems } from "@/database/schemas/cart";
 import { productVariants } from "@/database/schemas/product-variants";
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import {
   CartNotFoundError,
   CartItemNotFoundError,
@@ -14,7 +14,7 @@ import type {
   UpdateCartItemDto,
   RemoveCartItemDto,
 } from "./dto";
-import type { CartSummary, CartWithItems, CartItemWithDetails } from "./types";
+import type { CartSummary, CartWithItems } from "./types";
 import type { SelectProductImage } from "@/database/schemas/product-images";
 import type { TestDatabase } from "@/test/utils/db-helper";
 
@@ -80,6 +80,19 @@ export class CartService {
             productVariant: {
               with: {
                 product: {
+                  // Explicitly avoid fetching embeddings from the products table
+                  columns: {
+                    id: true,
+                    availableForSale: true,
+                    title: true,
+                    description: true,
+                    descriptionHtml: true,
+                    tags: true,
+                    categoryId: true,
+                    createdAt: true,
+                    updatedAt: true,
+                    // Do NOT include 'embedding'
+                  },
                   with: {
                     images: true,
                   },

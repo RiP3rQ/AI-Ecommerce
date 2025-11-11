@@ -1,6 +1,6 @@
 import type { SelectCart, SelectCartItem } from "@/database/schemas/cart";
 import type { SelectProductVariant } from "@/database/schemas/product-variants";
-import type { SelectProduct } from "@/database/schemas/products";
+import type { SelectProductWithoutEmbedding } from "@/database/schemas/products";
 import type { SelectProductImage } from "@/database/schemas/product-images";
 
 /**
@@ -8,7 +8,7 @@ import type { SelectProductImage } from "@/database/schemas/product-images";
  */
 export interface CartItemWithDetails extends SelectCartItem {
   productVariant: SelectProductVariant & {
-    product: SelectProduct;
+    product: SelectProductWithoutEmbedding;
   };
   featuredImage: SelectProductImage | null;
 }

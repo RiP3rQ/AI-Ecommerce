@@ -37,6 +37,17 @@ export class OrderService {
             productVariant: {
               with: {
                 product: {
+                  columns: {
+                    id: true,
+                    title: true,
+                    description: true,
+                    descriptionHtml: true,
+                    tags: true,
+                    categoryId: true,
+                    createdAt: true,
+                    updatedAt: true,
+                    // Do NOT include 'embedding'
+                  },
                   with: {
                     images: true,
                   },

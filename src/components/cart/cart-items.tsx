@@ -86,6 +86,7 @@ export function CartItems(): ReactNode {
                       href={merchandiseUrl}
                       onClick={closeCart}
                       className="z-30 ml-2 flex flex-row space-x-4"
+                      prefetch={true}
                     >
                       <div className="flex flex-1 flex-col text-base">
                         <span className="leading-tight">

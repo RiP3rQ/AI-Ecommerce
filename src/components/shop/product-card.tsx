@@ -1,10 +1,12 @@
-import type { ReactNode } from "react";
+import { useCallback, type ReactNode } from "react";
 import { Link } from "react-transition-progress/next";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { BASE_URL, cn } from "@/lib/utils";
 import { Price } from "../custom-price";
 import type { ProductWithDetails } from "@/app/api/shop/types";
+import { swrFetcher } from "@/lib/swr-fetcher";
+import { preload } from "swr";
 
 interface ProductCardProps {
   product: ProductWithDetails;
@@ -17,12 +19,20 @@ export function ProductCard({
 }: ProductCardProps): ReactNode {
   const hasImage = !!product.featuredImage?.url;
 
+  const onHoverHandler = useCallback(() => {
+    if (product.id) {
+      preload(`${BASE_URL}/api/product/${product.id}`, swrFetcher);
+      preload(`${BASE_URL}/api/review?productId=${product.id}`, swrFetcher);
+    }
+  }, [product.id]);
+
   return (
     <Link
       href={`/product/${product.id}`}
       prefetch={true}
       className="group relative flex flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white transition-all hover:border-blue-600 hover:shadow-lg dark:border-neutral-800 dark:bg-black dark:hover:border-blue-500"
       data-testid="product-card"
+      onMouseEnter={onHoverHandler}
     >
       {/* Product Image */}
       <div className="relative aspect-square w-full overflow-hidden bg-neutral-100 dark:bg-neutral-900">
