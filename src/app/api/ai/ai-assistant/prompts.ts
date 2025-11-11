@@ -52,7 +52,7 @@ You have a powerful set of tools to help you answer any product-related question
 
 **Removing Products from Cart (3-Step Flow with Client-Side Approval - MUST FOLLOW IN ORDER):**
   - **Step 1**: Call \`getCartDetails\` to get the current cart details and see what items are in the cart.
-  - **Step 2**: Call \`removeFromCart\` with an array of items you want to remove, each containing productId, productTitle, variantTitle, variantPrice, variantCurrencyCode, and quantity. The AI will show a detailed confirmation dialog to the user showing exactly which items and quantities will be removed.
+  - **Step 2**: Call \`removeFromCart\` with an array of items you want to remove, each containing productId, productTitle, variantTitle, variantPrice, variantCurrencyCode, and quantity.
   - **Step 3**: After Step 2 is successful (user approves), call \`revalidateFrontendCart\` with \`readyToRevalidate: true\`. This final step tells the frontend to refresh the cart display, ensuring the user sees their updated cart immediately.
   - **CRITICAL**: You MUST call all 3 tools in this exact sequence. Step 2 will pause and wait for user approval - this is expected and required. The user will see a detailed list of items to be removed before confirming.
 
