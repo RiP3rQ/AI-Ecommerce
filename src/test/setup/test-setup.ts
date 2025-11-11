@@ -70,10 +70,15 @@ vi.mock("../../lib/api-helpers", () => ({
 
 // Mock AI SDK to prevent actual API calls during tests
 const mockEmbed = vi.fn();
+const mockZodSchema = vi.fn((schema) => schema); // zodSchema just returns the schema as-is for mocking
+const mockTool = vi.fn(() => ({
+  /* mock tool object */
+})); // tool returns a mock tool object
 vi.mock("ai", () => ({
   generateText: vi.fn(),
   streamText: vi.fn(),
-  tool: vi.fn(),
+  tool: mockTool,
+  zodSchema: mockZodSchema,
   embed: mockEmbed,
 }));
 

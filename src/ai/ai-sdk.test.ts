@@ -10,6 +10,7 @@ import {
 import { AiSdkHandler } from "./ai-sdk";
 import { generateText, type Output, type GenerateTextResult } from "ai";
 import { createTestableUnit, dbHelpers } from "@/test/utils/db-helper";
+import { GEMINI_MODEL_MAX_OUTPUT_TOKENS } from "./constants";
 
 // Mock the AI SDK generateText function
 const mockGenerateText = vi.mocked(generateText);
@@ -61,7 +62,7 @@ describe("AiSdkHandler", () => {
         temperature: options.temperature,
         stopWhen: undefined,
         experimental_context: undefined,
-        maxOutputTokens: 1000, // default from constants
+        maxOutputTokens: GEMINI_MODEL_MAX_OUTPUT_TOKENS, // default from constants
         tools: expect.any(Object), // default tools from getAiTools()
       });
 
@@ -90,12 +91,8 @@ describe("AiSdkHandler", () => {
         const aiDataTable = db.query.aiData.findMany();
         const savedRecords = await aiDataTable;
 
-        console.log("savedRecords", savedRecords);
-
         expect(savedRecords).toHaveLength(1);
         const savedRecord = savedRecords[0];
-
-        console.log("savedRecord", savedRecord);
 
         expect(savedRecord).toEqual({
           id: expect.any(String),
@@ -207,7 +204,7 @@ describe("AiSdkHandler", () => {
         temperature: 0.1, // default from constants
         stopWhen: undefined,
         experimental_context: undefined,
-        maxOutputTokens: 1000, // default from constants
+        maxOutputTokens: GEMINI_MODEL_MAX_OUTPUT_TOKENS, // default from constants
         tools: expect.any(Object),
       });
     });
