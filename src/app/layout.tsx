@@ -15,8 +15,7 @@ import { MobileNoticeModal } from "@/components/global/mobile-notice-modal";
 import "./globals.css";
 import { CartProvider } from "@/providers/cart-provider";
 import { ChatProvider } from "@/providers/chat-provider";
-import { Provider } from "react-redux";
-import { cartStore } from "@/store";
+import { ReduxProvider } from "@/providers/redux-provider";
 import { TourCard } from "@/components/tour/tour-card";
 import { onboardingSteps } from "@/components/tour/onboarding-steps";
 import { ProgressBar, ProgressBarProvider } from "react-transition-progress";
@@ -103,7 +102,7 @@ export default function RootLayout({
                   enableSystem
                   disableTransitionOnChange
                 >
-                  <Provider store={cartStore}>
+                  <ReduxProvider>
                     <CartProvider>
                       <ChatProvider>
                         <ProgressBarProvider>
@@ -119,7 +118,7 @@ export default function RootLayout({
                         </ProgressBarProvider>
                       </ChatProvider>
                     </CartProvider>
-                  </Provider>
+                  </ReduxProvider>
                 </ThemeProvider>
               </TooltipProvider>
             </NuqsAdapter>
