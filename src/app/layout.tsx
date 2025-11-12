@@ -15,6 +15,8 @@ import { MobileNoticeModal } from "@/components/global/mobile-notice-modal";
 import "./globals.css";
 import { CartProvider } from "@/providers/cart-provider";
 import { ChatProvider } from "@/providers/chat-provider";
+import { Provider } from "react-redux";
+import { cartStore } from "@/store";
 import { TourCard } from "@/components/tour/tour-card";
 import { onboardingSteps } from "@/components/tour/onboarding-steps";
 import { ProgressBar, ProgressBarProvider } from "react-transition-progress";
@@ -101,21 +103,23 @@ export default function RootLayout({
                   enableSystem
                   disableTransitionOnChange
                 >
-                  <CartProvider>
-                    <ChatProvider>
-                      <ProgressBarProvider>
-                        <ProgressBar className="fixed w-full h-1 shadow-lg shadow-sky-500/20 bg-sky-500 top-0" />
-                        <main>
-                          {children}
-                          <Toaster closeButton position="top-center" />
-                          <WelcomeToast />
-                          <MobileNoticeModal />
-                          <AssistantButton />
-                          <ModeSwitcher />
-                        </main>
-                      </ProgressBarProvider>
-                    </ChatProvider>
-                  </CartProvider>
+                  <Provider store={cartStore}>
+                    <CartProvider>
+                      <ChatProvider>
+                        <ProgressBarProvider>
+                          <ProgressBar className="fixed w-full h-1 shadow-lg shadow-sky-500/20 bg-sky-500 top-0" />
+                          <main>
+                            {children}
+                            <Toaster closeButton position="top-center" />
+                            <WelcomeToast />
+                            <MobileNoticeModal />
+                            <AssistantButton />
+                            <ModeSwitcher />
+                          </main>
+                        </ProgressBarProvider>
+                      </ChatProvider>
+                    </CartProvider>
+                  </Provider>
                 </ThemeProvider>
               </TooltipProvider>
             </NuqsAdapter>
