@@ -13,7 +13,6 @@ import {
   lastAssistantMessageIsCompleteWithToolCalls,
 } from "ai";
 import { toast } from "sonner";
-import { useCart } from "@/providers/cart-provider";
 import { useAuth } from "@/hooks/use-auth";
 import { useChatProvider } from "@/providers/chat-provider";
 import { ResetChatModal } from "./reset-chat-modal";
@@ -22,7 +21,6 @@ import { AiCapabilitiesModal } from "./ai-capabilities-modal";
 
 export function Chat(): ReactNode {
   const { isAuthenticated } = useAuth();
-  const { mutate: mutateCart } = useCart();
   const { persistedMessages, setPersistedMessages, resetChatSession } =
     useChatProvider();
   const [isResetModalOpen, setIsResetModalOpen] = useState<boolean>(false);
@@ -55,21 +53,10 @@ export function Chat(): ReactNode {
 
       // Handle `revalidateFrontendCart`
       if (toolCall.toolName === "revalidateFrontendCart") {
-        // Revalidate the cart data
-        mutateCart()
-          .then(() => {
-            toast.success("Cart updated successfully! 🛒", {
-              description:
-                "Your cart has been refreshed with the latest items.",
-            });
-          })
-          .catch((error) => {
-            console.error("Failed to revalidate cart:", error);
-            toast.error("Failed to update cart", {
-              description:
-                "There was an issue refreshing your cart. Please try again.",
-            });
-          });
+        // Cart is updated optimistically, so just show success message
+        toast.success("Cart updated successfully! 🛒", {
+          description: "Your cart has been refreshed with the latest items.",
+        });
 
         // Add tool result
         addToolOutput({

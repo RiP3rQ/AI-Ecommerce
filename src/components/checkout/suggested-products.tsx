@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AuthGuard } from "@/components/auth-guard";
 import { useAuth } from "@/hooks/use-auth";
-import { useCart } from "@/providers/cart-provider";
+import { useCartState } from "@/providers/cart-provider";
 import { Sparkles, Loader2, ShoppingBag } from "lucide-react";
 import { getProductSuggestions, ApiResponseError } from "@/lib/ai-api";
 import type { SuggestProductsResponse } from "@/app/api/ai/suggest-products/types";
@@ -26,7 +26,7 @@ export function SuggestedProducts(): ReactNode {
   }
 
   const { isAuthenticated, isLoading: authLoading } = useAuth();
-  const { cart, isLoading: cartLoading } = useCart();
+  const { cart, isLoading: cartLoading } = useCartState();
 
   // State for suggestions
   const [suggestions, setSuggestions] = useState<

@@ -8,7 +8,7 @@ import {
 } from "../ui/sheet";
 import Chat from "./chat";
 import { Separator } from "../ui/separator";
-import { useCart } from "@/providers/cart-provider";
+import { useCartState } from "@/providers/cart-provider";
 
 export function ChatSheet({
   open,
@@ -17,15 +17,15 @@ export function ChatSheet({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }>): ReactNode {
-  const { setDirectionOfTheSheet } = useCart();
+  const { setDirection } = useCartState();
 
   useEffect(() => {
     if (open) {
-      setDirectionOfTheSheet("left");
+      setDirection("left");
     } else {
-      setDirectionOfTheSheet("right");
+      setDirection("right");
     }
-  }, [open]);
+  }, [open, setDirection]);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>

@@ -2,7 +2,8 @@
 
 import type { SelectProductVariant } from "@/database/schema";
 import type { ProductData } from "@/app/api/product/[id]/types";
-import { useCart } from "@/providers/cart-provider";
+import { useCartState } from "@/providers/cart-provider";
+import { useCartActions } from "@/state/cart";
 import { useProductProvider } from "@/providers/product-provider";
 import clsx from "clsx";
 import { PlusIcon } from "lucide-react";
@@ -107,7 +108,8 @@ export function AddToCart({
 }) {
   const { availableForSale } = product;
   const { state } = useProductProvider();
-  const { cart, addItem, updateItemQuantity } = useCart();
+  const { cart } = useCartState();
+  const { addItem, updateItemQuantity } = useCartActions();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { isAuthenticated } = useAuth();

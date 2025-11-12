@@ -12,12 +12,12 @@ import { BASE_URL } from "@/lib/utils";
 import { type OrderDetails } from "@/app/api/order/[id]/dto";
 import type { SWRResponse } from "@/types/swr";
 import { swrFetcher } from "@/lib/swr-fetcher";
-import { useCart } from "@/providers/cart-provider";
+import { useCartActions } from "@/state/cart";
 import { CheckoutCompleteSkeleton } from "./checkout-complete-skeleton";
 
 export function CheckoutComplete(): ReactNode {
   const searchParams = useSearchParams();
-  const { clearCart } = useCart();
+  const { clearCart } = useCartActions();
   const orderId = searchParams.get("orderId");
 
   const {

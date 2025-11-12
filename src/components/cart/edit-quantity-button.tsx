@@ -4,7 +4,7 @@ import type { SelectCartItem } from "@/types/cart";
 import { MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import { useState } from "react";
-import { useCart } from "@/providers/cart-provider";
+import { useCartActions } from "@/state/cart";
 
 function SubmitButton({
   type,
@@ -45,7 +45,7 @@ export function EditItemQuantityButton({
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { updateItemQuantity } = useCart();
+  const { updateItemQuantity } = useCartActions();
 
   if (!item.id) {
     console.error("Cart item ID is missing");

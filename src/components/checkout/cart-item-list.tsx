@@ -2,7 +2,8 @@
 
 import type { ReactNode } from "react";
 import Image from "next/image";
-import { useCart } from "@/providers/cart-provider";
+import { useCartState } from "@/providers/cart-provider";
+import { useCartActions } from "@/state/cart";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -15,7 +16,8 @@ import { Minus, Plus, Trash2 } from "lucide-react";
  * Includes controls to modify quantities or remove items.
  */
 export function CartItemList(): ReactNode {
-  const { cart, updateItemQuantity, removeItem, isLoading, error } = useCart();
+  const { cart, isLoading, error } = useCartState();
+  const { updateItemQuantity, removeItem } = useCartActions();
 
   if (error) {
     return (

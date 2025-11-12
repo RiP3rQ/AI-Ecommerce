@@ -3,7 +3,9 @@
 import { type ReactNode, useEffect, useState } from "react";
 import OpenCart from "./open-cart-button";
 import { ChevronRightCircleIcon } from "lucide-react";
-import { useCart } from "@/providers/cart-provider";
+import { useCartState } from "@/providers/cart-provider";
+import { cartTotalQuantityState } from "@/state/cart";
+import { useRecoilValue } from "recoil";
 import {
   Drawer,
   DrawerTitle,
@@ -17,12 +19,13 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { CartItems } from "./cart-items";
 
 export function CartDrawerWithTrigger(): ReactNode {
-  const [quantity, setQuantity] = useState<number>(0);
-  const { cart, isOpen, setIsOpen, openCart, directionOfTheSheet } = useCart();
-
-  useEffect(() => {
-    setQuantity(cart?.totalQuantity || 0);
-  }, [cart]);
+  const {
+    isOpen,
+    setIsOpen,
+    openCart,
+    direction: directionOfTheSheet,
+  } = useCartState();
+  const quantity = useRecoilValue(cartTotalQuantityState);
 
   return (
     <Drawer
@@ -39,7 +42,7 @@ export function CartDrawerWithTrigger(): ReactNode {
           <OpenCart quantity={quantity} />
         </button>
       </DrawerTrigger>
-      <DrawerContent aria-describedby={undefined} className="z-[99]">
+      <DrawerContent aria-describedby={undefined} className="z-99">
         <DrawerHeader>
           <DrawerTitle className="text-2xl font-bold">Cart</DrawerTitle>
         </DrawerHeader>

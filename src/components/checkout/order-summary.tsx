@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useCart } from "@/providers/cart-provider";
+import { useCartState } from "@/providers/cart-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Price } from "@/components/custom-price";
@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
  * Shows subtotal, shipping costs (mocked as free), and final total.
  */
 export function OrderSummary(): ReactNode {
-  const { cart, isLoading } = useCart();
+  const { cart, isLoading } = useCartState();
 
   if (isLoading || !cart) {
     return (

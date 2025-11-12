@@ -2,13 +2,13 @@
 
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
-import { useCart } from "@/providers/cart-provider";
+import { useCartActions } from "@/state/cart";
 import type { SelectCartItem } from "@/types/cart";
 
 export function DeleteItemButton({ item }: { item: SelectCartItem }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { removeItem } = useCart();
+  const { removeItem } = useCartActions();
   const cartItemId = item.id;
 
   if (!cartItemId) {
