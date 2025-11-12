@@ -40,7 +40,7 @@ export function CartItems(): ReactNode {
   return (
     <div className="flex h-full flex-col justify-between overflow-hidden m-4 p-2 overflow-y-auto overflow-x-visible">
       <ul className="grow py-4 ">
-        {cart.lines
+        {[...cart.lines]
           .sort((a, b) =>
             a.merchandise.product.title.localeCompare(
               b.merchandise.product.title,
