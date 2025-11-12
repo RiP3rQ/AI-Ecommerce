@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import Image from "next/image";
-import { useCartState } from "@/providers/cart-provider";
+import { useCartState } from "@/hooks/use-cart";
 import { useCartActions } from "@/state/cart";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";

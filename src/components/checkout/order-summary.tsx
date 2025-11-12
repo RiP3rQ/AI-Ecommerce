@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useCartState } from "@/providers/cart-provider";
+import { useCartState } from "@/hooks/use-cart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Price } from "@/components/custom-price";

@@ -7,7 +7,7 @@ import { CheckoutButton } from "./checkout-button";
 import { DeleteItemButton } from "./delete-item-button";
 import { EditItemQuantityButton } from "./edit-quantity-button";
 import { useAuth } from "@/hooks/use-auth";
-import { useCartState } from "@/providers/cart-provider";
+import { useCartState } from "@/hooks/use-cart";
 import { useCartActions } from "@/state/cart";
 import Image from "next/image";
 import { Link } from "react-transition-progress/next";

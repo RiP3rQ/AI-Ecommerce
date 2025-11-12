@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
-import { useCartState } from "@/providers/cart-provider";
+import { useCartState } from "@/hooks/use-cart";
 
 export function CheckoutButton(): ReactNode {
   const router = useRouter();

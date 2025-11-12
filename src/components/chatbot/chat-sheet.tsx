@@ -8,7 +8,7 @@ import {
 } from "../ui/sheet";
 import Chat from "./chat";
 import { Separator } from "../ui/separator";
-import { useCartState } from "@/providers/cart-provider";
+import { useCartState } from "@/hooks/use-cart";
 
 export function ChatSheet({
   open,

@@ -3,9 +3,7 @@
 import { type ReactNode, useEffect, useState } from "react";
 import OpenCart from "./open-cart-button";
 import { ChevronRightCircleIcon } from "lucide-react";
-import { useCartState } from "@/providers/cart-provider";
-import { cartTotalQuantityState } from "@/state/cart";
-import { useRecoilValue } from "recoil";
+import { useCartState, useCartTotalQuantity } from "@/hooks/use-cart";
 import {
   Drawer,
   DrawerTitle,
@@ -25,7 +23,7 @@ export function CartDrawerWithTrigger(): ReactNode {
     openCart,
     direction: directionOfTheSheet,
   } = useCartState();
-  const quantity = useRecoilValue(cartTotalQuantityState);
+  const quantity = useCartTotalQuantity();
 
   return (
     <Drawer

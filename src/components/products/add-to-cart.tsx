@@ -2,7 +2,7 @@
 
 import type { SelectProductVariant } from "@/database/schema";
 import type { ProductData } from "@/app/api/product/[id]/types";
-import { useCartState } from "@/providers/cart-provider";
+import { useCartState } from "@/hooks/use-cart";
 import { useCartActions } from "@/state/cart";
 import { useProductProvider } from "@/providers/product-provider";
 import clsx from "clsx";

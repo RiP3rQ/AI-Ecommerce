@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useCartActions } from "@/state/cart";
+import { useCartActionsHook } from "@/hooks/use-cart";
 import { Price } from "@/components/custom-price";
 import { cn } from "@/lib/utils";
 import { ShoppingCart, Plus } from "lucide-react";
@@ -53,7 +53,7 @@ export function ProductCardWithAddToCart({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedVariantId, setSelectedVariantId] = useState<string>("");
   const [isAddingToCart, setIsAddingToCart] = useState(false);
-  const { addItem } = useCartActions();
+  const { addItem } = useCartActionsHook();
   const { isAuthenticated } = useAuth();
 
   const hasImage = !!product.featuredImage?.url;

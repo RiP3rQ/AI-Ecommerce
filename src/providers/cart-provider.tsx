@@ -77,28 +77,3 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-/**
- * Custom hooks for cart functionality using Recoil
- */
-export function useCartState() {
-  const [cart] = useRecoilState(cartState);
-  const [isOpen, setIsOpen] = useRecoilState(cartDrawerOpenState);
-  const [direction, setDirection] = useRecoilState(cartDrawerDirectionState);
-  const [isLoading] = useRecoilState(cartLoadingState);
-  const [error] = useRecoilState(cartErrorState);
-
-  const openCart = useCallback(() => setIsOpen(true), [setIsOpen]);
-  const closeCart = useCallback(() => setIsOpen(false), [setIsOpen]);
-
-  return {
-    cart,
-    isOpen,
-    setIsOpen,
-    direction,
-    setDirection,
-    isLoading,
-    error,
-    openCart,
-    closeCart,
-  };
-}
